@@ -1,0 +1,6 @@
+# macOS
+.DS_Store
+
+# Local-only tooling (Mac paths, preview server)
+.claude/
+server.py
