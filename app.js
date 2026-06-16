@@ -87,7 +87,7 @@ const I18N = {
     nav_portfolio: "Portfolio",
     portfolio_title: "Your portfolio", portfolio_sub: "Add what you already own and see how close you are to freedom.",
     holding_ph: "Holding name", add_holding: "+ Add holding", total_value: "Total portfolio value",
-    target_via: "Freedom target via", target_x: "Target {x}", to_freedom: "to financial freedom",
+    target_via: "Freedom target via (pick one or more)", target_x: "Target {x}", to_freedom: "to financial freedom", blended_return: "Blended return",
     income_line: "Right now your portfolio could generate about {income}/month, covering {pct} of your expenses.",
     freedom_reached: "🎉 You've reached your freedom number. Your investments can cover your expenses!",
     portfolio_empty: "Add your holdings above to see your progress.",
@@ -168,7 +168,7 @@ const I18N = {
     nav_portfolio: "Portföy",
     portfolio_title: "Portföyün", portfolio_sub: "Sahip olduklarını ekle, özgürlüğe ne kadar yaklaştığını gör.",
     holding_ph: "Varlık adı", add_holding: "+ Varlık ekle", total_value: "Toplam portföy değeri",
-    target_via: "Özgürlük hedefi (şununla)", target_x: "Hedef {x}", to_freedom: "finansal özgürlüğe",
+    target_via: "Özgürlük hedefi (bir veya birkaçını seç)", target_x: "Hedef {x}", to_freedom: "finansal özgürlüğe", blended_return: "Karma getiri",
     income_line: "Şu an portföyün ayda yaklaşık {income} üretebilir, giderlerinin {pct} kadarını karşılar.",
     freedom_reached: "🎉 Özgürlük rakamına ulaştın. Yatırımların giderlerini karşılayabilir!",
     portfolio_empty: "İlerlemeni görmek için yukarıdan varlık ekle.",
@@ -249,7 +249,7 @@ const I18N = {
     nav_portfolio: "投资组合",
     portfolio_title: "你的投资组合", portfolio_sub: "添加你已持有的资产，看看你离财务自由有多近。",
     holding_ph: "持仓名称", add_holding: "+ 添加持仓", total_value: "投资组合总价值",
-    target_via: "自由目标（按）", target_x: "目标 {x}", to_freedom: "距财务自由",
+    target_via: "自由目标（可选一个或多个）", target_x: "目标 {x}", to_freedom: "距财务自由", blended_return: "混合收益率",
     income_line: "目前你的投资组合每月约可产生 {income}，覆盖你支出的 {pct}。",
     freedom_reached: "🎉 你已达到自由数字。你的投资可以覆盖你的支出！",
     portfolio_empty: "在上方添加持仓以查看你的进度。",
@@ -303,7 +303,7 @@ const state = {
   },
   portfolio: {
     holdings: [], seq: 0,
-    target: { USD: SAVINGS_DEFAULT_INVEST.USD, TL: SAVINGS_DEFAULT_INVEST.TL },
+    target: { USD: [SAVINGS_DEFAULT_INVEST.USD], TL: [SAVINGS_DEFAULT_INVEST.TL] },
   },
 };
 SAVINGS_CATEGORIES.forEach((id) => { state.savings.amounts[id] = 0; state.savings.on[id] = true; });
@@ -360,7 +360,8 @@ const el = {
   portList: document.getElementById("portList"),
   addHolding: document.getElementById("addHolding"),
   portTotal: document.getElementById("portTotal"),
-  portSelect: document.getElementById("portSelect"),
+  portChips: document.getElementById("portChips"),
+  portBlended: document.getElementById("portBlended"),
   portPct: document.getElementById("portPct"),
   portTarget: document.getElementById("portTarget"),
   portBarFill: document.getElementById("portBarFill"),
@@ -816,12 +817,31 @@ function addHolding() {
   refreshPortfolio();
 }
 
-function buildPortfolioOptions() {
+// Equal-weight blended return of the selected instruments.
+function blendedRate(cur) {
+  const sel = state.portfolio.target[cur];
+  if (!sel.length) return 0;
+  return sel.reduce((s, id) => s + (state.rates[cur][id] || 0), 0) / sel.length;
+}
+
+function buildPortfolioChips() {
   const cur = state.currency;
-  el.portSelect.innerHTML = INSTRUMENTS[cur]
-    .map((inst) => `<option value="${inst.id}">${instName(inst.id)} (${formatRate(state.rates[cur][inst.id])})</option>`)
+  const sel = state.portfolio.target[cur];
+  el.portChips.innerHTML = INSTRUMENTS[cur]
+    .map((inst) => {
+      const on = sel.includes(inst.id);
+      return `<button type="button" class="chip${on ? " is-on" : ""}" data-chip="${inst.id}" aria-pressed="${on}">${instName(inst.id)} <span class="chip-rate">${formatRate(state.rates[cur][inst.id])}</span></button>`;
+    })
     .join("");
-  el.portSelect.value = state.portfolio.target[cur];
+  el.portChips.querySelectorAll("[data-chip]").forEach((b) => {
+    b.addEventListener("click", () => {
+      const arr = state.portfolio.target[cur];
+      const i = arr.indexOf(b.dataset.chip);
+      if (i >= 0) { if (arr.length > 1) arr.splice(i, 1); } // keep at least one selected
+      else arr.push(b.dataset.chip);
+      refreshPortfolio();
+    });
+  });
 }
 
 function refreshPortfolio() {
@@ -831,8 +851,9 @@ function refreshPortfolio() {
   const total = state.portfolio.holdings.reduce((sum, h) => sum + (h.value || 0), 0);
   el.portTotal.textContent = formatMoney(total);
 
-  buildPortfolioOptions();
-  const ratePct = state.rates[cur][state.portfolio.target[cur]] || 0;
+  buildPortfolioChips();
+  const ratePct = blendedRate(cur);
+  el.portBlended.textContent = formatRate(ratePct);
   const target = ratePct > 0 ? (state.monthlyExpenses * 12) / (ratePct / 100) : Infinity;
   const pct = isFinite(target) && target > 0 ? (total / target) * 100 : 0;
   const monthlyIncome = total * (ratePct / 100) / 12;
@@ -889,7 +910,6 @@ el.addCat.addEventListener("click", addCustomCategory);
 el.investSelect.addEventListener("change", () => { state.savings.invest[state.currency] = el.investSelect.value; refreshSavings(); });
 
 el.addHolding.addEventListener("click", addHolding);
-el.portSelect.addEventListener("change", () => { state.portfolio.target[state.currency] = el.portSelect.value; refreshPortfolio(); });
 
 el.expenses.addEventListener("input", () => { state.monthlyExpenses = parseNumber(el.expenses.value); refresh(); });
 el.expenses.addEventListener("blur", () => { if (state.monthlyExpenses > 0) el.expenses.value = formatThousands(state.monthlyExpenses); });
