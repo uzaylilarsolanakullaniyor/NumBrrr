@@ -84,6 +84,14 @@ const I18N = {
     theme_doge: "Doge", theme_doge_desc: "such wow · much finance · very meme",
     theme_vaporwave: "Vaporwave", theme_vaporwave_desc: "80s neon dream · A E S T H E T I C",
     more_soon: "More features coming soon ✨",
+    nav_portfolio: "Portfolio",
+    portfolio_title: "Your portfolio", portfolio_sub: "Add what you already own and see how close you are to freedom.",
+    holding_ph: "Holding name", add_holding: "+ Add holding", total_value: "Total portfolio value",
+    target_via: "Freedom target via", target_x: "Target {x}", to_freedom: "to financial freedom",
+    income_line: "Right now your portfolio could generate about {income}/month, covering {pct} of your expenses.",
+    freedom_reached: "🎉 You've reached your freedom number. Your investments can cover your expenses!",
+    portfolio_empty: "Add your holdings above to see your progress.",
+    portfolio_note: "Freedom target = yearly expenses ÷ chosen return. Passive income = value × return. Estimates, not advice.",
     note_historical: "Based on historical averages, not a guarantee.",
     note_btc_warn: "Bitcoin is highly volatile; this figure is speculative.",
     note_btc_tl: "Trailing ~12-month return in lira terms (≈ +37%, as of mid-2026, source: CoinGecko). Bitcoin is extremely volatile, a single year is not a forecast.",
@@ -157,6 +165,14 @@ const I18N = {
     theme_doge: "Doge", theme_doge_desc: "çok vov · büyük para · efsane meme",
     theme_vaporwave: "Vaporwave", theme_vaporwave_desc: "80'ler neon rüyası · A E S T H E T I C",
     more_soon: "Yeni özellikler yakında ✨",
+    nav_portfolio: "Portföy",
+    portfolio_title: "Portföyün", portfolio_sub: "Sahip olduklarını ekle, özgürlüğe ne kadar yaklaştığını gör.",
+    holding_ph: "Varlık adı", add_holding: "+ Varlık ekle", total_value: "Toplam portföy değeri",
+    target_via: "Özgürlük hedefi (şununla)", target_x: "Hedef {x}", to_freedom: "finansal özgürlüğe",
+    income_line: "Şu an portföyün ayda yaklaşık {income} üretebilir, giderlerinin {pct} kadarını karşılar.",
+    freedom_reached: "🎉 Özgürlük rakamına ulaştın. Yatırımların giderlerini karşılayabilir!",
+    portfolio_empty: "İlerlemeni görmek için yukarıdan varlık ekle.",
+    portfolio_note: "Özgürlük hedefi = yıllık gider ÷ seçilen getiri. Pasif gelir = değer × getiri. Tahmindir, tavsiye değildir.",
     note_historical: "Tarihsel ortalamalara dayanır, garanti değildir.",
     note_btc_warn: "Bitcoin son derece oynaktır; bu rakam spekülatiftir.",
     note_btc_tl: "Lira bazında son ~12 ayın getirisi (≈ +%37, 2026 ortası itibarıyla, kaynak: CoinGecko). Bitcoin son derece oynaktır, tek bir yıl tahmin değildir.",
@@ -230,6 +246,14 @@ const I18N = {
     theme_doge: "Doge", theme_doge_desc: "这么哇 · 很多钱 · 非常迷因",
     theme_vaporwave: "Vaporwave", theme_vaporwave_desc: "80 年代霓虹梦 · 美 学",
     more_soon: "更多功能即将推出 ✨",
+    nav_portfolio: "投资组合",
+    portfolio_title: "你的投资组合", portfolio_sub: "添加你已持有的资产，看看你离财务自由有多近。",
+    holding_ph: "持仓名称", add_holding: "+ 添加持仓", total_value: "投资组合总价值",
+    target_via: "自由目标（按）", target_x: "目标 {x}", to_freedom: "距财务自由",
+    income_line: "目前你的投资组合每月约可产生 {income}，覆盖你支出的 {pct}。",
+    freedom_reached: "🎉 你已达到自由数字。你的投资可以覆盖你的支出！",
+    portfolio_empty: "在上方添加持仓以查看你的进度。",
+    portfolio_note: "自由目标 = 年支出 ÷ 所选收益率。被动收入 = 价值 × 收益率。仅为估算，非建议。",
     note_historical: "基于历史平均，不构成保证。",
     note_btc_warn: "比特币极度波动；该数字为投机性。",
     note_btc_tl: "以里拉计的近 ~12 个月收益（≈ +37%，截至 2026 年中，来源：CoinGecko）。比特币极度波动，单一年份并非预测。",
@@ -277,8 +301,14 @@ const state = {
     amounts: {}, on: {}, custom: [], customSeq: 0,
     invest: { USD: SAVINGS_DEFAULT_INVEST.USD, TL: SAVINGS_DEFAULT_INVEST.TL },
   },
+  portfolio: {
+    holdings: [], seq: 0,
+    target: { USD: SAVINGS_DEFAULT_INVEST.USD, TL: SAVINGS_DEFAULT_INVEST.TL },
+  },
 };
 SAVINGS_CATEGORIES.forEach((id) => { state.savings.amounts[id] = 0; state.savings.on[id] = true; });
+// start with a few empty holding rows (no preset values)
+[0, 1, 2].forEach(() => state.portfolio.holdings.push({ id: "h" + ++state.portfolio.seq, label: "", value: 0 }));
 
 // ---- i18n helpers ----
 function L() { return I18N[state.lang] || I18N.en; }
@@ -326,6 +356,15 @@ const el = {
   savingsAnnual: document.getElementById("savingsAnnual"),
   investSelect: document.getElementById("investSelect"),
   savingsPunch: document.getElementById("savingsPunch"),
+  // portfolio view
+  portList: document.getElementById("portList"),
+  addHolding: document.getElementById("addHolding"),
+  portTotal: document.getElementById("portTotal"),
+  portSelect: document.getElementById("portSelect"),
+  portPct: document.getElementById("portPct"),
+  portTarget: document.getElementById("portTarget"),
+  portBarFill: document.getElementById("portBarFill"),
+  portPunch: document.getElementById("portPunch"),
 };
 
 // ---- Helpers ----
@@ -724,6 +763,91 @@ function refreshSavings() {
 }
 
 // ============================================================
+//  Portfolio
+// ============================================================
+function buildPortfolio() {
+  el.portList.innerHTML = "";
+  state.portfolio.holdings.forEach((h) => el.portList.appendChild(makeHoldingRow(h.id)));
+}
+
+function makeHoldingRow(id) {
+  const meta = CURRENCY_META[state.currency];
+  const h = state.portfolio.holdings.find((x) => x.id === id);
+  const row = document.createElement("div");
+  row.className = "cat-row port-row";
+  row.dataset.hold = id;
+  const safeLabel = h && h.label ? h.label.replace(/"/g, "&quot;") : "";
+  row.innerHTML = `
+    <input class="cat-name port-name" data-hold-name="${id}" value="${safeLabel}" placeholder="${t("holding_ph")}" />
+    <div class="money-input money-input--sm cat-amount">
+      <span class="money-symbol savings-symbol">${meta.symbol}</span>
+      <input type="text" inputmode="numeric" data-hold-val="${id}" value="${h && h.value ? formatThousands(h.value) : ""}" placeholder="0" />
+    </div>
+    <button class="cat-remove" type="button" data-hold-del="${id}" aria-label="remove">×</button>`;
+
+  row.querySelector("[data-hold-name]").addEventListener("input", (e) => {
+    const x = state.portfolio.holdings.find((y) => y.id === id);
+    if (x) x.label = e.target.value;
+  });
+  const v = row.querySelector("[data-hold-val]");
+  v.addEventListener("input", () => {
+    const x = state.portfolio.holdings.find((y) => y.id === id);
+    if (x) x.value = parseNumber(v.value);
+    refreshPortfolio();
+  });
+  v.addEventListener("blur", () => {
+    const x = state.portfolio.holdings.find((y) => y.id === id);
+    if (x && x.value > 0) v.value = formatThousands(x.value);
+  });
+  row.querySelector("[data-hold-del]").addEventListener("click", () => {
+    state.portfolio.holdings = state.portfolio.holdings.filter((y) => y.id !== id);
+    row.remove();
+    refreshPortfolio();
+  });
+  return row;
+}
+
+function addHolding() {
+  const id = "h" + ++state.portfolio.seq;
+  state.portfolio.holdings.push({ id, label: "", value: 0 });
+  const row = makeHoldingRow(id);
+  el.portList.appendChild(row);
+  row.querySelector("[data-hold-name]").focus();
+  refreshPortfolio();
+}
+
+function buildPortfolioOptions() {
+  const cur = state.currency;
+  el.portSelect.innerHTML = INSTRUMENTS[cur]
+    .map((inst) => `<option value="${inst.id}">${instName(inst.id)} (${formatRate(state.rates[cur][inst.id])})</option>`)
+    .join("");
+  el.portSelect.value = state.portfolio.target[cur];
+}
+
+function refreshPortfolio() {
+  const cur = state.currency, meta = CURRENCY_META[cur];
+  document.querySelectorAll("#view-portfolio .savings-symbol").forEach((s) => (s.textContent = meta.symbol));
+
+  const total = state.portfolio.holdings.reduce((sum, h) => sum + (h.value || 0), 0);
+  el.portTotal.textContent = formatMoney(total);
+
+  buildPortfolioOptions();
+  const ratePct = state.rates[cur][state.portfolio.target[cur]] || 0;
+  const target = ratePct > 0 ? (state.monthlyExpenses * 12) / (ratePct / 100) : Infinity;
+  const pct = isFinite(target) && target > 0 ? (total / target) * 100 : 0;
+  const monthlyIncome = total * (ratePct / 100) / 12;
+  const coversPct = state.monthlyExpenses > 0 ? (monthlyIncome / state.monthlyExpenses) * 100 : 0;
+
+  el.portPct.textContent = Math.round(pct) + "%";
+  el.portTarget.textContent = isFinite(target) ? t("target_x", { x: formatMoney(target) }) : "—";
+  el.portBarFill.style.width = Math.max(0, Math.min(100, pct)) + "%";
+
+  if (total <= 0) el.portPunch.textContent = t("portfolio_empty");
+  else if (pct >= 100) el.portPunch.textContent = t("freedom_reached");
+  else el.portPunch.textContent = t("income_line", { income: formatMoney(monthlyIncome), pct: Math.round(coversPct) + "%" });
+}
+
+// ============================================================
 //  Language + Theme
 // ============================================================
 function applyLanguage(lang) {
@@ -733,6 +857,7 @@ function applyLanguage(lang) {
   document.querySelectorAll("[data-i18n-html]").forEach((node) => { node.innerHTML = t(node.dataset.i18nHtml); });
   buildLayout(); refresh();
   buildSavings(); refreshSavings();
+  buildPortfolio(); refreshPortfolio();
   updateSettingsActive();
   try { localStorage.setItem("numbr_lang", lang); } catch (e) {}
 }
@@ -752,7 +877,7 @@ function setCurrency(cur) {
   if (cur === state.currency || !CURRENCY_META[cur]) return;
   state.currency = cur;
   el.inflation.value = formatRate(state.inflation[cur], false);
-  buildLayout(); refresh(); refreshSavings();
+  buildLayout(); refresh(); refreshSavings(); refreshPortfolio();
   updateSettingsActive();
   try { localStorage.setItem("numbr_currency", cur); } catch (e) {}
 }
@@ -762,6 +887,9 @@ document.querySelectorAll("[data-currency]").forEach((b) => b.addEventListener("
 
 el.addCat.addEventListener("click", addCustomCategory);
 el.investSelect.addEventListener("change", () => { state.savings.invest[state.currency] = el.investSelect.value; refreshSavings(); });
+
+el.addHolding.addEventListener("click", addHolding);
+el.portSelect.addEventListener("change", () => { state.portfolio.target[state.currency] = el.portSelect.value; refreshPortfolio(); });
 
 el.expenses.addEventListener("input", () => { state.monthlyExpenses = parseNumber(el.expenses.value); refresh(); });
 el.expenses.addEventListener("blur", () => { if (state.monthlyExpenses > 0) el.expenses.value = formatThousands(state.monthlyExpenses); });
@@ -788,8 +916,10 @@ document.querySelectorAll("[data-theme-pick]").forEach((b) => b.addEventListener
     document.getElementById("view-home").hidden = name !== "home";
     document.getElementById("view-savings").hidden = name !== "savings";
     document.getElementById("view-settings").hidden = name !== "settings";
+    document.getElementById("view-portfolio").hidden = name !== "portfolio";
     document.querySelector(".brand").hidden = name !== "home"; // logo only on Home
     if (name === "savings") refreshSavings();
+    if (name === "portfolio") refreshPortfolio();
     window.scrollTo({ top: 0, behavior: "auto" });
   }
   tabs.forEach((tab) => {

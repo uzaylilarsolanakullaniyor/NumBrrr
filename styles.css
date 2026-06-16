@@ -598,6 +598,26 @@ body {
 .savings-punch { margin: 0; font-size: 15px; font-weight: 600; color: var(--good); line-height: 1.45; }
 .savings-note { margin: 0; font-size: 12px; color: var(--text-faint); line-height: 1.5; }
 
+/* ---------- Portfolio ---------- */
+.port-row { gap: 12px; }
+.port-name { flex: 1; min-width: 0; }
+.port-progress { display: flex; flex-direction: column; gap: 10px; }
+.port-progress-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.port-pct { font-size: 13px; color: var(--text-dim); }
+.port-pct strong { font-family: "Sora", sans-serif; font-size: 22px; font-weight: 800; color: var(--good); margin-right: 5px; }
+.port-target { font-size: 13px; color: var(--text-faint); }
+.port-bar {
+  height: 14px; border-radius: 999px;
+  background: rgba(0, 0, 0, 0.3); overflow: hidden;
+  border: 1px solid var(--glass-border-soft);
+}
+.port-bar-fill {
+  height: 100%; width: 0; border-radius: 999px;
+  background: linear-gradient(90deg, var(--accent), var(--good));
+  transition: width 0.6s cubic-bezier(0.2, 0.7, 0.2, 1);
+  box-shadow: 0 0 14px color-mix(in srgb, var(--good) 50%, transparent);
+}
+
 /* ---------- Bottom navigation (app-style, floating) ---------- */
 .tabbar {
   position: fixed;
