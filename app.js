@@ -938,24 +938,29 @@ function makeIncomeRow(id, isCustom) {
     ? `<input class="cat-name" data-inc-name="${id}" value="${label ? label.replace(/"/g, "&quot;") : ""}" placeholder="${t("income_ph")}" />`
     : label;
 
+  // Type badge: fixed (read-only) for preset categories, clickable only for custom ones.
+  const badge = isCustom
+    ? `<button type="button" class="inc-type inc-type--btn" data-inc-toggle="${id}">${passive ? t("passive_label") : t("active_label")}</button>`
+    : `<span class="inc-type">${passive ? t("passive_label") : t("active_label")}</span>`;
+
   row.innerHTML = `
-    <label class="switch switch--sm inc-toggle">
-      <input type="checkbox" data-inc-passive="${id}" ${passive ? "checked" : ""} />
-      <span class="switch-track"><span class="switch-thumb"></span></span>
-    </label>
-    <div class="cat-label">${labelHtml}<small class="inc-type" data-inc-type>${passive ? t("passive_label") : t("active_label")}</small></div>
+    <div class="cat-label">${labelHtml}${badge}</div>
     <div class="money-input money-input--sm cat-amount">
       <span class="money-symbol savings-symbol">${meta.symbol}</span>
       <input type="text" inputmode="numeric" data-inc-amt="${id}" value="${amt ? formatThousands(amt) : ""}" placeholder="0" />
     </div>
     ${isCustom ? `<button class="cat-remove" type="button" data-inc-del="${id}" aria-label="remove">×</button>` : ""}`;
 
-  row.querySelector("[data-inc-passive]").addEventListener("change", (e) => {
-    state.income.passive[id] = e.target.checked;
-    row.classList.toggle("is-passive", e.target.checked);
-    row.querySelector("[data-inc-type]").textContent = e.target.checked ? t("passive_label") : t("active_label");
-    refreshIncome();
-  });
+  if (isCustom) {
+    const toggleBtn = row.querySelector("[data-inc-toggle]");
+    toggleBtn.addEventListener("click", () => {
+      const next = !state.income.passive[id];
+      state.income.passive[id] = next;
+      row.classList.toggle("is-passive", next);
+      toggleBtn.textContent = next ? t("passive_label") : t("active_label");
+      refreshIncome();
+    });
+  }
   const amtInput = row.querySelector("[data-inc-amt]");
   amtInput.addEventListener("input", () => { state.income.amounts[id] = parseNumber(amtInput.value); refreshIncome(); });
   amtInput.addEventListener("blur", () => { if (state.income.amounts[id] > 0) amtInput.value = formatThousands(state.income.amounts[id]); });
