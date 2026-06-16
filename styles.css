@@ -23,6 +23,9 @@
 
 * { box-sizing: border-box; }
 
+::selection { background: rgba(124, 92, 255, 0.45); color: #fff; }
+::-moz-selection { background: rgba(124, 92, 255, 0.45); color: #fff; }
+
 html, body {
   margin: 0;
   padding: 0;
@@ -51,21 +54,19 @@ body {
     linear-gradient(160deg, #0b1020 0%, #0e1230 55%, #0a0f24 100%);
 }
 
+/* Blobs are static: animating blurred shapes *behind* backdrop-filter cards
+   forces constant re-sampling and produces dark "selection-like" repaint
+   boxes around text in some browsers. A still gradient avoids that entirely. */
 .blob {
   position: absolute;
   border-radius: 50%;
   filter: blur(70px);
   opacity: 0.55;
-  will-change: transform;
 }
-.blob-1 { width: 460px; height: 460px; background: #6c4bff; top: -120px; left: -80px; animation: float1 18s ease-in-out infinite; }
-.blob-2 { width: 520px; height: 520px; background: #14c8ff; bottom: -160px; right: -120px; animation: float2 22s ease-in-out infinite; }
-.blob-3 { width: 360px; height: 360px; background: #ff5ca8; top: 40%; left: 55%; opacity: 0.32; animation: float3 26s ease-in-out infinite; }
-.blob-4 { width: 300px; height: 300px; background: #2ee6a6; top: 15%; right: 18%; opacity: 0.25; animation: float1 30s ease-in-out infinite reverse; }
-
-@keyframes float1 { 0%,100% { transform: translate(0,0) scale(1); } 50% { transform: translate(60px, 40px) scale(1.08); } }
-@keyframes float2 { 0%,100% { transform: translate(0,0) scale(1); } 50% { transform: translate(-50px,-30px) scale(1.12); } }
-@keyframes float3 { 0%,100% { transform: translate(0,0) scale(1); } 50% { transform: translate(-40px, 50px) scale(1.05); } }
+.blob-1 { width: 460px; height: 460px; background: #6c4bff; top: -120px; left: -80px; }
+.blob-2 { width: 520px; height: 520px; background: #14c8ff; bottom: -160px; right: -120px; }
+.blob-3 { width: 360px; height: 360px; background: #ff5ca8; top: 40%; left: 55%; opacity: 0.32; }
+.blob-4 { width: 300px; height: 300px; background: #2ee6a6; top: 15%; right: 18%; opacity: 0.25; }
 
 /* ---------- Layout shell ---------- */
 .shell {
@@ -85,6 +86,8 @@ body {
   -webkit-backdrop-filter: blur(22px) saturate(150%);
   backdrop-filter: blur(22px) saturate(150%);
   box-shadow: var(--shadow), inset 0 1px 0 rgba(255,255,255,0.12);
+  /* own compositing layer → frosted cards repaint atomically, no text artifacts */
+  will-change: transform;
 }
 
 /* ---------- Branding ---------- */
@@ -343,6 +346,7 @@ body {
   border-radius: var(--radius-md);
   -webkit-backdrop-filter: blur(18px) saturate(140%);
   backdrop-filter: blur(18px) saturate(140%);
+  will-change: transform;
   padding: 20px;
   display: flex;
   flex-direction: column;
@@ -353,7 +357,7 @@ body {
   overflow: hidden;
   animation: cardIn 0.5s cubic-bezier(0.2,0.7,0.2,1) both;
 }
-@keyframes cardIn { from { opacity: 0; transform: translateY(14px) scale(0.98); } to { opacity: 1; transform: none; } }
+@keyframes cardIn { from { opacity: 0; } to { opacity: 1; } }
 .card:hover {
   transform: translateY(-6px);
   border-color: var(--glass-border);
