@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="Numbr — calculate the total savings you need to become financially free." />
-  <title>Numbr — What's your number?</title>
+  <meta name="description" content="NumBrrr — calculate the total savings you need to become financially free." />
+  <title>NumBrrr — What's your number?</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Sora:wght@600;700;800&family=Cinzel:wght@600;700;800&family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet" />
@@ -19,11 +19,26 @@
     <span class="blob blob-4"></span>
   </div>
 
+  <!-- Floating winged-money (Liquid Glass theme only; sits behind the frosted glass) -->
+  <div class="money-rain" aria-hidden="true">
+    <span class="money" style="left:5%;  font-size:30px; --money-op:.5;  --sway:24px;  --rot:18deg;  animation-duration:15s; animation-delay:-1s;">💸</span>
+    <span class="money" style="left:14%; font-size:44px; --money-op:.45; --sway:-30px; --rot:-22deg; animation-duration:19s; animation-delay:-6s;">💸</span>
+    <span class="money" style="left:24%; font-size:24px; --money-op:.55; --sway:34px;  --rot:30deg;  animation-duration:13s; animation-delay:-9s;">💸</span>
+    <span class="money" style="left:33%; font-size:52px; --money-op:.4;  --sway:-20px; --rot:-14deg; animation-duration:22s; animation-delay:-3s;">💸</span>
+    <span class="money" style="left:43%; font-size:28px; --money-op:.5;  --sway:28px;  --rot:24deg;  animation-duration:16s; animation-delay:-12s;">💸</span>
+    <span class="money" style="left:52%; font-size:38px; --money-op:.5;  --sway:-26px; --rot:-20deg; animation-duration:18s; animation-delay:-7s;">💸</span>
+    <span class="money" style="left:61%; font-size:22px; --money-op:.6;  --sway:32px;  --rot:28deg;  animation-duration:12s; animation-delay:-2s;">💸</span>
+    <span class="money" style="left:70%; font-size:48px; --money-op:.4;  --sway:-34px; --rot:-26deg; animation-duration:21s; animation-delay:-10s;">💸</span>
+    <span class="money" style="left:79%; font-size:30px; --money-op:.5;  --sway:22px;  --rot:16deg;  animation-duration:14s; animation-delay:-5s;">💸</span>
+    <span class="money" style="left:88%; font-size:40px; --money-op:.45; --sway:-28px; --rot:-22deg; animation-duration:17s; animation-delay:-13s;">💸</span>
+    <span class="money" style="left:95%; font-size:26px; --money-op:.55; --sway:30px;  --rot:26deg;  animation-duration:20s; animation-delay:-8s;">💸</span>
+  </div>
+
   <main class="shell">
     <!-- Branding -->
     <header class="brand">
       <div class="logo">
-        <h1 class="logo-word">Numbr</h1>
+        <h1 class="logo-word">NumBrrr</h1>
         <span class="logo-emoji" aria-hidden="true">💸</span>
       </div>
     </header>
@@ -88,7 +103,7 @@
         <h2 data-i18n="rule_title">25× your annual expenses</h2>
       </div>
       <p class="rule-text" data-i18n-html="rule_text">
-        Numbr generalizes a classic idea: if your savings earn about <strong>4% a year</strong>,
+        NumBrrr generalizes a classic idea: if your savings earn about <strong>4% a year</strong>,
         you need roughly <strong>25× your annual expenses</strong> so the returns alone cover your
         life — without ever draining the principal. That "safe withdrawal rate" comes from the
         <strong>Trinity Study (1998)</strong>, a landmark academic analysis of historical market
@@ -128,7 +143,7 @@
     <footer class="disclaimer glass">
       <h3 data-i18n="disc_title">Good to know</h3>
       <ul>
-        <li data-i18n-html="disc_1"><strong>Estimates, not advice.</strong> Numbr is an educational planning tool, not financial advice.</li>
+        <li data-i18n-html="disc_1"><strong>Estimates, not advice.</strong> NumBrrr is an educational planning tool, not financial advice.</li>
         <li data-i18n-html="disc_2"><strong>Historical ≠ future.</strong> Stock indices (S&P 500, Nasdaq, BIST 100) and Bitcoin returns are historical averages and do not guarantee future performance.</li>
         <li data-i18n-html="disc_3"><strong>Bitcoin is highly volatile.</strong> Crypto can swing dramatically; treat its return as speculative.</li>
         <li data-i18n-html="disc_4"><strong>Real estate yields vary.</strong> Rental yields differ widely by city and property type; defaults are national averages (Global Property Guide) and are historical, not a guarantee. Use the property-value &amp; rent fields for your own number.</li>

@@ -68,6 +68,27 @@ body {
 .blob-3 { width: 360px; height: 360px; background: #ff5ca8; top: 40%; left: 55%; opacity: 0.32; }
 .blob-4 { width: 300px; height: 300px; background: #2ee6a6; top: 15%; right: 18%; opacity: 0.25; }
 
+/* ---------- Floating winged money (Liquid Glass theme only) ----------
+   Sits at z-index -1 (behind in-flow content, in front of .bg), so the
+   frosted cards' backdrop-filter blurs it — money drifts up behind the glass. */
+.money-rain { position: fixed; inset: 0; z-index: -1; overflow: hidden; pointer-events: none; }
+.money {
+  position: absolute; bottom: -12vh; line-height: 1;
+  will-change: transform, opacity;
+  animation: moneyRise linear infinite;
+}
+@keyframes moneyRise {
+  0%   { transform: translateY(0) translateX(0) rotate(0deg); opacity: 0; }
+  8%   { opacity: var(--money-op, 0.5); }
+  92%  { opacity: var(--money-op, 0.5); }
+  100% { transform: translateY(-130vh) translateX(var(--sway, 20px)) rotate(var(--rot, 25deg)); opacity: 0; }
+}
+/* Only the Liquid Glass theme shows the money rain */
+[data-theme="xp"] .money-rain,
+[data-theme="medieval"] .money-rain,
+[data-theme="doge"] .money-rain,
+[data-theme="vaporwave"] .money-rain { display: none; }
+
 /* ---------- Layout shell ---------- */
 .shell {
   max-width: 1080px;
@@ -699,6 +720,7 @@ body {
 
 @media (prefers-reduced-motion: reduce) {
   .blob { animation: none; }
+  .money-rain { display: none; }
   * { transition-duration: 0.001ms !important; }
 }
 

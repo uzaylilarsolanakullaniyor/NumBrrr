@@ -1,5 +1,5 @@
 /* ============================================================
-   Numbr — financial freedom calculator
+   NumBrrr — financial freedom calculator
    Required Savings = (Monthly Expenses × 12) / Annual Return Rate
    ============================================================ */
 
@@ -49,7 +49,7 @@ const I18N = {
     not_reachable: "Not reachable", no_beat_inflation: "No instrument beats inflation",
     not_reachable_note: "At these rates, real returns are zero or negative — passive income can't outpace inflation. Lower your inflation assumption or raise a return rate.",
     rule_badge: "📚 The 4% Rule · Trinity Study", rule_title: "25× your annual expenses",
-    rule_text: 'Numbr generalizes a classic idea: if your savings earn about <strong>4% a year</strong>, you need roughly <strong>25× your annual expenses</strong> so the returns alone cover your life — without ever draining the principal. That "safe withdrawal rate" comes from the <strong>Trinity Study (1998)</strong>, a landmark academic analysis of historical market data, and it\'s the foundation of the financial-independence (FIRE) movement.',
+    rule_text: 'NumBrrr generalizes a classic idea: if your savings earn about <strong>4% a year</strong>, you need roughly <strong>25× your annual expenses</strong> so the returns alone cover your life — without ever draining the principal. That "safe withdrawal rate" comes from the <strong>Trinity Study (1998)</strong>, a landmark academic analysis of historical market data, and it\'s the foundation of the financial-independence (FIRE) movement.',
     rule_number_label: "Your 25× number (at 4%)", rule_link: "Read the Trinity Study →",
     rule_note_USD: "Based on ~30 years of historical US stock & bond returns and a balanced portfolio. A guideline, not a guarantee — past performance doesn't predict the future.",
     rule_note_TL: "Heads-up: the 4% rule is drawn from long-run US market history. In a high-inflation currency like the lira, think in real (after-inflation) terms — switch on Real return mode above for a more honest number.",
@@ -65,7 +65,7 @@ const I18N = {
     chart_title: "Savings required", chart_sub: "Lower is better — less to save before your money works for you.",
     bar_easiest: "· easiest", out_of_reach: "Out of reach",
     disc_title: "Good to know",
-    disc_1: "<strong>Estimates, not advice.</strong> Numbr is an educational planning tool, not financial advice.",
+    disc_1: "<strong>Estimates, not advice.</strong> NumBrrr is an educational planning tool, not financial advice.",
     disc_2: "<strong>Historical ≠ future.</strong> Stock indices (S&P 500, Nasdaq, BIST 100) and Bitcoin returns are historical averages and do not guarantee future performance.",
     disc_3: "<strong>Bitcoin is highly volatile.</strong> Crypto can swing dramatically; treat its return as speculative.",
     disc_4: "<strong>Real estate yields vary.</strong> Rental yields differ widely by city and property type; defaults are national averages (Global Property Guide) and are historical, not a guarantee. Use the property-value & rent fields for your own number.",
@@ -123,7 +123,7 @@ const I18N = {
     not_reachable: "Ulaşılamaz", no_beat_inflation: "Hiçbir araç enflasyonu yenmiyor",
     not_reachable_note: "Bu oranlarda reel getiriler sıfır veya negatif — pasif gelir enflasyonu geçemez. Enflasyon varsayımını düşür veya bir getiri oranını yükselt.",
     rule_badge: "📚 %4 Kuralı · Trinity Çalışması", rule_title: "Yıllık giderinin 25 katı",
-    rule_text: 'Numbr klasik bir fikri genelleştirir: birikimin yılda yaklaşık <strong>%4</strong> kazandırırsa, getirinin tek başına yaşamını karşılaması için kabaca <strong>yıllık giderinin 25 katına</strong> ihtiyacın vardır — anaparaya hiç dokunmadan. Bu "güvenli çekim oranı" <strong>Trinity Çalışması (1998)</strong>\'ndan gelir; tarihsel piyasa verilerinin dönüm noktası niteliğinde akademik analizidir ve finansal bağımsızlık (FIRE) hareketinin temelidir.',
+    rule_text: 'NumBrrr klasik bir fikri genelleştirir: birikimin yılda yaklaşık <strong>%4</strong> kazandırırsa, getirinin tek başına yaşamını karşılaması için kabaca <strong>yıllık giderinin 25 katına</strong> ihtiyacın vardır — anaparaya hiç dokunmadan. Bu "güvenli çekim oranı" <strong>Trinity Çalışması (1998)</strong>\'ndan gelir; tarihsel piyasa verilerinin dönüm noktası niteliğinde akademik analizidir ve finansal bağımsızlık (FIRE) hareketinin temelidir.',
     rule_number_label: "25× rakamın (%4'te)", rule_link: "Trinity Çalışması'nı oku →",
     rule_note_USD: "~30 yıllık ABD hisse ve tahvil getirilerine ve dengeli bir portföye dayanır. Bir kılavuzdur, garanti değildir — geçmiş performans geleceği belirlemez.",
     rule_note_TL: "Not: %4 kuralı uzun vadeli ABD piyasa geçmişinden gelir. Lira gibi yüksek enflasyonlu bir para biriminde reel (enflasyon sonrası) düşün — daha dürüst bir rakam için yukarıdaki Reel getiri modunu aç.",
@@ -139,7 +139,7 @@ const I18N = {
     chart_title: "Gereken birikim", chart_sub: "Düşük olması iyidir — paran senin için çalışmadan önce daha az birikim.",
     bar_easiest: "· en kolay", out_of_reach: "Ulaşılamaz",
     disc_title: "Bilmekte fayda var",
-    disc_1: "<strong>Tahmin, tavsiye değil.</strong> Numbr eğitim amaçlı bir planlama aracıdır, finansal tavsiye değildir.",
+    disc_1: "<strong>Tahmin, tavsiye değil.</strong> NumBrrr eğitim amaçlı bir planlama aracıdır, finansal tavsiye değildir.",
     disc_2: "<strong>Geçmiş ≠ gelecek.</strong> Hisse endeksleri (S&P 500, Nasdaq, BIST 100) ve Bitcoin getirileri tarihsel ortalamalardır ve gelecekteki performansı garanti etmez.",
     disc_3: "<strong>Bitcoin son derece oynaktır.</strong> Kripto sert dalgalanabilir; getirisini spekülatif olarak değerlendir.",
     disc_4: "<strong>Kira getirileri değişir.</strong> Kira getirileri şehre ve mülk tipine göre çok farklılaşır; varsayılanlar ulusal ortalamalardır (Global Property Guide) ve tarihseldir, garanti değildir. Kendi rakamın için mülk değeri ve kira alanlarını kullan.",
@@ -197,7 +197,7 @@ const I18N = {
     not_reachable: "无法实现", no_beat_inflation: "没有工具能跑赢通胀",
     not_reachable_note: "在这些利率下，实际收益为零或为负——被动收入无法跑赢通胀。请降低通胀假设或提高某个收益率。",
     rule_badge: "📚 4% 法则 · Trinity 研究", rule_title: "年支出的 25 倍",
-    rule_text: 'Numbr 概括了一个经典理念：如果你的储蓄每年约赚 <strong>4%</strong>，那么你大约需要 <strong>年支出的 25 倍</strong>，仅靠收益就能覆盖生活——而无需动用本金。这个"安全提取率"来自 <strong>Trinity 研究 (1998)</strong>，一项对历史市场数据具有里程碑意义的学术分析，也是财务独立（FIRE）运动的基础。',
+    rule_text: 'NumBrrr 概括了一个经典理念：如果你的储蓄每年约赚 <strong>4%</strong>，那么你大约需要 <strong>年支出的 25 倍</strong>，仅靠收益就能覆盖生活——而无需动用本金。这个"安全提取率"来自 <strong>Trinity 研究 (1998)</strong>，一项对历史市场数据具有里程碑意义的学术分析，也是财务独立（FIRE）运动的基础。',
     rule_number_label: "你的 25 倍数字（按 4%）", rule_link: "阅读 Trinity 研究 →",
     rule_note_USD: "基于约 30 年的美国股票与债券历史收益及均衡投资组合。这是一个参考，并非保证——过往业绩不预示未来。",
     rule_note_TL: "提示：4% 法则源自长期的美国市场历史。在里拉这样的高通胀货币中，请以实际（扣除通胀后）口径思考——打开上方的实际收益模式以获得更真实的数字。",
@@ -213,7 +213,7 @@ const I18N = {
     chart_title: "所需储蓄", chart_sub: "越低越好——让钱为你工作前需要存的更少。",
     bar_easiest: "· 最易", out_of_reach: "无法实现",
     disc_title: "须知",
-    disc_1: "<strong>仅为估算，非建议。</strong> Numbr 是一个教育性规划工具，并非财务建议。",
+    disc_1: "<strong>仅为估算，非建议。</strong> NumBrrr 是一个教育性规划工具，并非财务建议。",
     disc_2: "<strong>历史 ≠ 未来。</strong> 股票指数（标普 500、纳斯达克、BIST 100）和比特币的收益为历史平均，不保证未来表现。",
     disc_3: "<strong>比特币极度波动。</strong> 加密货币可能剧烈波动；请将其收益视为投机性。",
     disc_4: "<strong>房地产收益各异。</strong> 租金收益率因城市和房产类型差异很大；默认值为全国平均（Global Property Guide），属历史数据，不构成保证。请使用房产价值与租金字段计算你自己的数字。",
