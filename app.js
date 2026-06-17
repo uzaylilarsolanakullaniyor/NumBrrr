@@ -95,6 +95,9 @@ const I18N = {
     nav_portfolio: "Portfolio",
     portfolio_title: "Your portfolio", portfolio_sub: "Add what you already own and see how it's spread across your assets.",
     holding_ph: "Holding name", add_holding: "+ Add holding", total_value: "Total portfolio value",
+    flow_title: "Monthly cash flow", flow_income: "Income", flow_expenses: "Expenses", flow_net: "Net / month",
+    flow_savings_note: "+{x}/month more if you cut your tracked spending.",
+    cat_cash: "Cash", cat_investment: "Investment",
     target_via: "Freedom target via (pick one or more)", target_x: "Target {x}", to_freedom: "to financial freedom", blended_return: "Blended return",
     income_line: "Right now your portfolio could generate about {income}/month, covering {pct} of your expenses.",
     freedom_reached: "🎉 You've reached your freedom number. Your investments can cover your expenses!",
@@ -185,6 +188,9 @@ const I18N = {
     nav_portfolio: "Portföy",
     portfolio_title: "Portföyün", portfolio_sub: "Sahip olduklarını ekle, varlıklarına nasıl dağıldığını gör.",
     holding_ph: "Varlık adı", add_holding: "+ Varlık ekle", total_value: "Toplam portföy değeri",
+    flow_title: "Aylık nakit akışı", flow_income: "Gelir", flow_expenses: "Gider", flow_net: "Aylık net",
+    flow_savings_note: "Takip ettiğin harcamaları kısarsan ayda +{x} daha.",
+    cat_cash: "Nakit", cat_investment: "Yatırım",
     target_via: "Özgürlük hedefi (bir veya birkaçını seç)", target_x: "Hedef {x}", to_freedom: "finansal özgürlüğe", blended_return: "Karma getiri",
     income_line: "Şu an portföyün ayda yaklaşık {income} üretebilir, giderlerinin {pct} kadarını karşılar.",
     freedom_reached: "🎉 Özgürlük rakamına ulaştın. Yatırımların giderlerini karşılayabilir!",
@@ -275,6 +281,9 @@ const I18N = {
     nav_portfolio: "投资组合",
     portfolio_title: "你的投资组合", portfolio_sub: "添加你已持有的资产，查看它们的分布。",
     holding_ph: "持仓名称", add_holding: "+ 添加持仓", total_value: "投资组合总价值",
+    flow_title: "每月现金流", flow_income: "收入", flow_expenses: "支出", flow_net: "每月净额",
+    flow_savings_note: "如果削减你记录的开支，每月可多 +{x}。",
+    cat_cash: "现金", cat_investment: "投资",
     target_via: "自由目标（可选一个或多个）", target_x: "目标 {x}", to_freedom: "距财务自由", blended_return: "混合收益率",
     income_line: "目前你的投资组合每月约可产生 {income}，覆盖你支出的 {pct}。",
     freedom_reached: "🎉 你已达到自由数字。你的投资可以覆盖你的支出！",
@@ -345,7 +354,7 @@ const state = {
 SAVINGS_CATEGORIES.forEach((id) => { state.savings.amounts[id] = 0; state.savings.on[id] = true; });
 INCOME_CATEGORIES.forEach((c) => { state.income.amounts[c.id] = 0; state.income.passive[c.id] = c.passive; });
 // start with a few empty holding rows (no preset values)
-[0, 1, 2].forEach(() => state.portfolio.holdings.push({ id: "h" + ++state.portfolio.seq, label: "", value: 0 }));
+[0, 1, 2].forEach(() => state.portfolio.holdings.push({ id: "h" + ++state.portfolio.seq, label: "", value: 0, category: "investment" }));
 
 // ---- i18n helpers ----
 function L() { return I18N[state.lang] || I18N.en; }
@@ -402,6 +411,11 @@ const el = {
   portDonut: document.getElementById("portDonut"),
   portLegend: document.getElementById("portLegend"),
   portEmpty: document.getElementById("portEmpty"),
+  flowIncome: document.getElementById("flowIncome"),
+  flowExpenses: document.getElementById("flowExpenses"),
+  flowNet: document.getElementById("flowNet"),
+  flowNetRow: document.getElementById("flowNetRow"),
+  flowSavings: document.getElementById("flowSavings"),
   // income view
   incList: document.getElementById("incList"),
   addIncome: document.getElementById("addIncome"),
@@ -823,8 +837,12 @@ function makeHoldingRow(id) {
   row.className = "cat-row port-row";
   row.dataset.hold = id;
   const safeLabel = h && h.label ? h.label.replace(/"/g, "&quot;") : "";
+  const cat = h && h.category === "cash" ? "cash" : "investment";
   row.innerHTML = `
-    <input class="cat-name port-name" data-hold-name="${id}" value="${safeLabel}" placeholder="${t("holding_ph")}" />
+    <div class="port-namecell">
+      <input class="cat-name port-name" data-hold-name="${id}" value="${safeLabel}" placeholder="${t("holding_ph")}" />
+      <button type="button" class="inc-type inc-type--btn port-cat ${cat === "cash" ? "is-cash" : "is-invest"}" data-hold-cat="${id}">${cat === "cash" ? t("cat_cash") : t("cat_investment")}</button>
+    </div>
     <div class="money-input money-input--sm cat-amount">
       <span class="money-symbol savings-symbol">${meta.symbol}</span>
       <input type="text" inputmode="numeric" data-hold-val="${id}" value="${h && h.value ? formatThousands(h.value) : ""}" placeholder="0" />
@@ -834,6 +852,16 @@ function makeHoldingRow(id) {
   row.querySelector("[data-hold-name]").addEventListener("input", (e) => {
     const x = state.portfolio.holdings.find((y) => y.id === id);
     if (x) x.label = e.target.value;
+  });
+  const catBtn = row.querySelector("[data-hold-cat]");
+  catBtn.addEventListener("click", () => {
+    const x = state.portfolio.holdings.find((y) => y.id === id);
+    const next = x.category === "cash" ? "investment" : "cash";
+    x.category = next;
+    catBtn.textContent = next === "cash" ? t("cat_cash") : t("cat_investment");
+    catBtn.classList.toggle("is-cash", next === "cash");
+    catBtn.classList.toggle("is-invest", next === "investment");
+    refreshPortfolio();
   });
   const v = row.querySelector("[data-hold-val]");
   v.addEventListener("input", () => {
@@ -855,7 +883,7 @@ function makeHoldingRow(id) {
 
 function addHolding() {
   const id = "h" + ++state.portfolio.seq;
-  state.portfolio.holdings.push({ id, label: "", value: 0 });
+  state.portfolio.holdings.push({ id, label: "", value: 0, category: "investment" });
   const row = makeHoldingRow(id);
   el.portList.appendChild(row);
   row.querySelector("[data-hold-name]").focus();
@@ -869,6 +897,23 @@ function refreshPortfolio() {
   const meta = CURRENCY_META[state.currency];
   document.querySelectorAll("#view-portfolio .savings-symbol").forEach((s) => (s.textContent = meta.symbol));
 
+  // --- Monthly cash flow (pulled live from Income / Home / Savings) ---
+  let income = 0;
+  INCOME_CATEGORIES.forEach((c) => (income += state.income.amounts[c.id] || 0));
+  state.income.custom.forEach((c) => (income += state.income.amounts[c.id] || 0));
+  let sav = 0;
+  SAVINGS_CATEGORIES.forEach((id) => { if (state.savings.on[id]) sav += state.savings.amounts[id] || 0; });
+  state.savings.custom.forEach((c) => { if (state.savings.on[c.id]) sav += state.savings.amounts[c.id] || 0; });
+  const exp = state.monthlyExpenses;
+  const net = income - exp;
+  el.flowIncome.textContent = formatMoney(income);
+  el.flowExpenses.textContent = "−" + formatMoney(exp);
+  el.flowNet.textContent = formatMoney(net);
+  el.flowNetRow.classList.toggle("is-pos", net >= 0);
+  el.flowNetRow.classList.toggle("is-neg", net < 0);
+  el.flowSavings.textContent = sav > 0 ? t("flow_savings_note", { x: formatMoney(sav) }) : "";
+
+  // --- Holdings total + donut (categorized Cash / Investment) ---
   const total = state.portfolio.holdings.reduce((sum, h) => sum + (h.value || 0), 0);
   el.portTotal.textContent = formatMoney(total);
 
@@ -883,23 +928,35 @@ function refreshPortfolio() {
   el.portChart.hidden = false;
   el.portEmpty.hidden = true;
 
-  // Donut ring (each holding's share of the total)
+  const colorOf = {};
+  segs.forEach((h, i) => (colorOf[h.id] = PIE_COLORS[i % PIE_COLORS.length]));
+
   let cum = 0;
   const ring = segs
-    .map((h, i) => {
+    .map((h) => {
       const pct = (h.value / total) * 100;
-      const circle = `<circle cx="21" cy="21" r="15.915" fill="none" stroke="${PIE_COLORS[i % PIE_COLORS.length]}" stroke-width="6" stroke-dasharray="${pct} ${100 - pct}" stroke-dashoffset="${25 - cum}" />`;
+      const circle = `<circle cx="21" cy="21" r="15.915" fill="none" stroke="${colorOf[h.id]}" stroke-width="6" stroke-dasharray="${pct} ${100 - pct}" stroke-dashoffset="${25 - cum}" />`;
       cum += pct;
       return circle;
     })
     .join("");
   el.portDonut.innerHTML = `<circle cx="21" cy="21" r="15.915" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="6" />${ring}`;
 
-  el.portLegend.innerHTML = segs
-    .map((h, i) => {
-      const pct = Math.round((h.value / total) * 100);
-      const name = h.label && h.label.trim() ? escapeHtml(h.label.trim()) : t("holding_ph");
-      return `<div class="leg-item"><span class="leg-dot" style="background:${PIE_COLORS[i % PIE_COLORS.length]}"></span><span class="leg-name">${name}</span><span class="leg-val">${formatMoney(h.value)} · ${pct}%</span></div>`;
+  // Legend grouped under Investment / Cash headings with subtotals
+  const groups = [["investment", t("cat_investment")], ["cash", t("cat_cash")]];
+  el.portLegend.innerHTML = groups
+    .map(([key, label]) => {
+      const items = segs.filter((h) => (h.category === "cash" ? "cash" : "investment") === key);
+      if (!items.length) return "";
+      const sub = items.reduce((s, h) => s + h.value, 0);
+      const rows = items
+        .map((h) => {
+          const pct = Math.round((h.value / total) * 100);
+          const name = h.label && h.label.trim() ? escapeHtml(h.label.trim()) : t("holding_ph");
+          return `<div class="leg-item"><span class="leg-dot" style="background:${colorOf[h.id]}"></span><span class="leg-name">${name}</span><span class="leg-val">${formatMoney(h.value)} · ${pct}%</span></div>`;
+        })
+        .join("");
+      return `<div class="leg-group"><div class="leg-head">${label} <span>${formatMoney(sub)} · ${Math.round((sub / total) * 100)}%</span></div>${rows}</div>`;
     })
     .join("");
 }

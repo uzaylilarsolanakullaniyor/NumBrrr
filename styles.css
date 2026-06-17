@@ -620,6 +620,34 @@ body {
 .blended-rate { font-size: 13px; color: var(--text-dim); }
 .blended-rate strong { font-family: "Sora", sans-serif; color: var(--good); font-size: 15px; margin-left: 2px; }
 
+/* ---------- Portfolio cash flow ---------- */
+.flow-card { padding: 22px 24px; display: flex; flex-direction: column; gap: 11px; }
+.flow-row { display: flex; align-items: baseline; justify-content: space-between; font-size: 14.5px; color: var(--text-dim); }
+.flow-val { font-family: "Sora", sans-serif; font-weight: 700; color: var(--text); }
+.flow-val.pos { color: var(--good); }
+.flow-val.neg { color: var(--warn); }
+.flow-net {
+  display: flex; align-items: baseline; justify-content: space-between;
+  padding-top: 12px; margin-top: 2px; border-top: 1px solid var(--glass-border-soft);
+  font-size: 15px; font-weight: 600; color: var(--text);
+}
+.flow-net .flow-val { font-size: 23px; }
+.flow-net.is-pos .flow-val { color: var(--good); }
+.flow-net.is-neg .flow-val { color: var(--warn); }
+.flow-note { margin: 4px 0 0; font-size: 12.5px; color: var(--text-faint); }
+
+/* holding row: name + category pill stacked */
+.port-namecell { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 6px; align-items: flex-start; }
+.port-cat { margin-left: 0; }
+.port-cat.is-invest { color: var(--accent); border-color: color-mix(in srgb, var(--accent) 45%, transparent); background: color-mix(in srgb, var(--accent) 13%, transparent); }
+.port-cat.is-cash { color: var(--accent-2); border-color: color-mix(in srgb, var(--accent-2) 45%, transparent); background: color-mix(in srgb, var(--accent-2) 13%, transparent); }
+
+/* legend groups */
+.leg-group { display: flex; flex-direction: column; gap: 8px; }
+.leg-group + .leg-group { margin-top: 6px; }
+.leg-head { display: flex; justify-content: space-between; gap: 10px; font-size: 11.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-faint); }
+.leg-head span { color: var(--text-dim); }
+
 /* ---------- Portfolio donut ---------- */
 .port-chart { display: flex; align-items: center; gap: 24px; flex-wrap: wrap; }
 .port-chart[hidden] { display: none; }
