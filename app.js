@@ -44,6 +44,8 @@ const INCOME_CATEGORIES = [
 const ASSET_TYPES = ["stocks", "crypto", "deposit", "bonds", "gold", "cash"];
 const WITHHOLD_PCT = 15; // approx. withholding tax (stopaj) on deposit/bond interest
 let cryptoMarkets = []; // top coins for the active currency: [{ id, symbol, name, price }]
+let goldPriceGram = 0; // per-gram gold price in the active currency
+const GRAMS_PER_OZ = 31.1034768;
 
 // ============================================================
 //  i18n dictionary
@@ -104,7 +106,7 @@ const I18N = {
     cat_cash: "Cash", cat_investment: "Investment",
     asset_stocks: "Stocks", asset_crypto: "Crypto", asset_deposit: "Deposit", asset_bonds: "Bonds", asset_realestate: "Real estate", asset_gold: "Gold", asset_cash: "Cash",
     inc_from_portfolio: "+{x}/mo from portfolio",
-    net_tax: "Net (−15% tax)", coin_search_ph: "Search coin (e.g. Solana)", qty_ph: "Qty", coin_loading: "Loading live prices…",
+    net_tax: "Net (−15% tax)", coin_search_ph: "Search coin (e.g. Solana)", qty_ph: "Qty", coin_loading: "Loading live prices…", grams_ph: "Grams",
     target_via: "Freedom target via (pick one or more)", target_x: "Target {x}", to_freedom: "to financial freedom", blended_return: "Blended return",
     income_line: "Right now your portfolio could generate about {income}/month, covering {pct} of your expenses.",
     freedom_reached: "🎉 You've reached your freedom number. Your investments can cover your expenses!",
@@ -200,7 +202,7 @@ const I18N = {
     cat_cash: "Nakit", cat_investment: "Yatırım",
     asset_stocks: "Hisse", asset_crypto: "Kripto", asset_deposit: "Mevduat", asset_bonds: "Tahvil", asset_realestate: "Gayrimenkul", asset_gold: "Altın", asset_cash: "Nakit",
     inc_from_portfolio: "+{x}/ay portföyden",
-    net_tax: "Net (stopaj −%15)", coin_search_ph: "Coin ara (örn. Solana)", qty_ph: "Adet", coin_loading: "Canlı fiyatlar yükleniyor…",
+    net_tax: "Net (stopaj −%15)", coin_search_ph: "Coin ara (örn. Solana)", qty_ph: "Adet", coin_loading: "Canlı fiyatlar yükleniyor…", grams_ph: "Gram",
     target_via: "Özgürlük hedefi (bir veya birkaçını seç)", target_x: "Hedef {x}", to_freedom: "finansal özgürlüğe", blended_return: "Karma getiri",
     income_line: "Şu an portföyün ayda yaklaşık {income} üretebilir, giderlerinin {pct} kadarını karşılar.",
     freedom_reached: "🎉 Özgürlük rakamına ulaştın. Yatırımların giderlerini karşılayabilir!",
@@ -296,7 +298,7 @@ const I18N = {
     cat_cash: "现金", cat_investment: "投资",
     asset_stocks: "股票", asset_crypto: "加密货币", asset_deposit: "存款", asset_bonds: "债券", asset_realestate: "房地产", asset_gold: "黄金", asset_cash: "现金",
     inc_from_portfolio: "+{x}/月 来自投资组合",
-    net_tax: "净额（−15% 税）", coin_search_ph: "搜索币种（如 Solana）", qty_ph: "数量", coin_loading: "正在加载实时价格…",
+    net_tax: "净额（−15% 税）", coin_search_ph: "搜索币种（如 Solana）", qty_ph: "数量", coin_loading: "正在加载实时价格…", grams_ph: "克",
     target_via: "自由目标（可选一个或多个）", target_x: "目标 {x}", to_freedom: "距财务自由", blended_return: "混合收益率",
     income_line: "目前你的投资组合每月约可产生 {income}，覆盖你支出的 {pct}。",
     freedom_reached: "🎉 你已达到自由数字。你的投资可以覆盖你的支出！",
@@ -624,6 +626,7 @@ function wireDynamicInputs() {
 }
 
 function refresh() {
+  saveState();
   const list = INSTRUMENTS[state.currency];
   const results = list.map((inst) => {
     const nominal = instrumentNominal(inst);
@@ -775,7 +778,7 @@ function makeCatRow(id, isCustom) {
   amtInput.addEventListener("input", () => { state.savings.amounts[id] = parseNumber(amtInput.value); refreshSavings(); });
   amtInput.addEventListener("blur", () => { if (state.savings.amounts[id] > 0) amtInput.value = formatThousands(state.savings.amounts[id]); });
   if (isCustom) {
-    row.querySelector("[data-cat-name]").addEventListener("input", (e) => { const c = state.savings.custom.find((x) => x.id === id); if (c) c.label = e.target.value; });
+    row.querySelector("[data-cat-name]").addEventListener("input", (e) => { const c = state.savings.custom.find((x) => x.id === id); if (c) c.label = e.target.value; saveState(); });
     row.querySelector("[data-cat-del]").addEventListener("click", () => {
       state.savings.custom = state.savings.custom.filter((x) => x.id !== id);
       delete state.savings.amounts[id]; delete state.savings.on[id];
@@ -812,6 +815,7 @@ function futureValue(annual, ratePct, years) {
   return annual * ((Math.pow(1 + r, years) - 1) / r);
 }
 function refreshSavings() {
+  saveState();
   const meta = CURRENCY_META[state.currency];
   document.querySelectorAll("#view-savings .savings-symbol").forEach((s) => (s.textContent = meta.symbol));
 
@@ -861,6 +865,16 @@ function wireRemove(row, id) {
     refreshPortfolio();
     refreshIncome();
   });
+}
+function updateGoldValue(row, id) {
+  const x = holdById(id);
+  const node = row.querySelector("[data-gold-value]");
+  if (!node || !x) return;
+  const price = goldPriceGram || x.price || 0; // fall back to last saved price
+  if (price && x.grams) node.innerHTML = `${formatMoney(x.grams * price)} <small>${x.grams} g @ ${formatMoney(price)}/g</small>`;
+  else if (x.grams && x.value) node.innerHTML = `${formatMoney(x.value)}`;
+  else if (price) node.innerHTML = `<small>@ ${formatMoney(price)}/g</small>`;
+  else node.textContent = "";
 }
 function updateCryptoValue(row, id) {
   const x = holdById(id);
@@ -936,6 +950,33 @@ function makeHoldingRow(id) {
     wireTypeSelect(row, id);
     wireRemove(row, id);
     wireCryptoRow(row, id);
+  } else if (at === "gold") {
+    const safeLabel = h.label ? h.label.replace(/"/g, "&quot;") : "";
+    row.innerHTML = `
+      <div class="port-namecell">
+        <input class="cat-name port-name" data-hold-name="${id}" value="${safeLabel}" placeholder="${t("asset_gold")}" />
+        ${typeSelect}
+      </div>
+      <div class="crypto-cell">
+        <input class="qty-field" type="text" inputmode="decimal" data-gold-grams="${id}" value="${h.grams ? h.grams : ""}" placeholder="${t("grams_ph")}" />
+        <div class="crypto-value" data-gold-value="${id}"></div>
+      </div>
+      <button class="cat-remove" type="button" data-hold-del="${id}" aria-label="remove">×</button>`;
+    wireTypeSelect(row, id);
+    wireRemove(row, id);
+    row.querySelector("[data-hold-name]").addEventListener("input", (e) => { const x = holdById(id); if (x) x.label = e.target.value; saveState(); });
+    const g = row.querySelector("[data-gold-grams]");
+    g.addEventListener("input", () => {
+      const x = holdById(id);
+      x.grams = parseNumber(g.value);
+      const p = goldPriceGram || x.price || 0;
+      x.price = p;
+      x.value = (x.grams || 0) * p;
+      updateGoldValue(row, id);
+      refreshPortfolio();
+      refreshIncome();
+    });
+    updateGoldValue(row, id);
   } else {
     const safeLabel = h.label ? h.label.replace(/"/g, "&quot;") : "";
     const isInterest = at === "deposit" || at === "bonds";
@@ -954,7 +995,7 @@ function makeHoldingRow(id) {
       <button class="cat-remove" type="button" data-hold-del="${id}" aria-label="remove">×</button>`;
     wireTypeSelect(row, id);
     wireRemove(row, id);
-    row.querySelector("[data-hold-name]").addEventListener("input", (e) => { const x = holdById(id); if (x) x.label = e.target.value; });
+    row.querySelector("[data-hold-name]").addEventListener("input", (e) => { const x = holdById(id); if (x) x.label = e.target.value; saveState(); });
     const v = row.querySelector("[data-hold-val]");
     v.addEventListener("input", () => { const x = holdById(id); if (x) x.value = parseNumber(v.value); refreshPortfolio(); refreshIncome(); });
     v.addEventListener("blur", () => { const x = holdById(id); if (x && x.value > 0) v.value = formatThousands(x.value); });
@@ -977,12 +1018,29 @@ async function loadCryptoMarkets() {
     try { localStorage.setItem(key, JSON.stringify({ t: Date.now(), data: cryptoMarkets })); } catch (e) {}
   } catch (e) { /* offline / local file:// — silently ignore, works once deployed */ }
 }
+// Live gold price (per gram) via PAX Gold (1 PAXG ≈ 1 troy oz), client-side, daily-cached.
+async function loadGoldPrice() {
+  const vs = state.currency === "TL" ? "try" : "usd";
+  const key = "numbr_gold_" + vs;
+  try { const c = JSON.parse(localStorage.getItem(key) || "null"); if (c && Date.now() - c.t < 24 * 3600 * 1000) { goldPriceGram = c.v; return; } } catch (e) {}
+  try {
+    const res = await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=pax-gold&vs_currencies=${vs}`);
+    if (!res.ok) return;
+    const j = await res.json();
+    const oz = j["pax-gold"] && j["pax-gold"][vs];
+    if (oz) { goldPriceGram = oz / GRAMS_PER_OZ; try { localStorage.setItem(key, JSON.stringify({ t: Date.now(), v: goldPriceGram })); } catch (e) {} }
+  } catch (e) { /* offline / local — works once deployed */ }
+}
 async function refreshCryptoPrices() {
   await loadCryptoMarkets();
+  await loadGoldPrice();
   state.portfolio.holdings.forEach((h) => {
     if (h.assetType === "crypto" && h.coinId) {
       const m = cryptoMarkets.find((x) => x.id === h.coinId);
       if (m) { h.price = m.price; h.value = (h.qty || 0) * m.price; }
+    } else if (h.assetType === "gold" && goldPriceGram > 0) {
+      h.price = goldPriceGram;
+      h.value = (h.grams || 0) * goldPriceGram;
     }
   });
   buildPortfolio();
@@ -1040,6 +1098,7 @@ function incomeManualTotal() {
 }
 
 function refreshPortfolio() {
+  saveState();
   const meta = CURRENCY_META[state.currency];
   document.querySelectorAll("#view-portfolio .savings-symbol").forEach((s) => (s.textContent = meta.symbol));
 
@@ -1156,7 +1215,7 @@ function makeIncomeRow(id, isCustom) {
   amtInput.addEventListener("input", () => { state.income.amounts[id] = parseNumber(amtInput.value); refreshIncome(); });
   amtInput.addEventListener("blur", () => { if (state.income.amounts[id] > 0) amtInput.value = formatThousands(state.income.amounts[id]); });
   if (isCustom) {
-    row.querySelector("[data-inc-name]").addEventListener("input", (e) => { const c = state.income.custom.find((x) => x.id === id); if (c) c.label = e.target.value; });
+    row.querySelector("[data-inc-name]").addEventListener("input", (e) => { const c = state.income.custom.find((x) => x.id === id); if (c) c.label = e.target.value; saveState(); });
     row.querySelector("[data-inc-del]").addEventListener("click", () => {
       state.income.custom = state.income.custom.filter((x) => x.id !== id);
       delete state.income.amounts[id]; delete state.income.passive[id];
@@ -1177,6 +1236,7 @@ function addIncome() {
 }
 
 function refreshIncome() {
+  saveState();
   const meta = CURRENCY_META[state.currency];
   document.querySelectorAll("#view-income .savings-symbol").forEach((s) => (s.textContent = meta.symbol));
 
@@ -1238,6 +1298,7 @@ function applyTheme(theme) {
   state.theme = theme;
   document.documentElement.dataset.theme = theme;
   updateSettingsActive();
+  saveState();
   try { localStorage.setItem("numbr_theme", theme); } catch (e) {}
 }
 function updateSettingsActive() {
@@ -1308,6 +1369,35 @@ document.querySelectorAll("[data-theme-pick]").forEach((b) => b.addEventListener
   });
 })();
 
+// ---- Persistence (localStorage; survives page refresh) ----
+function saveState() {
+  try {
+    localStorage.setItem("numbr_state", JSON.stringify({
+      v: 1,
+      lang: state.lang, theme: state.theme, currency: state.currency,
+      monthlyExpenses: state.monthlyExpenses, realMode: state.realMode,
+      inflation: state.inflation, rates: state.rates, realEstate: state.realEstate,
+      savings: state.savings, income: state.income, portfolio: state.portfolio,
+    }));
+  } catch (e) {}
+}
+function loadState() {
+  let s;
+  try { s = JSON.parse(localStorage.getItem("numbr_state") || "null"); } catch (e) { return; }
+  if (!s) return;
+  if (s.lang && I18N[s.lang]) state.lang = s.lang;
+  if (s.theme) state.theme = s.theme;
+  if (s.currency && CURRENCY_META[s.currency]) state.currency = s.currency;
+  if (typeof s.monthlyExpenses === "number") state.monthlyExpenses = s.monthlyExpenses;
+  if (typeof s.realMode === "boolean") state.realMode = s.realMode;
+  if (s.inflation) state.inflation = s.inflation;
+  if (s.rates) state.rates = s.rates;
+  if (s.realEstate) state.realEstate = s.realEstate;
+  if (s.savings) state.savings = s.savings;
+  if (s.income) state.income = s.income;
+  if (s.portfolio) state.portfolio = s.portfolio;
+}
+
 // ---- Init ----
 try {
   const savedLang = localStorage.getItem("numbr_lang");
@@ -1317,6 +1407,7 @@ try {
   if (savedTheme) state.theme = savedTheme;
   if (savedCur && CURRENCY_META[savedCur]) state.currency = savedCur;
 } catch (e) {}
+loadState(); // full saved snapshot takes precedence over the legacy per-key values
 
 el.expenses.value = formatThousands(state.monthlyExpenses);
 el.inflation.value = formatRate(state.inflation[state.currency], false);
