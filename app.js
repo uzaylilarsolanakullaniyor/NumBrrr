@@ -143,7 +143,7 @@ const I18N = {
       subscriptions_hint: "Netflix, Spotify, YouTube Premium, etc.",
       eatingout: "Eating out / restaurants", delivery: "Food delivery", coffee: "Daily coffee",
       gaming: "Gaming subs + in-game purchases", fuel: "Fuel / gas",
-      shopping: "Impulse / fast-fashion shopping",
+      shopping: "Shopping",
     },
   },
 
