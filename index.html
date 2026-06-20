@@ -102,11 +102,7 @@
         <h2 data-i18n="rule_title">25× your annual expenses</h2>
       </div>
       <p class="rule-text" data-i18n-html="rule_text">
-        NumBrrr generalizes a classic idea: if your savings earn about <strong>4% a year</strong>,
-        you need roughly <strong>25× your annual expenses</strong> so the returns alone cover your
-        life, without ever draining the principal. That "safe withdrawal rate" comes from the
-        <strong>Trinity Study (1998)</strong>, a landmark academic analysis of historical market
-        data, and it's the foundation of the financial-independence (FIRE) movement.
+        Earn about <strong>4% a year</strong> and you need roughly <strong>25× your annual expenses</strong>, so the returns alone cover your life without draining the principal.
       </p>
       <div class="rule-foot">
         <div class="rule-number">
@@ -117,14 +113,12 @@
           Read the Trinity Study →
         </a>
       </div>
-      <p class="rule-note" id="ruleNote"></p>
     </section>
 
     <!-- Comparison cards -->
     <section id="compare" aria-label="Investment comparison">
       <div class="section-head">
         <h2 data-i18n="compare_title">Compare instruments</h2>
-        <p data-i18n="compare_sub">Each card shows the savings you'd need so its yearly return pays your expenses. Rates are editable.</p>
       </div>
       <div class="cards" id="cards"></div>
     </section>
@@ -133,21 +127,13 @@
     <section class="glass chart" aria-label="Savings required comparison chart">
       <div class="section-head section-head--chart">
         <h2 data-i18n="chart_title">Savings required</h2>
-        <p data-i18n="chart_sub">Lower is better, less to save before your money works for you.</p>
       </div>
       <div class="bars" id="bars"></div>
     </section>
 
-    <!-- Disclaimers -->
+    <!-- Disclaimer -->
     <footer class="disclaimer glass">
-      <h3 data-i18n="disc_title">Good to know</h3>
-      <ul>
-        <li data-i18n-html="disc_1"><strong>Estimates, not advice.</strong> NumBrrr is an educational planning tool, not financial advice.</li>
-        <li data-i18n-html="disc_2"><strong>Historical ≠ future.</strong> Stock indices (S&P 500, Nasdaq, BIST 100) and Bitcoin returns are historical averages and do not guarantee future performance.</li>
-        <li data-i18n-html="disc_3"><strong>Bitcoin is highly volatile.</strong> Crypto can swing dramatically; treat its return as speculative.</li>
-        <li data-i18n-html="disc_4"><strong>Real estate yields vary.</strong> Rental yields differ widely by city and property type; defaults are national averages (Global Property Guide) and are historical, not a guarantee. Use the property-value &amp; rent fields for your own number.</li>
-        <li data-i18n-html="disc_5"><strong>Rates are defaults.</strong> Every return rate is pre-filled with a reasonable default and is fully editable, tune them to your own assumptions.</li>
-      </ul>
+      <p data-i18n="disc_1">Estimates for education, not financial advice. Returns are historical or assumed, not guaranteed, and every rate is editable.</p>
     </footer>
     </div><!-- /view-home -->
 
@@ -155,7 +141,7 @@
     <div class="view" id="view-savings" hidden>
       <div class="view-intro">
         <h2 class="view-title" data-i18n="cut_title">Your expenses</h2>
-        <p class="subtagline" data-i18n="cut_sub">List what you spend each month. Toggle items on or off, and see what each could become if you invested it instead. These totals are what count as your expenses across the app.</p>
+        <p class="subtagline" data-i18n="cut_sub">Your monthly spending. See what investing it instead could become.</p>
       </div>
 
       <section class="glass savings-panel" aria-label="Spending categories">
@@ -182,7 +168,6 @@
         </div>
 
         <p class="savings-punch" id="savingsPunch"></p>
-        <p class="savings-note" data-i18n="savings_note">Projection compounds yearly contributions: FV = annual × [((1 + r)ⁿ − 1) / r], where r is the selected annual return. Returns are assumptions, not guarantees.</p>
       </section>
     </div><!-- /view-savings -->
 
@@ -259,7 +244,7 @@
     <div class="view" id="view-portfolio">
       <div class="view-intro">
         <h2 class="view-title" data-i18n="portfolio_title">Your portfolio</h2>
-        <p class="subtagline" data-i18n="portfolio_sub">Add what you already own and see how close you are to freedom.</p>
+        <p class="subtagline" data-i18n="portfolio_sub">Add what you own and see your allocation.</p>
       </div>
 
       <section class="glass savings-result port-total-card" aria-label="Total portfolio value">
@@ -296,7 +281,7 @@
     <div class="view" id="view-income" hidden>
       <div class="view-intro">
         <h2 class="view-title" data-i18n="income_title">Your income</h2>
-        <p class="subtagline" data-i18n="income_sub">Add your monthly income. Mark the passive ones (rent, interest, dividends); only passive income counts toward freedom.</p>
+        <p class="subtagline" data-i18n="income_sub">Add your income. Mark the passive ones, only they count toward freedom.</p>
       </div>
 
       <section class="glass savings-panel" aria-label="Income sources">
@@ -320,7 +305,6 @@
 
         <p class="savings-punch" id="incPunch"></p>
         <p class="inc-surplus" id="incSurplus"></p>
-        <p class="savings-note" data-i18n="income_note">Passive income = rent, interest, dividends, and similar. Financial freedom = passive income ≥ your expenses.</p>
       </section>
     </div><!-- /view-income -->
 
@@ -328,7 +312,7 @@
     <div class="view" id="view-watch" hidden>
       <div class="view-intro">
         <h2 class="view-title" data-i18n="watch_title">Watchlist</h2>
-        <p class="subtagline" data-i18n="watch_sub">Search and favorite assets to track their price and performance.</p>
+        <p class="subtagline" data-i18n="watch_sub">Search and favorite assets to track them.</p>
       </div>
 
       <section class="glass watch-panel" aria-label="Watchlist">
