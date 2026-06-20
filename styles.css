@@ -1279,3 +1279,18 @@ body {
 .onboard-start:active { transform: scale(0.99); }
 @keyframes ob-fade { from { opacity: 0; } to { opacity: 1; } }
 @keyframes ob-rise { from { opacity: 0; transform: translateY(14px) scale(0.98); } to { opacity: 1; transform: none; } }
+
+/* ============ Portfolio total + currency toggle ============ */
+.port-total-card { padding: 20px 22px; }
+.port-total-head { display: flex; align-items: center; gap: 10px; }
+.port-ccy-toggle {
+  flex: none; cursor: pointer; font: inherit;
+  font-size: 11.5px; font-weight: 700; letter-spacing: 0.02em;
+  color: var(--text); background: rgba(10, 14, 32, 0.62);
+  border: 1px solid var(--glass-border-soft); border-radius: 999px;
+  padding: 4px 11px; line-height: 1.4;
+  transition: border-color 0.2s ease, background 0.2s ease, transform 0.12s ease;
+}
+.port-ccy-toggle:hover { border-color: var(--accent); }
+.port-ccy-toggle:active { transform: scale(0.97); }
+.port-ccy-toggle[hidden] { display: none; }

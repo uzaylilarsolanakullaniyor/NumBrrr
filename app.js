@@ -332,6 +332,7 @@ const state = {
     holdings: [], seq: 0,
     target: { USD: [SAVINGS_DEFAULT_INVEST.USD], TL: [SAVINGS_DEFAULT_INVEST.TL] },
   },
+  portTotalUSD: false, // when currency is TL, show the total portfolio value in USD instead
   watchlist: [], // [{ type, key, name }] — assets to monitor (price + 24h/1mo/1yr performance)
   income: { amounts: {}, passive: {}, custom: [], seq: 0 },
 };
@@ -391,6 +392,7 @@ const el = {
   portList: document.getElementById("portList"),
   addHolding: document.getElementById("addHolding"),
   portTotal: document.getElementById("portTotal"),
+  portCcyToggle: document.getElementById("portCcyToggle"),
   portChart: document.getElementById("portChart"),
   portDonut: document.getElementById("portDonut"),
   portLegend: document.getElementById("portLegend"),
@@ -424,6 +426,16 @@ function parseNumber(str) {
 }
 function formatMoney(value, { compact = false } = {}) {
   const meta = CURRENCY_META[state.currency];
+  if (!isFinite(value)) return "—";
+  return new Intl.NumberFormat(meta.locale, {
+    style: "currency", currency: meta.code,
+    maximumFractionDigits: compact ? 1 : 0,
+    notation: compact ? "compact" : "standard",
+  }).format(value);
+}
+// Format a value in a specific currency (USD or TL), independent of state.currency.
+function formatMoneyCcy(value, curKey, { compact = false } = {}) {
+  const meta = CURRENCY_META[curKey] || CURRENCY_META[state.currency];
   if (!isFinite(value)) return "—";
   return new Intl.NumberFormat(meta.locale, {
     style: "currency", currency: meta.code,
@@ -1237,6 +1249,23 @@ function incomeManualTotal() {
   return t;
 }
 
+// Render the total portfolio value. For Turkey (TL) a small toggle lets the user
+// view the total in USD (converted via the live USD/TRY rate); USA always shows USD.
+function renderPortTotal(totalNative) {
+  const isTL = state.currency === "TL";
+  el.portCcyToggle.hidden = !isTL;
+  if (!isTL) { state.portTotalUSD = false; }
+
+  const showUSD = isTL && state.portTotalUSD && usdTry > 0;
+  if (showUSD) {
+    el.portTotal.textContent = formatMoneyCcy(totalNative / usdTry, "USD");
+  } else {
+    el.portTotal.textContent = formatMoney(totalNative);
+  }
+  // Button shows the currency you'd switch TO.
+  if (isTL) el.portCcyToggle.textContent = state.portTotalUSD ? "₺ TL" : "$ USD";
+}
+
 function refreshPortfolio() {
   saveState();
   const meta = CURRENCY_META[state.currency];
@@ -1257,7 +1286,7 @@ function refreshPortfolio() {
 
   // --- Holdings total + donut (categorized Cash / Investment) ---
   const total = state.portfolio.holdings.reduce((sum, h) => sum + (h.value || 0), 0);
-  el.portTotal.textContent = formatMoney(total);
+  renderPortTotal(total);
 
   const segs = state.portfolio.holdings.filter((h) => h.value > 0);
   if (!segs.length) {
@@ -1586,6 +1615,7 @@ el.investSelect.addEventListener("change", () => { state.savings.invest[state.cu
 
 el.addHolding.addEventListener("click", addHolding);
 el.addIncome.addEventListener("click", addIncome);
+el.portCcyToggle.addEventListener("click", () => { state.portTotalUSD = !state.portTotalUSD; refreshPortfolio(); });
 
 el.expenses.addEventListener("input", () => { state.monthlyExpenses = parseNumber(el.expenses.value); refresh(); });
 el.expenses.addEventListener("blur", () => { if (state.monthlyExpenses > 0) el.expenses.value = formatThousands(state.monthlyExpenses); });
@@ -1641,6 +1671,7 @@ function saveState() {
       monthlyExpenses: state.monthlyExpenses, realMode: state.realMode,
       inflation: state.inflation, rates: state.rates, realEstate: state.realEstate,
       savings: state.savings, income: state.income, portfolio: state.portfolio, watchlist: state.watchlist,
+      portTotalUSD: state.portTotalUSD,
     }));
   } catch (e) {}
 }
@@ -1660,6 +1691,7 @@ function loadState() {
   if (s.income) state.income = s.income;
   if (s.portfolio) state.portfolio = s.portfolio;
   if (Array.isArray(s.watchlist)) state.watchlist = s.watchlist;
+  if (typeof s.portTotalUSD === "boolean") state.portTotalUSD = s.portTotalUSD;
   // normalize any legacy/removed asset types from older saves
   if (state.portfolio && Array.isArray(state.portfolio.holdings)) {
     state.portfolio.holdings.forEach((h) => {
