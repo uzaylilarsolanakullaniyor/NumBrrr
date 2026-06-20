@@ -96,7 +96,7 @@ let watchData = {}; // key -> { price, ccy, chg24, chg1mo, chg1y } for watchlist
 // ============================================================
 const I18N = {
   en: {
-    nav_home: "Home", nav_savings: "Savings", nav_settings: "Settings", nav_more: "More",
+    nav_home: "Home", nav_savings: "Expenses", nav_settings: "Settings", nav_more: "More",
     currency: "Currency", monthly_expenses: "Monthly expenses", per_month: "/ month",
     real_mode: "Real return mode", real_mode_sub: "Subtract inflation from each rate",
     inflation_label: "Inflation (annual %)",
@@ -128,7 +128,7 @@ const I18N = {
     disc_3: "<strong>Bitcoin is highly volatile.</strong> Crypto can swing dramatically; treat its return as speculative.",
     disc_4: "<strong>Real estate yields vary.</strong> Rental yields differ widely by city and property type; defaults are national averages (Global Property Guide) and are historical, not a guarantee. Use the property-value & rent fields for your own number.",
     disc_5: "<strong>Rates are defaults.</strong> Every return rate is pre-filled with a reasonable default and is fully editable, tune them to your own assumptions.",
-    cut_title: "Cut your spending", cut_sub: "Toggle the habits you'd quit, type what you actually spend, and see what it becomes if invested. No averages, every number is yours.",
+    cut_title: "Your expenses", cut_sub: "List what you spend each month. Toggle items on or off, and see what each could become if you invested it instead. These totals are what count as your expenses across the app.",
     add_custom: "+ Add custom category", custom_ph: "Custom category", eg: "e.g.",
     redirect_label: "If you redirect this every month", per_mo: "{x} /mo", per_year: "{x} a year",
     invested_in: "Invested in", yr1: "1 year", yr5: "5 years", yr10: "10 years",
@@ -196,7 +196,7 @@ const I18N = {
   },
 
   tr: {
-    nav_home: "Ana Sayfa", nav_savings: "Tasarruf", nav_settings: "Ayarlar", nav_more: "Daha",
+    nav_home: "Ana Sayfa", nav_savings: "Gider", nav_settings: "Ayarlar", nav_more: "Daha",
     currency: "Para Birimi", monthly_expenses: "Aylık giderler", per_month: "/ ay",
     real_mode: "Reel getiri modu", real_mode_sub: "Her orandan enflasyonu düş",
     inflation_label: "Enflasyon (yıllık %)",
@@ -228,7 +228,7 @@ const I18N = {
     disc_3: "<strong>Bitcoin son derece oynaktır.</strong> Kripto sert dalgalanabilir; getirisini spekülatif olarak değerlendir.",
     disc_4: "<strong>Kira getirileri değişir.</strong> Kira getirileri şehre ve mülk tipine göre çok farklılaşır; varsayılanlar ulusal ortalamalardır (Global Property Guide) ve tarihseldir, garanti değildir. Kendi rakamın için mülk değeri ve kira alanlarını kullan.",
     disc_5: "<strong>Oranlar varsayılandır.</strong> Her getiri oranı makul bir varsayılanla doldurulmuştur ve tamamen düzenlenebilir, kendi varsayımlarına göre ayarla.",
-    cut_title: "Harcamanı azalt", cut_sub: "Bırakacağın alışkanlıkları aç/kapat, gerçekte ne harcadığını yaz ve yatırılırsa ne olacağını gör. Ortalama yok, her rakam senin.",
+    cut_title: "Giderlerin", cut_sub: "Her ay ne harcadığını yaz. Kalemleri aç veya kapat, her birini yatırsan ne olabileceğini gör. Uygulamadaki gider rakamı yalnızca buradaki toplamdır.",
     add_custom: "+ Özel kategori ekle", custom_ph: "Özel kategori", eg: "örn.",
     redirect_label: "Bunu her ay yatırıma yönlendirsen", per_mo: "{x} /ay", per_year: "{x} yıllık",
     invested_in: "Şuna yatırılırsa", yr1: "1 yıl", yr5: "5 yıl", yr10: "10 yıl",
@@ -296,7 +296,7 @@ const I18N = {
   },
 
   zh: {
-    nav_home: "首页", nav_savings: "储蓄", nav_settings: "设置", nav_more: "更多",
+    nav_home: "首页", nav_savings: "支出", nav_settings: "设置", nav_more: "更多",
     currency: "货币", monthly_expenses: "每月支出", per_month: "/ 月",
     real_mode: "实际收益模式", real_mode_sub: "从每个收益率中减去通胀",
     inflation_label: "通胀（年 %）",
@@ -328,7 +328,7 @@ const I18N = {
     disc_3: "<strong>比特币极度波动。</strong> 加密货币可能剧烈波动；请将其收益视为投机性。",
     disc_4: "<strong>房地产收益各异。</strong> 租金收益率因城市和房产类型差异很大；默认值为全国平均（Global Property Guide），属历史数据，不构成保证。请使用房产价值与租金字段计算你自己的数字。",
     disc_5: "<strong>收益率为默认值。</strong> 每个收益率都预填了合理默认值且完全可编辑，根据你自己的假设调整。",
-    cut_title: "削减你的开支", cut_sub: "打开你想戒掉的习惯，输入你实际花费的金额，看看若拿去投资会变成多少。没有平均值，每个数字都是你自己的。",
+    cut_title: "你的支出", cut_sub: "列出你每月的支出。打开或关闭各项，看看若改为投资每项会变成多少。整个应用中计为支出的就是这里的合计。",
     add_custom: "+ 添加自定义类别", custom_ph: "自定义类别", eg: "例如",
     redirect_label: "如果你每月把这些钱拿去投资", per_mo: "{x} / 月", per_year: "{x} / 年",
     invested_in: "投资于", yr1: "1 年", yr5: "5 年", yr10: "10 年",
@@ -864,6 +864,15 @@ function savingsInvestRate() {
   const rate = state.rates[state.currency][state.savings.invest[state.currency]];
   return typeof rate === "number" ? rate : 0;
 }
+// Total monthly expenses tracked in the Expenses (Gider) view. This is the only
+// figure that counts as expenses for the Income and Portfolio cash-flow views.
+// The Home page's state.monthlyExpenses stays local to the Home freedom calculator.
+function expensesTotal() {
+  let total = 0;
+  SAVINGS_CATEGORIES.forEach((id) => { if (state.savings.on[id]) total += state.savings.amounts[id] || 0; });
+  state.savings.custom.forEach((c) => { if (state.savings.on[c.id]) total += state.savings.amounts[c.id] || 0; });
+  return total;
+}
 function buildInvestOptions() {
   const cur = state.currency;
   el.investSelect.innerHTML = INSTRUMENTS[cur]
@@ -881,9 +890,7 @@ function refreshSavings() {
   const meta = CURRENCY_META[state.currency];
   document.querySelectorAll("#view-savings .savings-symbol").forEach((s) => (s.textContent = meta.symbol));
 
-  let monthly = 0;
-  SAVINGS_CATEGORIES.forEach((id) => { if (state.savings.on[id]) monthly += state.savings.amounts[id] || 0; });
-  state.savings.custom.forEach((c) => { if (state.savings.on[c.id]) monthly += state.savings.amounts[c.id] || 0; });
+  const monthly = expensesTotal();
   const annual = monthly * 12;
 
   el.savingsMonthly.textContent = t("per_mo", { x: formatMoney(monthly) });
@@ -1326,17 +1333,15 @@ function refreshPortfolio() {
   // --- Monthly cash flow (Income incl. portfolio yield − Expenses) ---
   const py = portfolioYield();
   const income = incomeManualTotal() + py.interest + py.rental;
-  let sav = 0;
-  SAVINGS_CATEGORIES.forEach((id) => { if (state.savings.on[id]) sav += state.savings.amounts[id] || 0; });
-  state.savings.custom.forEach((c) => { if (state.savings.on[c.id]) sav += state.savings.amounts[c.id] || 0; });
-  const exp = state.monthlyExpenses;
+  // Expenses come from the Expenses (Gider) view only, not the Home page.
+  const exp = expensesTotal();
   const net = income - exp;
   el.flowIncome.textContent = formatMoney(income);
   el.flowExpenses.textContent = "−" + formatMoney(exp);
   el.flowNet.textContent = formatMoney(net);
   el.flowNetRow.classList.toggle("is-pos", net >= 0);
   el.flowNetRow.classList.toggle("is-neg", net < 0);
-  el.flowSavings.textContent = sav > 0 ? t("flow_savings_note", { x: formatMoney(sav) }) : "";
+  el.flowSavings.textContent = "";
 
   // --- Holdings total + donut (categorized Cash / Investment) ---
   const total = state.portfolio.holdings.reduce((sum, h) => sum + (h.value || 0), 0);
@@ -1478,7 +1483,8 @@ function refreshIncome() {
   noteFor("rental", py.rental);
 
   const active = total - passive;
-  const exp = state.monthlyExpenses;
+  // Expenses come from the Expenses (Gider) view only, not the Home page.
+  const exp = expensesTotal();
 
   el.incTotal.textContent = formatMoney(total);
   el.incBreakdown.textContent = `${t("passive_label")}: ${formatMoney(passive)} · ${t("active_label")}: ${formatMoney(active)}`;
