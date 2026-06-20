@@ -104,7 +104,7 @@ let watchData = {}; // key -> { price, ccy, chg24, chg1mo, chg1y } for watchlist
 // ============================================================
 const I18N = {
   en: {
-    nav_home: "Home", nav_savings: "Expenses", nav_settings: "Settings", nav_more: "More",
+    nav_home: "Freedom", nav_savings: "Expenses", nav_settings: "Settings", nav_more: "More",
     currency: "Currency", monthly_expenses: "Monthly expenses", per_month: "/ month",
     real_mode: "Real return mode", real_mode_sub: "Subtract inflation from each rate",
     inflation_label: "Inflation (annual %)",
@@ -206,7 +206,7 @@ const I18N = {
   },
 
   tr: {
-    nav_home: "Ana Sayfa", nav_savings: "Gider", nav_settings: "Ayarlar", nav_more: "Daha",
+    nav_home: "Özgürlük", nav_savings: "Gider", nav_settings: "Ayarlar", nav_more: "Daha",
     currency: "Para Birimi", monthly_expenses: "Aylık giderler", per_month: "/ ay",
     real_mode: "Reel getiri modu", real_mode_sub: "Her orandan enflasyonu düş",
     inflation_label: "Enflasyon (yıllık %)",
