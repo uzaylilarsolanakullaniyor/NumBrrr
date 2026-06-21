@@ -147,7 +147,7 @@ const I18N = {
     exp_cat_ph: "Category", exp_day_ph: "Day", exp_paid: "Paid",
     exp_due_fmt: "Day {day}", exp_empty: "No expenses logged yet.",
     exp_overdue: "Overdue", exp_soon: "Due soon",
-    veh_title: "My vehicles", veh_add: "+ Add vehicle", veh_plate_ph: "Plate",
+    veh_title: "My vehicles", veh_add: "+ Add vehicle", veh_model_ph: "Vehicle model",
     veh_reminders: "Payment reminders", veh_add_reminder: "+ Add reminder", veh_label_ph: "Insurance, tax…",
     veh_expenses: "Expenses", veh_add_expense: "+ Add expense", veh_monthly: "This month",
     vsched: { insurance: "Insurance", kasko: "Casco", tax: "Tax", inspection: "Inspection", service: "Service" },
@@ -261,7 +261,7 @@ const I18N = {
     exp_cat_ph: "Kategori", exp_day_ph: "Gün", exp_paid: "Ödendi",
     exp_due_fmt: "Ayın {day}'i", exp_empty: "Henüz harcama eklenmedi.",
     exp_overdue: "Gecikmiş", exp_soon: "Yaklaşıyor",
-    veh_title: "Araçlarım", veh_add: "+ Araç ekle", veh_plate_ph: "Plaka",
+    veh_title: "Araçlarım", veh_add: "+ Araç ekle", veh_model_ph: "Araç modeli",
     veh_reminders: "Ödeme hatırlatmaları", veh_add_reminder: "+ Hatırlatma ekle", veh_label_ph: "Sigorta, vergi…",
     veh_expenses: "Harcamalar", veh_add_expense: "+ Harcama ekle", veh_monthly: "Bu ay",
     vsched: { insurance: "Sigorta", kasko: "Kasko", tax: "Vergi (MTV)", inspection: "Muayene", service: "Bakım" },
@@ -969,7 +969,7 @@ function makeVehicleCard(v) {
   card.dataset.veh = v.id;
   card.innerHTML = `
     <div class="veh-head">
-      <input class="veh-plate" data-veh-plate value="${(v.plate || "").replace(/"/g, "&quot;")}" placeholder="${t("veh_plate_ph")}" />
+      <input class="veh-plate" data-veh-plate value="${(v.plate || "").replace(/"/g, "&quot;")}" placeholder="${t("veh_model_ph")}" />
       <span class="veh-monthly" data-veh-total></span>
       <button class="cat-remove veh-del" type="button" data-veh-del aria-label="remove">×</button>
     </div>

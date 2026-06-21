@@ -1432,10 +1432,9 @@ body {
 .veh-plate {
   flex: 1; min-width: 0; background: transparent; border: 0;
   border-bottom: 1px solid transparent; color: var(--text);
-  font: inherit; font-size: 16px; font-weight: 700; letter-spacing: 0.04em;
-  text-transform: uppercase; padding: 4px 0;
+  font: inherit; font-size: 16px; font-weight: 700; padding: 4px 0;
 }
-.veh-plate::placeholder { color: var(--text-faint); font-weight: 600; letter-spacing: 0; text-transform: none; }
+.veh-plate::placeholder { color: var(--text-faint); font-weight: 600; }
 .veh-plate:focus { outline: none; border-bottom-color: color-mix(in srgb, var(--accent) 55%, transparent); }
 .veh-monthly { font-size: 12.5px; font-weight: 700; color: var(--good); white-space: nowrap; }
 .veh-del { flex: none; }
