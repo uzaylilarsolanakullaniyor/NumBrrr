@@ -1896,14 +1896,19 @@ function buildWatchlist() {
   el.watchEmpty.hidden = true;
   el.watchList.innerHTML = state.watchlist.map((w) => {
     const d = watchData[w.key] || {};
-    return `<div class="watch-row">
-      <div class="watch-top">
-        <div class="watch-name">${escapeHtml(w.name)} <small>${escapeHtml((w.sym || "").toUpperCase())}</small></div>
-        <div class="watch-price">${watchPriceLabel(w)}</div>
-      </div>
-      <div class="watch-perf">
-        ${chgHtml(t("lbl_24h"), d.chg24)}${chgHtml(t("lbl_1mo"), d.chg1mo)}${chgHtml(t("lbl_1yr"), d.chg1y)}
-        <button class="watch-del" type="button" data-wdel="${w.type}|${w.key}" aria-label="remove">×</button>
+    return `<div class="watch-row" data-wkey="${w.type}|${w.key}">
+      <button class="watch-grip" type="button" data-wgrip aria-label="reorder">
+        <svg viewBox="0 0 16 16" width="14" height="14" fill="currentColor" aria-hidden="true"><circle cx="5" cy="3" r="1.3"/><circle cx="11" cy="3" r="1.3"/><circle cx="5" cy="8" r="1.3"/><circle cx="11" cy="8" r="1.3"/><circle cx="5" cy="13" r="1.3"/><circle cx="11" cy="13" r="1.3"/></svg>
+      </button>
+      <div class="watch-body">
+        <div class="watch-top">
+          <div class="watch-name">${escapeHtml(w.name)} <small>${escapeHtml((w.sym || "").toUpperCase())}</small></div>
+          <div class="watch-price">${watchPriceLabel(w)}</div>
+        </div>
+        <div class="watch-perf">
+          ${chgHtml(t("lbl_24h"), d.chg24)}${chgHtml(t("lbl_1mo"), d.chg1mo)}${chgHtml(t("lbl_1yr"), d.chg1y)}
+          <button class="watch-del" type="button" data-wdel="${w.type}|${w.key}" aria-label="remove">×</button>
+        </div>
       </div>
     </div>`;
   }).join("");
@@ -1911,6 +1916,36 @@ function buildWatchlist() {
     const idx = b.dataset.wdel.indexOf("|");
     removeWatch(b.dataset.wdel.slice(0, idx), b.dataset.wdel.slice(idx + 1));
   }));
+  el.watchList.querySelectorAll("[data-wgrip]").forEach((g) => g.addEventListener("pointerdown", startWatchReorder));
+}
+// Drag-to-reorder the watchlist via each row's grip handle (touch + mouse).
+function startWatchReorder(e) {
+  e.preventDefault();
+  const list = el.watchList;
+  const grip = e.currentTarget;
+  const row = grip.closest(".watch-row");
+  if (!row) return;
+  row.classList.add("wl-dragging");
+  if (grip.setPointerCapture) try { grip.setPointerCapture(e.pointerId); } catch (err) {}
+  const move = (ev) => {
+    const others = [...list.querySelectorAll(".watch-row:not(.wl-dragging)")];
+    let before = null;
+    for (const r of others) {
+      const rect = r.getBoundingClientRect();
+      if (ev.clientY < rect.top + rect.height / 2) { before = r; break; }
+    }
+    if (before) list.insertBefore(row, before); else list.appendChild(row);
+  };
+  const up = () => {
+    document.removeEventListener("pointermove", move);
+    document.removeEventListener("pointerup", up);
+    row.classList.remove("wl-dragging");
+    const order = [...list.querySelectorAll(".watch-row")].map((r) => r.dataset.wkey);
+    state.watchlist.sort((a, b) => order.indexOf(a.type + "|" + a.key) - order.indexOf(b.type + "|" + b.key));
+    saveState();
+  };
+  document.addEventListener("pointermove", move);
+  document.addEventListener("pointerup", up);
 }
 async function refreshWatchData() {
   if (!state.watchlist.length) return;

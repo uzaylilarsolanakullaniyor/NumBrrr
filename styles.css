@@ -759,8 +759,23 @@ body {
 [data-theme="xp"] .watch-search, [data-theme="doge"] .watch-search { background: #fff; border-color: #9a9a8a; color: #1a1a1a; }
 [data-theme="medieval"] .watch-search { background: rgba(60, 40, 18, 0.1); border-color: #9a7b4a; color: #2b1c0c; }
 .watch-list { display: flex; flex-direction: column; }
-.watch-row { padding: 12px 0; border-bottom: 1px solid var(--glass-border-soft); }
+.watch-row { display: flex; align-items: stretch; gap: 8px; padding: 12px 0; border-bottom: 1px solid var(--glass-border-soft); }
 .watch-row:last-child { border-bottom: 0; }
+.watch-body { flex: 1; min-width: 0; }
+.watch-grip {
+  flex: none; align-self: center; display: grid; place-items: center;
+  width: 26px; padding: 4px 2px; background: transparent; border: 0;
+  color: var(--text-faint); cursor: grab; touch-action: none; user-select: none;
+  transition: color 0.18s ease;
+}
+.watch-grip:hover { color: var(--text-dim); }
+.watch-grip:active { cursor: grabbing; }
+.watch-row.wl-dragging {
+  background: rgba(124, 92, 255, 0.12);
+  border-radius: 12px; border-bottom-color: transparent;
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.35);
+}
+.watch-row.wl-dragging .watch-grip { color: var(--accent); }
 .watch-top { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
 .watch-name { font-size: 15px; font-weight: 600; min-width: 0; }
 .watch-name small { color: var(--text-faint); font-weight: 400; font-size: 11.5px; margin-left: 5px; }
