@@ -41,6 +41,9 @@ function countryForCurrency(cur) { return cur === "TL" ? "TR" : "US"; }
 const SAVINGS_DEFAULT_INVEST = { USD: "sp500", TL: "deposit" };
 // Preset expense categories (translated; users can also type their own).
 const EXPENSE_CATS = ["rent","bills","market","food","electric","water","internet","transport","health","shopping","entertainment","other"];
+// Vehicle payment-reminder labels + vehicle expense categories (suggestions).
+const VEH_SCHED_PRESETS = ["insurance","kasko","tax","inspection","service"];
+const VEH_EXP_PRESETS = ["fuel","service","parking","fine","tires","wash"];
 // Income sources, pre-classified as passive (counts toward freedom) or active.
 const INCOME_CATEGORIES = [
   { id: "salary", passive: false },
@@ -144,6 +147,11 @@ const I18N = {
     exp_cat_ph: "Category", exp_day_ph: "Day", exp_paid: "Paid",
     exp_due_fmt: "Day {day}", exp_empty: "No expenses logged yet.",
     exp_overdue: "Overdue", exp_soon: "Due soon",
+    veh_title: "My vehicles", veh_add: "+ Add vehicle", veh_plate_ph: "Plate",
+    veh_reminders: "Payment reminders", veh_add_reminder: "+ Add reminder", veh_label_ph: "Insurance, tax…",
+    veh_expenses: "Expenses", veh_add_expense: "+ Add expense", veh_monthly: "This month",
+    vsched: { insurance: "Insurance", kasko: "Casco", tax: "Tax", inspection: "Inspection", service: "Service" },
+    vcat: { fuel: "Fuel", service: "Service", parking: "Parking", fine: "Fine", tires: "Tires", wash: "Wash" },
     ecat: { rent: "Rent", bills: "Bills", market: "Groceries", food: "Eating out", electric: "Electricity", water: "Water", internet: "Internet", transport: "Transport", health: "Health", shopping: "Shopping", entertainment: "Entertainment", other: "Other" },
     add_custom: "+ Add custom category", custom_ph: "Custom category", eg: "e.g.",
     redirect_label: "If you redirect this every month", per_mo: "{x} /mo", per_year: "{x} a year",
@@ -253,6 +261,11 @@ const I18N = {
     exp_cat_ph: "Kategori", exp_day_ph: "Gün", exp_paid: "Ödendi",
     exp_due_fmt: "Ayın {day}'i", exp_empty: "Henüz harcama eklenmedi.",
     exp_overdue: "Gecikmiş", exp_soon: "Yaklaşıyor",
+    veh_title: "Araçlarım", veh_add: "+ Araç ekle", veh_plate_ph: "Plaka",
+    veh_reminders: "Ödeme hatırlatmaları", veh_add_reminder: "+ Hatırlatma ekle", veh_label_ph: "Sigorta, vergi…",
+    veh_expenses: "Harcamalar", veh_add_expense: "+ Harcama ekle", veh_monthly: "Bu ay",
+    vsched: { insurance: "Sigorta", kasko: "Kasko", tax: "Vergi (MTV)", inspection: "Muayene", service: "Bakım" },
+    vcat: { fuel: "Yakıt", service: "Bakım", parking: "Otopark", fine: "Ceza", tires: "Lastik", wash: "Yıkama" },
     ecat: { rent: "Kira", bills: "Fatura", market: "Market", food: "Yemek", electric: "Elektrik", water: "Su", internet: "İnternet", transport: "Ulaşım", health: "Sağlık", shopping: "Alışveriş", entertainment: "Eğlence", other: "Diğer" },
     add_custom: "+ Özel kategori ekle", custom_ph: "Özel kategori", eg: "örn.",
     redirect_label: "Bunu her ay yatırıma yönlendirsen", per_mo: "{x} /ay", per_year: "{x} yıllık",
@@ -345,6 +358,9 @@ const state = {
   expenses: {
     month: "", recurring: [], oneoff: [], history: [], recSeq: 0, oneSeq: 0,
   },
+  // Vehicles: each has a plate, dated payment reminders (sched) and logged
+  // expenses (oneoff). Vehicle costs roll into the monthly expense total.
+  vehicles: [], vehSeq: 0,
   portfolio: {
     holdings: [], seq: 0,
     target: { USD: [SAVINGS_DEFAULT_INVEST.USD], TL: [SAVINGS_DEFAULT_INVEST.TL] },
@@ -410,6 +426,10 @@ const el = {
   expHistorySec: document.getElementById("expHistorySec"),
   expHistToggle: document.getElementById("expHistToggle"),
   expHistList: document.getElementById("expHistList"),
+  vehList: document.getElementById("vehList"),
+  addVehicle: document.getElementById("addVehicle"),
+  vehSchedList: document.getElementById("vehSchedList"),
+  vehCatList: document.getElementById("vehCatList"),
   expCatList: document.getElementById("expCatList"),
   // portfolio view
   portList: document.getElementById("portList"),
@@ -764,6 +784,7 @@ function rollExpenseMonth() {
   if (e.history.length > 36) e.history.length = 36;
   e.oneoff = [];
   (e.recurring || []).forEach((r) => (r.paid = false));
+  (state.vehicles || []).forEach((v) => (v.oneoff = [])); // reset per-vehicle spends too
   e.month = now;
 }
 
@@ -777,8 +798,19 @@ function expensesTotal() {
   let total = 0;
   (e.recurring || []).forEach((r) => { if (r.paid) total += r.amount || 0; });
   (e.oneoff || []).forEach((o) => (total += o.amount || 0));
-  return total;
+  return total + vehiclesMonthlyTotal();
 }
+
+// A vehicle's spend this month = its logged expenses + scheduled payments paid
+// this month. Scheduled (dated) payments are one-time, so they only count in the
+// month they were marked paid.
+function vehMonthlyTotal(v) {
+  let t = 0;
+  (v.oneoff || []).forEach((o) => (t += o.amount || 0));
+  (v.sched || []).forEach((s) => { if (s.paidMonth && s.paidMonth === state.expenses.month) t += s.amount || 0; });
+  return t;
+}
+function vehiclesMonthlyTotal() { return (state.vehicles || []).reduce((a, v) => a + vehMonthlyTotal(v), 0); }
 
 function buildExpenses() {
   // category suggestions (translated presets; users can still type their own)
@@ -787,6 +819,7 @@ function buildExpenses() {
   state.expenses.recurring.forEach((r) => el.expRecList.appendChild(makeRecRow(r)));
   el.expOneList.innerHTML = "";
   state.expenses.oneoff.forEach((o) => el.expOneList.appendChild(makeOneRow(o)));
+  buildVehicles();
   refreshExpenses();
 }
 
@@ -898,6 +931,148 @@ function refreshExpenses() {
   el.expHistList.innerHTML = hist
     .map((h) => `<div class="exp-hist-row"><span>${monthLabel(h.month)}</span><strong>${formatMoney(h.total)}</strong></div>`)
     .join("");
+
+  refreshVehicles();
+}
+
+// ============================================================
+//  Vehicles (Araçlarım) — plate, dated payment reminders, expenses
+// ============================================================
+function vschedName(c) { return (L().vsched && L().vsched[c]) || (I18N.en.vsched && I18N.en.vsched[c]) || c; }
+function vcatName(c) { return (L().vcat && L().vcat[c]) || (I18N.en.vcat && I18N.en.vcat[c]) || c; }
+
+function buildVehicles() {
+  el.vehSchedList.innerHTML = VEH_SCHED_PRESETS.map((c) => `<option value="${vschedName(c).replace(/"/g, "&quot;")}"></option>`).join("");
+  el.vehCatList.innerHTML = VEH_EXP_PRESETS.map((c) => `<option value="${vcatName(c).replace(/"/g, "&quot;")}"></option>`).join("");
+  el.vehList.innerHTML = "";
+  (state.vehicles || []).forEach((v) => el.vehList.appendChild(makeVehicleCard(v)));
+}
+
+function refreshVehicles() {
+  (state.vehicles || []).forEach((v) => {
+    const card = el.vehList.querySelector(`[data-veh="${v.id}"]`);
+    if (!card) return;
+    const tEl = card.querySelector("[data-veh-total]");
+    if (tEl) tEl.textContent = `${t("veh_monthly")}: ${formatMoney(vehMonthlyTotal(v))}`;
+    (v.sched || []).forEach((s) => {
+      const row = card.querySelector(`[data-vsched="${s.id}"]`);
+      if (row) updateVehSchedStatus(row, s);
+    });
+  });
+}
+
+function makeVehicleCard(v) {
+  const card = document.createElement("div");
+  card.className = "veh-card";
+  card.dataset.veh = v.id;
+  card.innerHTML = `
+    <div class="veh-head">
+      <input class="veh-plate" data-veh-plate value="${(v.plate || "").replace(/"/g, "&quot;")}" placeholder="${t("veh_plate_ph")}" />
+      <span class="veh-monthly" data-veh-total></span>
+      <button class="cat-remove veh-del" type="button" data-veh-del aria-label="remove">×</button>
+    </div>
+    <div class="veh-sub">
+      <div class="veh-sub-head">${t("veh_reminders")}</div>
+      <div class="veh-sched-wrap" data-veh-sched-list></div>
+      <button class="veh-add-btn" type="button" data-veh-add-sched>${t("veh_add_reminder")}</button>
+    </div>
+    <div class="veh-sub">
+      <div class="veh-sub-head">${t("veh_expenses")}</div>
+      <div class="veh-exp-wrap" data-veh-exp-list></div>
+      <button class="veh-add-btn" type="button" data-veh-add-exp>${t("veh_add_expense")}</button>
+    </div>`;
+
+  card.querySelector("[data-veh-plate]").addEventListener("input", (e) => { v.plate = e.target.value; saveState(); });
+  card.querySelector("[data-veh-del]").addEventListener("click", () => {
+    state.vehicles = state.vehicles.filter((x) => x.id !== v.id);
+    card.remove(); refreshExpenses();
+  });
+
+  const sl = card.querySelector("[data-veh-sched-list]");
+  (v.sched || []).forEach((s) => sl.appendChild(makeVehSchedRow(v, s)));
+  const xl = card.querySelector("[data-veh-exp-list]");
+  (v.oneoff || []).forEach((o) => xl.appendChild(makeVehExpRow(v, o)));
+
+  card.querySelector("[data-veh-add-sched]").addEventListener("click", () => {
+    const s = { id: "s" + ++v.schedSeq, label: "", amount: 0, date: "", paidMonth: "" };
+    v.sched.push(s);
+    const row = makeVehSchedRow(v, s); sl.appendChild(row);
+    row.querySelector("[data-vs-label]").focus();
+    refreshExpenses();
+  });
+  card.querySelector("[data-veh-add-exp]").addEventListener("click", () => {
+    const o = { id: "x" + ++v.expSeq, day: new Date().getDate(), cat: "", amount: 0 };
+    v.oneoff.push(o);
+    const row = makeVehExpRow(v, o); xl.appendChild(row);
+    row.querySelector("[data-vx-cat]").focus();
+    refreshExpenses();
+  });
+  return card;
+}
+
+function makeVehSchedRow(v, s) {
+  const sym = CURRENCY_META[state.currency].symbol;
+  const row = document.createElement("div");
+  row.className = "veh-sched-row";
+  row.dataset.vsched = s.id;
+  row.innerHTML = `
+    <button class="exp-paid" type="button" data-vs-paid aria-label="${t("exp_paid")}">✓</button>
+    <input class="cat-name veh-sched-label" list="vehSchedList" data-vs-label value="${(s.label || "").replace(/"/g, "&quot;")}" placeholder="${t("veh_label_ph")}" />
+    <input type="date" class="veh-date" data-vs-date value="${s.date || ""}" />
+    <div class="money-input money-input--sm veh-amt"><span class="money-symbol exp-symbol">${sym}</span><input type="text" inputmode="numeric" data-vs-amt value="${s.amount ? formatThousands(s.amount) : ""}" placeholder="0" /></div>
+    <button class="cat-remove" type="button" data-vs-del aria-label="remove">×</button>`;
+
+  row.querySelector("[data-vs-paid]").addEventListener("click", () => { s.paidMonth = s.paidMonth ? "" : state.expenses.month; refreshExpenses(); });
+  row.querySelector("[data-vs-label]").addEventListener("input", (e) => { s.label = e.target.value; saveState(); });
+  row.querySelector("[data-vs-date]").addEventListener("input", (e) => { s.date = e.target.value; updateVehSchedStatus(row, s); saveState(); });
+  const amt = row.querySelector("[data-vs-amt]");
+  amt.addEventListener("input", () => { s.amount = parseNumber(amt.value); refreshExpenses(); });
+  amt.addEventListener("blur", () => { if (s.amount > 0) amt.value = formatThousands(s.amount); });
+  row.querySelector("[data-vs-del]").addEventListener("click", () => { v.sched = v.sched.filter((x) => x.id !== s.id); row.remove(); refreshExpenses(); });
+  updateVehSchedStatus(row, s);
+  return row;
+}
+
+function updateVehSchedStatus(row, s) {
+  row.classList.remove("is-paid", "is-over", "is-soon");
+  if (s.paidMonth) { row.classList.add("is-paid"); return; }
+  if (!s.date) return;
+  const due = new Date(s.date + "T00:00:00");
+  if (isNaN(due)) return;
+  const now = new Date(); now.setHours(0, 0, 0, 0);
+  const days = Math.round((due - now) / 86400000);
+  if (days < 0) row.classList.add("is-over");
+  else if (days <= 14) row.classList.add("is-soon");
+}
+
+function makeVehExpRow(v, o) {
+  const sym = CURRENCY_META[state.currency].symbol;
+  const row = document.createElement("div");
+  row.className = "cat-row exp-row";
+  row.dataset.vexp = o.id;
+  row.innerHTML = `
+    <div class="exp-day"><input class="exp-dayfield" inputmode="numeric" data-vx-day value="${o.day || ""}" placeholder="${t("exp_day_ph")}" maxlength="2" /></div>
+    <input class="cat-name exp-cat" list="vehCatList" data-vx-cat value="${(o.cat || "").replace(/"/g, "&quot;")}" placeholder="${t("exp_cat_ph")}" />
+    <div class="money-input money-input--sm cat-amount"><span class="money-symbol exp-symbol">${sym}</span><input type="text" inputmode="numeric" data-vx-amt value="${o.amount ? formatThousands(o.amount) : ""}" placeholder="0" /></div>
+    <button class="cat-remove" type="button" data-vx-del aria-label="remove">×</button>`;
+
+  const day = row.querySelector("[data-vx-day]");
+  day.addEventListener("input", () => { o.day = clampDay(parseNumber(day.value)); saveState(); });
+  row.querySelector("[data-vx-cat]").addEventListener("input", (e) => { o.cat = e.target.value; saveState(); });
+  const amt = row.querySelector("[data-vx-amt]");
+  amt.addEventListener("input", () => { o.amount = parseNumber(amt.value); refreshExpenses(); });
+  amt.addEventListener("blur", () => { if (o.amount > 0) amt.value = formatThousands(o.amount); });
+  row.querySelector("[data-vx-del]").addEventListener("click", () => { v.oneoff = v.oneoff.filter((x) => x.id !== o.id); row.remove(); refreshExpenses(); });
+  return row;
+}
+
+function addVehicle() {
+  const v = { id: "v" + ++state.vehSeq, plate: "", sched: [], oneoff: [], schedSeq: 0, expSeq: 0 };
+  state.vehicles.push(v);
+  const card = makeVehicleCard(v);
+  el.vehList.appendChild(card);
+  card.querySelector("[data-veh-plate]").focus();
+  refreshExpenses();
 }
 
 // ============================================================
@@ -1683,6 +1858,7 @@ document.querySelectorAll("[data-currency]").forEach((b) => b.addEventListener("
 
 el.addRecurring.addEventListener("click", addRecurring);
 el.addExpense.addEventListener("click", addExpense);
+el.addVehicle.addEventListener("click", addVehicle);
 el.expHistToggle.addEventListener("click", () => {
   const open = el.expHistList.hidden;
   el.expHistList.hidden = !open;
@@ -1747,7 +1923,8 @@ function saveState() {
       lang: state.lang, theme: state.theme, currency: state.currency,
       monthlyExpenses: state.monthlyExpenses, realMode: state.realMode,
       inflation: state.inflation, rates: state.rates, realEstate: state.realEstate,
-      expenses: state.expenses, income: state.income, portfolio: state.portfolio, watchlist: state.watchlist,
+      expenses: state.expenses, vehicles: state.vehicles, vehSeq: state.vehSeq,
+      income: state.income, portfolio: state.portfolio, watchlist: state.watchlist,
       portTotalUSD: state.portTotalUSD,
     }));
   } catch (e) {}
@@ -1771,6 +1948,13 @@ function loadState() {
       history: e.history || [], recSeq: e.recSeq || 0, oneSeq: e.oneSeq || 0,
     };
   }
+  if (Array.isArray(s.vehicles)) {
+    state.vehicles = s.vehicles.map((v) => ({
+      id: v.id, plate: v.plate || "", sched: v.sched || [], oneoff: v.oneoff || [],
+      schedSeq: v.schedSeq || (v.sched ? v.sched.length : 0), expSeq: v.expSeq || (v.oneoff ? v.oneoff.length : 0),
+    }));
+  }
+  if (typeof s.vehSeq === "number") state.vehSeq = s.vehSeq;
   if (s.income) state.income = s.income;
   if (s.portfolio) state.portfolio = s.portfolio;
   if (Array.isArray(s.watchlist)) state.watchlist = s.watchlist;

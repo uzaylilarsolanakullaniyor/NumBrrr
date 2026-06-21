@@ -175,6 +175,15 @@
         <button class="add-cat" id="addExpense" type="button" data-i18n="exp_add">+ Add expense</button>
       </section>
 
+      <!-- My vehicles -->
+      <section class="glass savings-panel exp-vehicles" aria-label="My vehicles">
+        <h3 class="settings-label exp-sec-label" data-i18n="veh_title">My vehicles</h3>
+        <div id="vehList"></div>
+        <button class="add-cat" id="addVehicle" type="button" data-i18n="veh_add">+ Add vehicle</button>
+      </section>
+      <datalist id="vehSchedList"></datalist>
+      <datalist id="vehCatList"></datalist>
+
       <!-- Past months (archived totals) — collapsed behind a toggle -->
       <section class="glass savings-panel exp-history" id="expHistorySec" aria-label="Past months" hidden>
         <button class="exp-hist-toggle" id="expHistToggle" type="button" aria-expanded="false">
