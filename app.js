@@ -765,13 +765,15 @@ function rollExpenseMonth() {
   e.month = now;
 }
 
-// Total monthly expenses = recurring bills + this month's logged spends. This is
-// the only figure that counts as expenses for the Income and Portfolio views.
-// The Home page's state.monthlyExpenses stays local to the Home freedom calculator.
+// Total spent this month = PAID recurring bills + this month's logged spends.
+// An unpaid recurring bill is only an upcoming reminder, not yet a real expense,
+// so it doesn't count until marked paid. This is the only figure that counts as
+// expenses for the Income and Portfolio views; the Home page's
+// state.monthlyExpenses stays local to the Home freedom calculator.
 function expensesTotal() {
   const e = state.expenses;
   let total = 0;
-  (e.recurring || []).forEach((r) => (total += r.amount || 0));
+  (e.recurring || []).forEach((r) => { if (r.paid) total += r.amount || 0; });
   (e.oneoff || []).forEach((o) => (total += o.amount || 0));
   return total;
 }
