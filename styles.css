@@ -1401,3 +1401,20 @@ body {
 }
 .exp-hist-row:last-child { border-bottom: 0; }
 .exp-hist-row strong { font-family: "Sora", sans-serif; color: var(--text); font-size: 15px; }
+
+/* Reminders header with total + collapsible history toggle */
+.exp-rem-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
+.exp-rem-head .settings-label { margin-bottom: 0; }
+.exp-rem-total { font-family: "Sora", sans-serif; font-weight: 700; font-size: 15px; color: var(--text); white-space: nowrap; }
+.exp-history { padding-top: 10px; padding-bottom: 10px; }
+.exp-hist-toggle {
+  width: 100%; display: flex; align-items: center; justify-content: space-between;
+  background: transparent; border: 0; cursor: pointer; color: var(--text-dim);
+  font: inherit; font-weight: 700; font-size: 13px; text-transform: uppercase;
+  letter-spacing: 0.06em; padding: 6px 0;
+}
+.exp-hist-toggle:hover { color: var(--text); }
+.exp-hist-caret { transition: transform 0.2s ease; font-size: 12px; }
+.exp-hist-toggle.is-open .exp-hist-caret { transform: rotate(180deg); }
+#expHistList { margin-top: 8px; }
+#expHistList[hidden] { display: none; }

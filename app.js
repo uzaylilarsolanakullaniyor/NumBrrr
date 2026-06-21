@@ -400,6 +400,7 @@ const el = {
   // expenses (Gider) view
   expMonthLabel: document.getElementById("expMonthLabel"),
   expReminders: document.getElementById("expReminders"),
+  expRemTotal: document.getElementById("expRemTotal"),
   expReminderList: document.getElementById("expReminderList"),
   expTotal: document.getElementById("expTotal"),
   expRecList: document.getElementById("expRecList"),
@@ -407,6 +408,7 @@ const el = {
   expOneList: document.getElementById("expOneList"),
   addExpense: document.getElementById("addExpense"),
   expHistorySec: document.getElementById("expHistorySec"),
+  expHistToggle: document.getElementById("expHistToggle"),
   expHistList: document.getElementById("expHistList"),
   expCatList: document.getElementById("expCatList"),
   // portfolio view
@@ -866,6 +868,8 @@ function refreshExpenses() {
   const today = new Date().getDate();
   const recs = state.expenses.recurring.filter((r) => (r.amount || 0) > 0 || r.cat);
   el.expReminders.hidden = recs.length === 0;
+  const remSum = recs.reduce((a, r) => a + (r.amount || 0), 0);
+  el.expRemTotal.textContent = remSum > 0 ? formatMoney(remSum) : "";
   el.expReminderList.innerHTML = recs
     .slice()
     .sort((a, b) => (a.dueDay || 99) - (b.dueDay || 99))
@@ -1679,6 +1683,12 @@ document.querySelectorAll("[data-currency]").forEach((b) => b.addEventListener("
 
 el.addRecurring.addEventListener("click", addRecurring);
 el.addExpense.addEventListener("click", addExpense);
+el.expHistToggle.addEventListener("click", () => {
+  const open = el.expHistList.hidden;
+  el.expHistList.hidden = !open;
+  el.expHistToggle.setAttribute("aria-expanded", String(open));
+  el.expHistToggle.classList.toggle("is-open", open);
+});
 
 el.addHolding.addEventListener("click", addHolding);
 el.addIncome.addEventListener("click", addIncome);

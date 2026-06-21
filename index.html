@@ -146,7 +146,10 @@
 
       <!-- Upcoming payment reminders (from recurring bills) -->
       <section class="glass exp-reminders" id="expReminders" aria-label="Upcoming payments" hidden>
-        <h3 class="settings-label" data-i18n="exp_reminders">Upcoming payments</h3>
+        <div class="exp-rem-head">
+          <h3 class="settings-label" data-i18n="exp_reminders">Upcoming payments</h3>
+          <span class="exp-rem-total" id="expRemTotal"></span>
+        </div>
         <div class="exp-reminder-list" id="expReminderList"></div>
       </section>
 
@@ -172,10 +175,13 @@
         <button class="add-cat" id="addExpense" type="button" data-i18n="exp_add">+ Add expense</button>
       </section>
 
-      <!-- Past months (archived totals) -->
+      <!-- Past months (archived totals) — collapsed behind a toggle -->
       <section class="glass savings-panel exp-history" id="expHistorySec" aria-label="Past months" hidden>
-        <h3 class="settings-label exp-sec-label" data-i18n="exp_history">Past months</h3>
-        <div id="expHistList"></div>
+        <button class="exp-hist-toggle" id="expHistToggle" type="button" aria-expanded="false">
+          <span data-i18n="exp_history">Past months</span>
+          <span class="exp-hist-caret" aria-hidden="true">▾</span>
+        </button>
+        <div id="expHistList" hidden></div>
       </section>
 
       <datalist id="expCatList"></datalist>
