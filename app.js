@@ -1727,28 +1727,133 @@ function watchPriceLabel(w) {
   if (w.type === "gold") return sym + fmtPrice(d.price * goldFactor()) + "/" + goldUnit();
   return sym + fmtPrice(d.price);
 }
-// Crypto-bubbles overview: one circle per watched asset, sized by the magnitude
-// of its 24h move and colored green/red by direction.
-function buildBubbles() {
+// ---- Crypto bubbles: floating, draggable physics field ----
+// One circle per watched asset, sized by 24h-move magnitude, colored by direction.
+// Bubbles drift, collide, bounce off the walls, and can be dragged/flung.
+const bubbleSim = { raf: 0, bubbles: [], drag: null };
+function clampN(v, lo, hi) { return v < lo ? lo : v > hi ? hi : v; }
+
+function bubbleRadius(ch) {
+  const mag = ch == null ? 0 : Math.min(Math.abs(ch), 24);
+  return Math.round(38 + mag * 1.5); // 38–74px radius (76–148px diameter)
+}
+function paintBubble(b) {
+  const cls = b.ch == null ? "flat" : b.ch >= 0 ? "up" : "down";
+  b.node.className = "bubble " + cls + (bubbleSim.drag && bubbleSim.drag.b === b ? " is-drag" : "");
+  b.node.style.width = b.node.style.height = b.r * 2 + "px";
+  b.node.style.setProperty("--fs", Math.max(12, Math.round(b.r * 0.34)) + "px");
+  const chTxt = b.ch == null ? "—" : (b.ch >= 0 ? "+" : "") + b.ch.toFixed(1) + "%";
+  b.node.innerHTML = `<span class="bubble-sym">${escapeHtml(b.sym)}</span><span class="bubble-chg">${chTxt}</span>`;
+  b.node.title = b.name;
+}
+function syncBubbles() {
   if (!el.watchBubbles) return;
   el.watchBubblesSec.hidden = !state.watchlist.length;
-  el.watchBubbles.innerHTML = state.watchlist.map((w) => {
+  if (!state.watchlist.length) { stopBubbles(); el.watchBubbles.innerHTML = ""; bubbleSim.bubbles = []; return; }
+  const existing = new Map(bubbleSim.bubbles.map((b) => [b.key, b]));
+  const keep = [];
+  state.watchlist.forEach((w) => {
     const d = watchData[w.key] || {};
     const ch = (typeof d.chg24 === "number" && !isNaN(d.chg24)) ? d.chg24 : null;
-    const mag = ch == null ? 0 : Math.min(Math.abs(ch), 25);
-    const size = Math.round(58 + mag * 2.6); // 58–123px
-    const cls = ch == null ? "flat" : ch >= 0 ? "up" : "down";
-    const chTxt = ch == null ? "—" : (ch >= 0 ? "+" : "") + ch.toFixed(1) + "%";
-    const sym = escapeHtml((w.sym || w.name || "").toUpperCase().slice(0, 5));
-    return `<div class="bubble ${cls}" style="--sz:${size}px" title="${escapeHtml(w.name)}">
-      <span class="bubble-sym">${sym}</span>
-      <span class="bubble-chg">${chTxt}</span>
-    </div>`;
-  }).join("");
+    let b = existing.get(w.key);
+    if (!b) {
+      b = { key: w.key, node: document.createElement("div"), x: 0, y: 0, vx: 0, vy: 0, place: true };
+      b.node.addEventListener("pointerdown", (e) => startBubbleDrag(b, e));
+      el.watchBubbles.appendChild(b.node);
+    }
+    existing.delete(w.key);
+    b.name = w.name; b.sym = (w.sym || w.name || "").toUpperCase().slice(0, 5); b.ch = ch; b.r = bubbleRadius(ch);
+    paintBubble(b);
+    keep.push(b);
+  });
+  existing.forEach((b) => b.node.remove());
+  bubbleSim.bubbles = keep;
+  startBubbles();
+  kickBubbles();
 }
+// Place any new bubbles and paint one frame immediately (so they appear correctly
+// without waiting for the first animation frame). Safe to call repeatedly.
+function kickBubbles() {
+  const host = el.watchBubbles;
+  if (!host || host.offsetParent === null) return;
+  const W = host.clientWidth, H = host.clientHeight;
+  if (!W || !H) return;
+  for (const b of bubbleSim.bubbles) {
+    if (b.place) {
+      b.x = b.r + Math.random() * Math.max(1, W - 2 * b.r);
+      b.y = b.r + Math.random() * Math.max(1, H - 2 * b.r);
+      const a = Math.random() * 6.283, s = 0.4 + Math.random() * 0.5;
+      b.vx = Math.cos(a) * s; b.vy = Math.sin(a) * s; b.place = false;
+    }
+    b.node.style.transform = `translate(${(b.x - b.r).toFixed(1)}px, ${(b.y - b.r).toFixed(1)}px)`;
+  }
+}
+function startBubbleDrag(b, e) {
+  e.preventDefault();
+  const rect = el.watchBubbles.getBoundingClientRect();
+  const drag = { b, lx: e.clientX, ly: e.clientY, vx: 0, vy: 0, rect };
+  bubbleSim.drag = drag;
+  b.node.classList.add("is-drag");
+  if (b.node.setPointerCapture) try { b.node.setPointerCapture(e.pointerId); } catch (err) {}
+  const move = (ev) => {
+    drag.vx = ev.clientX - drag.lx; drag.vy = ev.clientY - drag.ly;
+    drag.lx = ev.clientX; drag.ly = ev.clientY;
+    b.x = clampN(ev.clientX - rect.left, b.r, rect.width - b.r);
+    b.y = clampN(ev.clientY - rect.top, b.r, rect.height - b.r);
+    b.vx = 0; b.vy = 0;
+  };
+  const up = () => {
+    document.removeEventListener("pointermove", move);
+    document.removeEventListener("pointerup", up);
+    b.node.classList.remove("is-drag");
+    b.vx = clampN(drag.vx, -22, 22) * 0.5; b.vy = clampN(drag.vy, -22, 22) * 0.5;
+    bubbleSim.drag = null;
+  };
+  document.addEventListener("pointermove", move);
+  document.addEventListener("pointerup", up);
+}
+function stepBubbles() {
+  const host = el.watchBubbles;
+  bubbleSim.raf = requestAnimationFrame(stepBubbles);
+  if (!host || host.offsetParent === null) return; // view hidden → idle
+  const W = host.clientWidth, H = host.clientHeight;
+  if (!W || !H) return;
+  const bs = bubbleSim.bubbles;
+  for (const b of bs) {
+    if (b.place) { // first placement once the field has a measured size
+      b.x = b.r + Math.random() * Math.max(1, W - 2 * b.r);
+      b.y = b.r + Math.random() * Math.max(1, H - 2 * b.r);
+      const a = Math.random() * 6.283, s = 0.4 + Math.random() * 0.5;
+      b.vx = Math.cos(a) * s; b.vy = Math.sin(a) * s; b.place = false;
+    }
+    if (bubbleSim.drag && bubbleSim.drag.b === b) continue;
+    b.x += b.vx; b.y += b.vy;
+    b.vx *= 0.992; b.vy *= 0.992;
+    if (b.x < b.r) { b.x = b.r; b.vx = Math.abs(b.vx) || 0.25; }
+    else if (b.x > W - b.r) { b.x = W - b.r; b.vx = -(Math.abs(b.vx) || 0.25); }
+    if (b.y < b.r) { b.y = b.r; b.vy = Math.abs(b.vy) || 0.25; }
+    else if (b.y > H - b.r) { b.y = H - b.r; b.vy = -(Math.abs(b.vy) || 0.25); }
+    if (Math.hypot(b.vx, b.vy) < 0.15) { const a = Math.random() * 6.283; b.vx += Math.cos(a) * 0.22; b.vy += Math.sin(a) * 0.22; }
+  }
+  for (let i = 0; i < bs.length; i++) for (let j = i + 1; j < bs.length; j++) {
+    const a = bs[i], c = bs[j];
+    let dx = c.x - a.x, dy = c.y - a.y, dist = Math.hypot(dx, dy) || 0.001, min = a.r + c.r;
+    if (dist < min) {
+      const nx = dx / dist, ny = dy / dist, ov = (min - dist) / 2;
+      if (!(bubbleSim.drag && bubbleSim.drag.b === a)) { a.x -= nx * ov; a.y -= ny * ov; }
+      if (!(bubbleSim.drag && bubbleSim.drag.b === c)) { c.x += nx * ov; c.y += ny * ov; }
+      const diff = (c.vx * nx + c.vy * ny) - (a.vx * nx + a.vy * ny);
+      a.vx += diff * nx; a.vy += diff * ny; c.vx -= diff * nx; c.vy -= diff * ny;
+    }
+  }
+  for (const b of bs) b.node.style.transform = `translate(${(b.x - b.r).toFixed(1)}px, ${(b.y - b.r).toFixed(1)}px)`;
+}
+function startBubbles() { if (!bubbleSim.raf) bubbleSim.raf = requestAnimationFrame(stepBubbles); }
+function stopBubbles() { if (bubbleSim.raf) { cancelAnimationFrame(bubbleSim.raf); bubbleSim.raf = 0; } }
+
 function buildWatchlist() {
   if (el.watchSearch) el.watchSearch.placeholder = t("watch_search_ph");
-  buildBubbles();
+  syncBubbles();
   if (!state.watchlist.length) { el.watchList.innerHTML = ""; el.watchEmpty.hidden = false; return; }
   el.watchEmpty.hidden = true;
   el.watchList.innerHTML = state.watchlist.map((w) => {

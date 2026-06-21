@@ -1476,31 +1476,43 @@ body {
 }
 .veh-add-btn:hover { color: var(--text); border-color: rgba(124, 92, 255, 0.5); background: rgba(124, 92, 255, 0.08); }
 
-/* ============ Crypto bubbles (watchlist overview) ============ */
-.watch-bubbles-sec { padding: 16px 14px; }
-.watch-bubbles { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; align-items: center; }
+/* ============ Crypto bubbles (floating, draggable physics field) ============ */
+.watch-bubbles-sec { padding: 8px; overflow: hidden; }
+.watch-bubbles { position: relative; width: 100%; height: clamp(320px, 52vh, 460px); overflow: hidden; }
 .bubble {
-  width: var(--sz); height: var(--sz);
+  position: absolute; top: 0; left: 0;
   border-radius: 50%;
   display: flex; flex-direction: column; align-items: center; justify-content: center;
-  gap: 1px; text-align: center; padding: 4px;
+  gap: 2px; text-align: center; padding: 4px;
   border: 1px solid var(--glass-border-soft);
-  animation: bubble-pop 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  cursor: grab; user-select: none; touch-action: none;
+  will-change: transform;
+  animation: bubble-pop 0.4s ease both;
+}
+.bubble:active, .bubble.is-drag { cursor: grabbing; }
+.bubble.is-drag { z-index: 5; }
+.bubble::after { /* glossy highlight */
+  content: ""; position: absolute; top: 11%; left: 16%; width: 42%; height: 32%;
+  border-radius: 50%; background: radial-gradient(circle at 50% 50%, rgba(255,255,255,0.4), transparent 70%);
+  pointer-events: none;
 }
 .bubble.up {
-  background: radial-gradient(circle at 35% 28%, color-mix(in srgb, var(--good) 38%, transparent), color-mix(in srgb, var(--good) 8%, transparent));
-  border-color: color-mix(in srgb, var(--good) 55%, transparent);
+  background: radial-gradient(circle at 36% 30%, color-mix(in srgb, var(--good) 46%, transparent), color-mix(in srgb, var(--good) 10%, transparent) 72%);
+  border-color: color-mix(in srgb, var(--good) 60%, transparent);
   color: var(--good);
+  box-shadow: 0 8px 22px color-mix(in srgb, var(--good) 28%, transparent), inset 0 -8px 18px rgba(0,0,0,0.18);
 }
 .bubble.down {
-  background: radial-gradient(circle at 35% 28%, rgba(255, 107, 107, 0.38), rgba(255, 107, 107, 0.08));
-  border-color: rgba(255, 107, 107, 0.55);
-  color: #ff8a8a;
+  background: radial-gradient(circle at 36% 30%, rgba(255, 107, 107, 0.46), rgba(255, 107, 107, 0.1) 72%);
+  border-color: rgba(255, 107, 107, 0.6);
+  color: #ff9b9b;
+  box-shadow: 0 8px 22px rgba(255, 80, 80, 0.26), inset 0 -8px 18px rgba(0,0,0,0.18);
 }
 .bubble.flat {
-  background: radial-gradient(circle at 35% 28%, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.02));
+  background: radial-gradient(circle at 36% 30%, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0.03) 72%);
   color: var(--text-dim);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.22), inset 0 -8px 18px rgba(0,0,0,0.18);
 }
-.bubble-sym { font-family: "Sora", sans-serif; font-weight: 800; font-size: 13px; line-height: 1.1; letter-spacing: 0.02em; }
-.bubble-chg { font-size: 11px; font-weight: 700; opacity: 0.95; }
-@keyframes bubble-pop { from { opacity: 0; transform: scale(0.5); } to { opacity: 1; transform: scale(1); } }
+.bubble-sym { font-family: "Sora", sans-serif; font-weight: 800; font-size: var(--fs, 14px); line-height: 1.05; letter-spacing: 0.02em; }
+.bubble-chg { font-size: calc(var(--fs, 14px) * 0.72); font-weight: 700; opacity: 0.95; }
+@keyframes bubble-pop { from { opacity: 0; } to { opacity: 1; } }
