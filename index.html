@@ -137,38 +137,48 @@
     </footer>
     </div><!-- /view-home -->
 
-    <!-- ============ SAVINGS VIEW (Cut your spending) ============ -->
+    <!-- ============ EXPENSES VIEW (Gider) ============ -->
     <div class="view" id="view-savings" hidden>
       <div class="view-intro">
-        <h2 class="view-title" data-i18n="cut_title">Your expenses</h2>
-        <p class="subtagline" data-i18n="cut_sub">Your monthly spending. See what investing it instead could become.</p>
+        <h2 class="view-title" data-i18n="cut_title">Expenses</h2>
+        <p class="subtagline" id="expMonthLabel">—</p>
       </div>
 
-      <section class="glass savings-panel" aria-label="Spending categories">
-        <div class="savings-list" id="savingsList"></div>
-        <button class="add-cat" id="addCat" type="button" data-i18n="add_custom">+ Add custom category</button>
+      <!-- Upcoming payment reminders (from recurring bills) -->
+      <section class="glass exp-reminders" id="expReminders" aria-label="Upcoming payments" hidden>
+        <h3 class="settings-label" data-i18n="exp_reminders">Upcoming payments</h3>
+        <div class="exp-reminder-list" id="expReminderList"></div>
       </section>
 
-      <section class="glass savings-result" aria-label="Savings projection">
+      <!-- This month's total -->
+      <section class="glass savings-result exp-total-card" aria-label="This month's expenses">
         <div class="savings-total">
-          <span class="savings-total-label" data-i18n="redirect_label">If you redirect this every month</span>
-          <span class="savings-total-value" id="savingsMonthly">—</span>
-          <span class="savings-total-sub" id="savingsAnnual">—</span>
+          <span class="savings-total-label" data-i18n="exp_total">This month's expenses</span>
+          <span class="savings-total-value" id="expTotal">—</span>
         </div>
-
-        <div class="invest-pick">
-          <label for="investSelect" data-i18n="invested_in">Invested in</label>
-          <select id="investSelect" aria-label="Investment for projection"></select>
-        </div>
-
-        <div class="proj">
-          <div class="proj-card"><span class="proj-years" data-i18n="yr1">1 year</span><span class="proj-val" id="proj1">—</span></div>
-          <div class="proj-card"><span class="proj-years" data-i18n="yr5">5 years</span><span class="proj-val" id="proj5">—</span></div>
-          <div class="proj-card proj-card--hero"><span class="proj-years" data-i18n="yr10">10 years</span><span class="proj-val" id="proj10">—</span></div>
-        </div>
-
-        <p class="savings-punch" id="savingsPunch"></p>
       </section>
+
+      <!-- Recurring expenses -->
+      <section class="glass savings-panel" aria-label="Recurring expenses">
+        <h3 class="settings-label exp-sec-label" data-i18n="exp_recurring">Recurring expenses</h3>
+        <div class="savings-list" id="expRecList"></div>
+        <button class="add-cat" id="addRecurring" type="button" data-i18n="exp_add_recurring">+ Add recurring</button>
+      </section>
+
+      <!-- This month's logged expenses -->
+      <section class="glass savings-panel" aria-label="This month">
+        <h3 class="settings-label exp-sec-label" data-i18n="exp_thismonth">This month</h3>
+        <div class="savings-list" id="expOneList"></div>
+        <button class="add-cat" id="addExpense" type="button" data-i18n="exp_add">+ Add expense</button>
+      </section>
+
+      <!-- Past months (archived totals) -->
+      <section class="glass savings-panel exp-history" id="expHistorySec" aria-label="Past months" hidden>
+        <h3 class="settings-label exp-sec-label" data-i18n="exp_history">Past months</h3>
+        <div id="expHistList"></div>
+      </section>
+
+      <datalist id="expCatList"></datalist>
     </div><!-- /view-savings -->
 
     <!-- ============ SETTINGS VIEW ============ -->

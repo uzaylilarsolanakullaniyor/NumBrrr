@@ -38,8 +38,9 @@ const COUNTRIES = {
 };
 function countryForCurrency(cur) { return cur === "TL" ? "TR" : "US"; }
 
-const SAVINGS_CATEGORIES = ["cigarettes","alcohol","subscriptions","eatingout","delivery","coffee","gaming","fuel","shopping"];
 const SAVINGS_DEFAULT_INVEST = { USD: "sp500", TL: "deposit" };
+// Preset expense categories (translated; users can also type their own).
+const EXPENSE_CATS = ["rent","bills","market","food","electric","water","internet","transport","health","shopping","entertainment","other"];
 // Income sources, pre-classified as passive (counts toward freedom) or active.
 const INCOME_CATEGORIES = [
   { id: "salary", passive: false },
@@ -137,6 +138,13 @@ const I18N = {
     disc_4: "<strong>Real estate yields vary.</strong> Rental yields differ widely by city and property type; defaults are national averages (Global Property Guide) and are historical, not a guarantee. Use the property-value & rent fields for your own number.",
     disc_5: "<strong>Rates are defaults.</strong> Every return rate is pre-filled with a reasonable default and is fully editable, tune them to your own assumptions.",
     cut_title: "Your expenses", cut_sub: "Your monthly spending. See what investing it instead could become.",
+    exp_reminders: "Upcoming payments", exp_total: "This month's expenses",
+    exp_recurring: "Recurring expenses", exp_add_recurring: "+ Add recurring",
+    exp_thismonth: "This month", exp_add: "+ Add expense", exp_history: "Past months",
+    exp_cat_ph: "Category", exp_day_ph: "Day", exp_paid: "Paid",
+    exp_due_fmt: "Day {day}", exp_empty: "No expenses logged yet.",
+    exp_overdue: "Overdue", exp_soon: "Due soon",
+    ecat: { rent: "Rent", bills: "Bills", market: "Groceries", food: "Eating out", electric: "Electricity", water: "Water", internet: "Internet", transport: "Transport", health: "Health", shopping: "Shopping", entertainment: "Entertainment", other: "Other" },
     add_custom: "+ Add custom category", custom_ph: "Custom category", eg: "e.g.",
     redirect_label: "If you redirect this every month", per_mo: "{x} /mo", per_year: "{x} a year",
     invested_in: "Invested in", yr1: "1 year", yr5: "5 years", yr10: "10 years",
@@ -239,6 +247,13 @@ const I18N = {
     disc_4: "<strong>Kira getirileri değişir.</strong> Kira getirileri şehre ve mülk tipine göre çok farklılaşır; varsayılanlar ulusal ortalamalardır (Global Property Guide) ve tarihseldir, garanti değildir. Kendi rakamın için mülk değeri ve kira alanlarını kullan.",
     disc_5: "<strong>Oranlar varsayılandır.</strong> Her getiri oranı makul bir varsayılanla doldurulmuştur ve tamamen düzenlenebilir, kendi varsayımlarına göre ayarla.",
     cut_title: "Giderlerin", cut_sub: "Aylık harcamaların. Yatırsan ne olabileceğini gör.",
+    exp_reminders: "Yaklaşan ödemeler", exp_total: "Bu ayki giderler",
+    exp_recurring: "Düzenli giderler", exp_add_recurring: "+ Düzenli gider ekle",
+    exp_thismonth: "Bu ay", exp_add: "+ Harcama ekle", exp_history: "Geçmiş aylar",
+    exp_cat_ph: "Kategori", exp_day_ph: "Gün", exp_paid: "Ödendi",
+    exp_due_fmt: "Ayın {day}'i", exp_empty: "Henüz harcama eklenmedi.",
+    exp_overdue: "Gecikmiş", exp_soon: "Yaklaşıyor",
+    ecat: { rent: "Kira", bills: "Fatura", market: "Market", food: "Yemek", electric: "Elektrik", water: "Su", internet: "İnternet", transport: "Ulaşım", health: "Sağlık", shopping: "Alışveriş", entertainment: "Eğlence", other: "Diğer" },
     add_custom: "+ Özel kategori ekle", custom_ph: "Özel kategori", eg: "örn.",
     redirect_label: "Bunu her ay yatırıma yönlendirsen", per_mo: "{x} /ay", per_year: "{x} yıllık",
     invested_in: "Şuna yatırılırsa", yr1: "1 yıl", yr5: "5 yıl", yr10: "10 yıl",
@@ -324,9 +339,11 @@ const state = {
     USD: { propertyValue: 0, monthlyRent: 0, netYield: false },
     TL: { propertyValue: 0, monthlyRent: 0, netYield: false },
   },
-  savings: {
-    amounts: {}, on: {}, custom: [], customSeq: 0,
-    invest: { USD: SAVINGS_DEFAULT_INVEST.USD, TL: SAVINGS_DEFAULT_INVEST.TL },
+  // Monthly expense tracker. recurring = fixed monthly bills (also shown as
+  // reminders); oneoff = this month's logged spends (reset each month); history
+  // = archived past-month totals. month = the month currently being tracked.
+  expenses: {
+    month: "", recurring: [], oneoff: [], history: [], recSeq: 0, oneSeq: 0,
   },
   portfolio: {
     holdings: [], seq: 0,
@@ -336,7 +353,6 @@ const state = {
   watchlist: [], // [{ type, key, name }] — assets to monitor (price + 24h/1mo/1yr performance)
   income: { amounts: {}, passive: {}, custom: [], seq: 0 },
 };
-SAVINGS_CATEGORIES.forEach((id) => { state.savings.amounts[id] = 0; state.savings.on[id] = true; });
 INCOME_CATEGORIES.forEach((c) => { state.income.amounts[c.id] = 0; state.income.passive[c.id] = c.passive; });
 // start with a few empty holding rows (no preset values)
 [0, 1, 2].forEach(() => state.portfolio.holdings.push({ id: "h" + ++state.portfolio.seq, label: "", value: 0, assetType: "usstock" }));
@@ -381,12 +397,18 @@ const el = {
   bestRate: document.getElementById("bestRate"),
   headlineNote: document.getElementById("headlineNote"),
   ruleNumber: document.getElementById("ruleNumber"),
-  savingsList: document.getElementById("savingsList"),
-  addCat: document.getElementById("addCat"),
-  savingsMonthly: document.getElementById("savingsMonthly"),
-  savingsAnnual: document.getElementById("savingsAnnual"),
-  investSelect: document.getElementById("investSelect"),
-  savingsPunch: document.getElementById("savingsPunch"),
+  // expenses (Gider) view
+  expMonthLabel: document.getElementById("expMonthLabel"),
+  expReminders: document.getElementById("expReminders"),
+  expReminderList: document.getElementById("expReminderList"),
+  expTotal: document.getElementById("expTotal"),
+  expRecList: document.getElementById("expRecList"),
+  addRecurring: document.getElementById("addRecurring"),
+  expOneList: document.getElementById("expOneList"),
+  addExpense: document.getElementById("addExpense"),
+  expHistorySec: document.getElementById("expHistorySec"),
+  expHistList: document.getElementById("expHistList"),
+  expCatList: document.getElementById("expCatList"),
   // portfolio view
   portList: document.getElementById("portList"),
   addHolding: document.getElementById("addHolding"),
@@ -719,112 +741,157 @@ function renderRule() {
 }
 
 // ============================================================
-//  Savings, "Cut your spending"
+//  Expenses (Gider) — monthly tracker with reminders + history
 // ============================================================
-function buildSavings() {
-  el.savingsList.innerHTML = "";
-  SAVINGS_CATEGORIES.forEach((id) => el.savingsList.appendChild(makeCatRow(id, false)));
-  state.savings.custom.forEach((c) => el.savingsList.appendChild(makeCatRow(c.id, true)));
+function currentYM(d = new Date()) { return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0"); }
+function monthLabel(ym) {
+  const [y, m] = (ym || currentYM()).split("-").map(Number);
+  const locale = state.lang === "tr" ? "tr-TR" : "en-US";
+  return new Date(y, m - 1, 1).toLocaleDateString(locale, { month: "long", year: "numeric" });
+}
+function ecatName(c) { return (L().ecat && L().ecat[c]) || (I18N.en.ecat && I18N.en.ecat[c]) || c; }
+
+// Roll over to the current calendar month: archive the previous month's total,
+// clear one-off entries, and reset each recurring bill's "paid" flag.
+function rollExpenseMonth() {
+  const e = state.expenses;
+  const now = currentYM();
+  if (!e.month) { e.month = now; return; }
+  if (e.month === now) return;
+  e.history.unshift({ month: e.month, total: expensesTotal() });
+  if (e.history.length > 36) e.history.length = 36;
+  e.oneoff = [];
+  (e.recurring || []).forEach((r) => (r.paid = false));
+  e.month = now;
 }
 
-function makeCatRow(id, isCustom) {
-  const meta = CURRENCY_META[state.currency];
-  const custom = isCustom ? state.savings.custom.find((x) => x.id === id) : null;
-  const label = isCustom ? (custom ? custom.label : "") : catLabel(id);
-  const hint = isCustom ? "" : catHint(id);
+// Total monthly expenses = recurring bills + this month's logged spends. This is
+// the only figure that counts as expenses for the Income and Portfolio views.
+// The Home page's state.monthlyExpenses stays local to the Home freedom calculator.
+function expensesTotal() {
+  const e = state.expenses;
+  let total = 0;
+  (e.recurring || []).forEach((r) => (total += r.amount || 0));
+  (e.oneoff || []).forEach((o) => (total += o.amount || 0));
+  return total;
+}
+
+function buildExpenses() {
+  // category suggestions (translated presets; users can still type their own)
+  el.expCatList.innerHTML = EXPENSE_CATS.map((c) => `<option value="${ecatName(c).replace(/"/g, "&quot;")}"></option>`).join("");
+  el.expRecList.innerHTML = "";
+  state.expenses.recurring.forEach((r) => el.expRecList.appendChild(makeRecRow(r)));
+  el.expOneList.innerHTML = "";
+  state.expenses.oneoff.forEach((o) => el.expOneList.appendChild(makeOneRow(o)));
+  refreshExpenses();
+}
+
+function makeRecRow(r) {
+  const sym = CURRENCY_META[state.currency].symbol;
   const row = document.createElement("div");
-  row.className = "cat-row" + (state.savings.on[id] ? "" : " is-off");
-  row.dataset.cat = id;
-
-  const labelHtml = isCustom
-    ? `<input class="cat-name" data-cat-name="${id}" value="${label}" placeholder="${t("custom_ph")}" />`
-    : `${label}${hint ? `<small>${hint}</small>` : ""}`;
-  const amt = state.savings.amounts[id];
-
+  row.className = "cat-row exp-row";
+  row.dataset.rec = r.id;
   row.innerHTML = `
-    <label class="switch switch--sm cat-toggle">
-      <input type="checkbox" data-cat-on="${id}" ${state.savings.on[id] ? "checked" : ""} />
-      <span class="switch-track"><span class="switch-thumb"></span></span>
-    </label>
-    <div class="cat-label">${labelHtml}</div>
-    <div class="money-input money-input--sm cat-amount">
-      <span class="money-symbol savings-symbol">${meta.symbol}</span>
-      <input type="text" inputmode="numeric" data-cat-amt="${id}" value="${amt ? formatThousands(amt) : ""}" placeholder="0" />
-    </div>
-    ${isCustom ? `<button class="cat-remove" type="button" data-cat-del="${id}" aria-label="remove">×</button>` : ""}`;
+    <input class="cat-name exp-cat" list="expCatList" data-rec-cat="${r.id}" value="${(r.cat || "").replace(/"/g, "&quot;")}" placeholder="${t("exp_cat_ph")}" />
+    <div class="exp-day"><span class="exp-day-pre">📅</span><input class="exp-dayfield" inputmode="numeric" data-rec-day="${r.id}" value="${r.dueDay || ""}" placeholder="${t("exp_day_ph")}" maxlength="2" /></div>
+    <div class="money-input money-input--sm cat-amount"><span class="money-symbol exp-symbol">${sym}</span><input type="text" inputmode="numeric" data-rec-amt="${r.id}" value="${r.amount ? formatThousands(r.amount) : ""}" placeholder="0" /></div>
+    <button class="cat-remove" type="button" data-rec-del="${r.id}" aria-label="remove">×</button>`;
 
-  row.querySelector("[data-cat-on]").addEventListener("change", (e) => {
-    state.savings.on[id] = e.target.checked;
-    row.classList.toggle("is-off", !e.target.checked);
-    refreshSavings();
+  row.querySelector("[data-rec-cat]").addEventListener("input", (e) => { r.cat = e.target.value; refreshExpenses(); });
+  const day = row.querySelector("[data-rec-day]");
+  day.addEventListener("input", () => { r.dueDay = clampDay(parseNumber(day.value)); refreshExpenses(); });
+  const amt = row.querySelector("[data-rec-amt]");
+  amt.addEventListener("input", () => { r.amount = parseNumber(amt.value); refreshExpenses(); });
+  amt.addEventListener("blur", () => { if (r.amount > 0) amt.value = formatThousands(r.amount); });
+  row.querySelector("[data-rec-del]").addEventListener("click", () => {
+    state.expenses.recurring = state.expenses.recurring.filter((x) => x.id !== r.id);
+    row.remove(); refreshExpenses();
   });
-  const amtInput = row.querySelector("[data-cat-amt]");
-  amtInput.addEventListener("input", () => { state.savings.amounts[id] = parseNumber(amtInput.value); refreshSavings(); });
-  amtInput.addEventListener("blur", () => { if (state.savings.amounts[id] > 0) amtInput.value = formatThousands(state.savings.amounts[id]); });
-  if (isCustom) {
-    row.querySelector("[data-cat-name]").addEventListener("input", (e) => { const c = state.savings.custom.find((x) => x.id === id); if (c) c.label = e.target.value; saveState(); });
-    row.querySelector("[data-cat-del]").addEventListener("click", () => {
-      state.savings.custom = state.savings.custom.filter((x) => x.id !== id);
-      delete state.savings.amounts[id]; delete state.savings.on[id];
-      row.remove(); refreshSavings();
-    });
-  }
   return row;
 }
 
-function addCustomCategory() {
-  const id = "custom-" + ++state.savings.customSeq;
-  state.savings.amounts[id] = 0; state.savings.on[id] = true;
-  state.savings.custom.push({ id, label: "" });
-  const row = makeCatRow(id, true);
-  el.savingsList.appendChild(row);
-  row.querySelector("[data-cat-name]").focus();
-  refreshSavings();
+function makeOneRow(o) {
+  const sym = CURRENCY_META[state.currency].symbol;
+  const row = document.createElement("div");
+  row.className = "cat-row exp-row";
+  row.dataset.one = o.id;
+  row.innerHTML = `
+    <div class="exp-day"><input class="exp-dayfield" inputmode="numeric" data-one-day="${o.id}" value="${o.day || ""}" placeholder="${t("exp_day_ph")}" maxlength="2" /></div>
+    <input class="cat-name exp-cat" list="expCatList" data-one-cat="${o.id}" value="${(o.cat || "").replace(/"/g, "&quot;")}" placeholder="${t("exp_cat_ph")}" />
+    <div class="money-input money-input--sm cat-amount"><span class="money-symbol exp-symbol">${sym}</span><input type="text" inputmode="numeric" data-one-amt="${o.id}" value="${o.amount ? formatThousands(o.amount) : ""}" placeholder="0" /></div>
+    <button class="cat-remove" type="button" data-one-del="${o.id}" aria-label="remove">×</button>`;
+
+  const day = row.querySelector("[data-one-day]");
+  day.addEventListener("input", () => { o.day = clampDay(parseNumber(day.value)); refreshExpenses(); });
+  row.querySelector("[data-one-cat]").addEventListener("input", (e) => { o.cat = e.target.value; saveState(); });
+  const amt = row.querySelector("[data-one-amt]");
+  amt.addEventListener("input", () => { o.amount = parseNumber(amt.value); refreshExpenses(); });
+  amt.addEventListener("blur", () => { if (o.amount > 0) amt.value = formatThousands(o.amount); });
+  row.querySelector("[data-one-del]").addEventListener("click", () => {
+    state.expenses.oneoff = state.expenses.oneoff.filter((x) => x.id !== o.id);
+    row.remove(); refreshExpenses();
+  });
+  return row;
 }
 
-function savingsInvestRate() {
-  const rate = state.rates[state.currency][state.savings.invest[state.currency]];
-  return typeof rate === "number" ? rate : 0;
+function clampDay(n) { n = Math.round(n) || 0; return n < 1 ? 0 : n > 31 ? 31 : n; }
+
+function addRecurring() {
+  const r = { id: "r" + ++state.expenses.recSeq, cat: "", amount: 0, dueDay: 1, paid: false };
+  state.expenses.recurring.push(r);
+  const row = makeRecRow(r);
+  el.expRecList.appendChild(row);
+  row.querySelector("[data-rec-cat]").focus();
+  refreshExpenses();
 }
-// Total monthly expenses tracked in the Expenses (Gider) view. This is the only
-// figure that counts as expenses for the Income and Portfolio cash-flow views.
-// The Home page's state.monthlyExpenses stays local to the Home freedom calculator.
-function expensesTotal() {
-  let total = 0;
-  SAVINGS_CATEGORIES.forEach((id) => { if (state.savings.on[id]) total += state.savings.amounts[id] || 0; });
-  state.savings.custom.forEach((c) => { if (state.savings.on[c.id]) total += state.savings.amounts[c.id] || 0; });
-  return total;
+function addExpense() {
+  const o = { id: "o" + ++state.expenses.oneSeq, day: new Date().getDate(), cat: "", amount: 0 };
+  state.expenses.oneoff.push(o);
+  const row = makeOneRow(o);
+  el.expOneList.appendChild(row);
+  row.querySelector("[data-one-cat]").focus();
+  refreshExpenses();
 }
-function buildInvestOptions() {
-  const cur = state.currency;
-  el.investSelect.innerHTML = INSTRUMENTS[cur]
-    .map((inst) => `<option value="${inst.id}">${instName(inst.id)} (${formatRate(state.rates[cur][inst.id])})</option>`)
-    .join("");
-  el.investSelect.value = state.savings.invest[cur];
-}
-function futureValue(annual, ratePct, years) {
-  const r = ratePct / 100;
-  if (r <= 0) return annual * years;
-  return annual * ((Math.pow(1 + r, years) - 1) / r);
-}
-function refreshSavings() {
+
+function refreshExpenses() {
   saveState();
-  const meta = CURRENCY_META[state.currency];
-  document.querySelectorAll("#view-savings .savings-symbol").forEach((s) => (s.textContent = meta.symbol));
+  const sym = CURRENCY_META[state.currency].symbol;
+  document.querySelectorAll("#view-savings .exp-symbol").forEach((s) => (s.textContent = sym));
+  el.expMonthLabel.textContent = monthLabel(state.expenses.month);
+  el.expTotal.textContent = formatMoney(expensesTotal());
 
-  const monthly = expensesTotal();
-  const annual = monthly * 12;
+  // Reminders (one per recurring bill), sorted by due day, with status.
+  const today = new Date().getDate();
+  const recs = state.expenses.recurring.filter((r) => (r.amount || 0) > 0 || r.cat);
+  el.expReminders.hidden = recs.length === 0;
+  el.expReminderList.innerHTML = recs
+    .slice()
+    .sort((a, b) => (a.dueDay || 99) - (b.dueDay || 99))
+    .map((r) => {
+      let cls = "is-up", badge = "";
+      if (r.paid) cls = "is-paid";
+      else if (r.dueDay && today > r.dueDay) { cls = "is-over"; badge = t("exp_overdue"); }
+      else if (r.dueDay && r.dueDay - today <= 3) { cls = "is-soon"; badge = t("exp_soon"); }
+      const cat = (r.cat || t("exp_cat_ph")).replace(/</g, "&lt;");
+      return `<div class="exp-reminder ${cls}" data-rem="${r.id}">
+        <button class="exp-paid" type="button" data-rem-paid="${r.id}" aria-label="${t("exp_paid")}">✓</button>
+        <div class="exp-rem-main"><div class="exp-rem-cat">${cat}</div>
+          <div class="exp-rem-sub">${t("exp_due_fmt", { day: r.dueDay || "—" })}${badge ? ` · <span class="exp-rem-badge">${badge}</span>` : ""}</div></div>
+        <div class="exp-rem-amt">${formatMoney(r.amount || 0)}</div>
+      </div>`;
+    })
+    .join("");
+  el.expReminderList.querySelectorAll("[data-rem-paid]").forEach((b) => b.addEventListener("click", () => {
+    const r = state.expenses.recurring.find((x) => x.id === b.dataset.remPaid);
+    if (r) { r.paid = !r.paid; refreshExpenses(); }
+  }));
 
-  el.savingsMonthly.textContent = t("per_mo", { x: formatMoney(monthly) });
-  el.savingsAnnual.textContent = t("per_year", { x: formatMoney(annual) });
-
-  buildInvestOptions();
-  const ratePct = savingsInvestRate();
-  [1, 5, 10].forEach((n) => { document.getElementById("proj" + n).textContent = formatMoney(futureValue(annual, ratePct, n)); });
-
-  el.savingsPunch.textContent = monthly > 0
-    ? t("punch", { x: formatMoney(futureValue(annual, ratePct, 10)) })
-    : t("punch_empty");
+  // History (archived past months)
+  const hist = state.expenses.history || [];
+  el.expHistorySec.hidden = hist.length === 0;
+  el.expHistList.innerHTML = hist
+    .map((h) => `<div class="exp-hist-row"><span>${monthLabel(h.month)}</span><strong>${formatMoney(h.total)}</strong></div>`)
+    .join("");
 }
 
 // ============================================================
@@ -1550,7 +1617,7 @@ function applyLanguage(lang) {
   document.querySelectorAll("[data-i18n]").forEach((node) => { node.textContent = t(node.dataset.i18n); });
   document.querySelectorAll("[data-i18n-html]").forEach((node) => { node.innerHTML = t(node.dataset.i18nHtml); });
   buildLayout(); refresh();
-  buildSavings(); refreshSavings();
+  buildExpenses();
   buildPortfolio(); refreshPortfolio();
   buildIncome(); refreshIncome();
   buildWatchlist();
@@ -1574,7 +1641,7 @@ function setCurrency(cur) {
   if (cur === state.currency || !CURRENCY_META[cur]) return;
   state.currency = cur;
   el.inflation.value = formatRate(state.inflation[cur], false);
-  buildLayout(); refresh(); refreshSavings(); refreshPortfolio(); refreshIncome();
+  buildLayout(); refresh(); refreshExpenses(); refreshPortfolio(); refreshIncome();
   refreshCryptoPrices(); // refetch crypto prices in the new currency
   buildWatchlist(); refreshWatchData();
   updateSettingsActive();
@@ -1608,8 +1675,8 @@ document.getElementById("obStart").addEventListener("click", finishOnboarding);
 // ---- Event wiring ----
 document.querySelectorAll("[data-currency]").forEach((b) => b.addEventListener("click", () => setCurrency(b.dataset.currency)));
 
-el.addCat.addEventListener("click", addCustomCategory);
-el.investSelect.addEventListener("change", () => { state.savings.invest[state.currency] = el.investSelect.value; refreshSavings(); });
+el.addRecurring.addEventListener("click", addRecurring);
+el.addExpense.addEventListener("click", addExpense);
 
 el.addHolding.addEventListener("click", addHolding);
 el.addIncome.addEventListener("click", addIncome);
@@ -1644,7 +1711,7 @@ document.querySelectorAll("[data-theme-pick]").forEach((b) => b.addEventListener
     document.getElementById("view-income").hidden = name !== "income";
     document.getElementById("view-watch").hidden = name !== "watch";
     document.querySelector(".brand").hidden = name !== "home"; // logo only on Home
-    if (name === "savings") refreshSavings();
+    if (name === "savings") { rollExpenseMonth(); buildExpenses(); }
     if (name === "portfolio") refreshPortfolio();
     if (name === "income") refreshIncome();
     if (name === "watch") refreshWatchData();
@@ -1668,7 +1735,7 @@ function saveState() {
       lang: state.lang, theme: state.theme, currency: state.currency,
       monthlyExpenses: state.monthlyExpenses, realMode: state.realMode,
       inflation: state.inflation, rates: state.rates, realEstate: state.realEstate,
-      savings: state.savings, income: state.income, portfolio: state.portfolio, watchlist: state.watchlist,
+      expenses: state.expenses, income: state.income, portfolio: state.portfolio, watchlist: state.watchlist,
       portTotalUSD: state.portTotalUSD,
     }));
   } catch (e) {}
@@ -1685,7 +1752,13 @@ function loadState() {
   if (s.inflation) state.inflation = s.inflation;
   if (s.rates) state.rates = s.rates;
   if (s.realEstate) state.realEstate = s.realEstate;
-  if (s.savings) state.savings = s.savings;
+  if (s.expenses && Array.isArray(s.expenses.recurring)) {
+    const e = s.expenses;
+    state.expenses = {
+      month: e.month || "", recurring: e.recurring || [], oneoff: e.oneoff || [],
+      history: e.history || [], recSeq: e.recSeq || 0, oneSeq: e.oneSeq || 0,
+    };
+  }
   if (s.income) state.income = s.income;
   if (s.portfolio) state.portfolio = s.portfolio;
   if (Array.isArray(s.watchlist)) state.watchlist = s.watchlist;
@@ -1713,6 +1786,7 @@ try {
   if (savedCur && CURRENCY_META[savedCur]) state.currency = savedCur;
 } catch (e) {}
 loadState(); // full saved snapshot takes precedence over the legacy per-key values
+rollExpenseMonth(); // archive past months + start the current month before rendering
 
 el.expenses.value = formatThousands(state.monthlyExpenses);
 el.inflation.value = formatRate(state.inflation[state.currency], false);
