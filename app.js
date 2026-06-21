@@ -459,6 +459,8 @@ const el = {
   watchDd: document.getElementById("watchDd"),
   watchList: document.getElementById("watchList"),
   watchEmpty: document.getElementById("watchEmpty"),
+  watchBubblesSec: document.getElementById("watchBubblesSec"),
+  watchBubbles: document.getElementById("watchBubbles"),
 };
 
 // ---- Helpers ----
@@ -1725,8 +1727,28 @@ function watchPriceLabel(w) {
   if (w.type === "gold") return sym + fmtPrice(d.price * goldFactor()) + "/" + goldUnit();
   return sym + fmtPrice(d.price);
 }
+// Crypto-bubbles overview: one circle per watched asset, sized by the magnitude
+// of its 24h move and colored green/red by direction.
+function buildBubbles() {
+  if (!el.watchBubbles) return;
+  el.watchBubblesSec.hidden = !state.watchlist.length;
+  el.watchBubbles.innerHTML = state.watchlist.map((w) => {
+    const d = watchData[w.key] || {};
+    const ch = (typeof d.chg24 === "number" && !isNaN(d.chg24)) ? d.chg24 : null;
+    const mag = ch == null ? 0 : Math.min(Math.abs(ch), 25);
+    const size = Math.round(58 + mag * 2.6); // 58–123px
+    const cls = ch == null ? "flat" : ch >= 0 ? "up" : "down";
+    const chTxt = ch == null ? "—" : (ch >= 0 ? "+" : "") + ch.toFixed(1) + "%";
+    const sym = escapeHtml((w.sym || w.name || "").toUpperCase().slice(0, 5));
+    return `<div class="bubble ${cls}" style="--sz:${size}px" title="${escapeHtml(w.name)}">
+      <span class="bubble-sym">${sym}</span>
+      <span class="bubble-chg">${chTxt}</span>
+    </div>`;
+  }).join("");
+}
 function buildWatchlist() {
   if (el.watchSearch) el.watchSearch.placeholder = t("watch_search_ph");
+  buildBubbles();
   if (!state.watchlist.length) { el.watchList.innerHTML = ""; el.watchEmpty.hidden = false; return; }
   el.watchEmpty.hidden = true;
   el.watchList.innerHTML = state.watchlist.map((w) => {
