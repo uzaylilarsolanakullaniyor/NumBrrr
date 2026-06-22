@@ -1770,15 +1770,20 @@ function watchPriceLabel(w) {
 const bubbleSim = { raf: 0, bubbles: [], drag: null };
 function clampN(v, lo, hi) { return v < lo ? lo : v > hi ? hi : v; }
 
-function bubbleRadius(ch) {
-  const mag = ch == null ? 0 : Math.min(Math.abs(ch), 24);
-  return Math.round(38 + mag * 1.5); // 38–74px radius (76–148px diameter)
+// Radius is proportional to how big the 24h move is relative to the biggest
+// mover currently in the list, so the largest gainer/loser is the largest
+// bubble and the smallest move is the smallest, with a clear spread.
+const BUBBLE_MIN_R = 20, BUBBLE_MAX_R = 46;
+function bubbleRadius(ch, maxMag) {
+  const mag = ch == null ? 0 : Math.abs(ch);
+  const frac = maxMag > 0 ? Math.min(mag / maxMag, 1) : 0.35;
+  return Math.round(BUBBLE_MIN_R + frac * (BUBBLE_MAX_R - BUBBLE_MIN_R));
 }
 function paintBubble(b) {
   const cls = b.ch == null ? "flat" : b.ch >= 0 ? "up" : "down";
   b.node.className = "bubble " + cls + (bubbleSim.drag && bubbleSim.drag.b === b ? " is-drag" : "");
   b.node.style.width = b.node.style.height = b.r * 2 + "px";
-  b.node.style.setProperty("--fs", Math.max(12, Math.round(b.r * 0.34)) + "px");
+  b.node.style.setProperty("--fs", Math.max(10, Math.round(b.r * 0.32)) + "px");
   const chTxt = b.ch == null ? "—" : (b.ch >= 0 ? "+" : "") + b.ch.toFixed(1) + "%";
   b.node.innerHTML = `<span class="bubble-sym">${escapeHtml(b.sym)}</span><span class="bubble-chg">${chTxt}</span>`;
   b.node.title = b.name;
@@ -1787,6 +1792,11 @@ function syncBubbles() {
   if (!el.watchBubbles) return;
   el.watchBubblesSec.hidden = !state.watchlist.length;
   if (!state.watchlist.length) { stopBubbles(); el.watchBubbles.innerHTML = ""; bubbleSim.bubbles = []; return; }
+  // Biggest absolute 24h move in the current set → drives proportional sizing.
+  const maxMag = state.watchlist.reduce((m, w) => {
+    const c = (watchData[w.key] || {}).chg24;
+    return (typeof c === "number" && !isNaN(c)) ? Math.max(m, Math.abs(c)) : m;
+  }, 0);
   const existing = new Map(bubbleSim.bubbles.map((b) => [b.key, b]));
   const keep = [];
   state.watchlist.forEach((w) => {
@@ -1799,7 +1809,7 @@ function syncBubbles() {
       el.watchBubbles.appendChild(b.node);
     }
     existing.delete(w.key);
-    b.name = w.name; b.sym = (w.sym || w.name || "").toUpperCase().slice(0, 5); b.ch = ch; b.r = bubbleRadius(ch);
+    b.name = w.name; b.sym = (w.sym || w.name || "").toUpperCase().slice(0, 5); b.ch = ch; b.r = bubbleRadius(ch, maxMag);
     paintBubble(b);
     keep.push(b);
   });
