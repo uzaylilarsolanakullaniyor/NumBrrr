@@ -53,7 +53,7 @@ const INCOME_CATEGORIES = [
   { id: "side", passive: false },
 ];
 // Portfolio holding asset types (tags). Interest-bearing ones feed Income.
-const ASSET_TYPES = ["usstock", "bist", "crypto", "gold", "deposit", "bonds", "cash"];
+const ASSET_TYPES = ["usstock", "bist", "crypto", "gold", "usd", "deposit", "bonds", "cash"];
 // Searchable company lists (symbol + display name). Prices fetched live from Yahoo.
 const US_STOCKS = [
   { s: "AAPL", n: "Apple" }, { s: "MSFT", n: "Microsoft" }, { s: "GOOGL", n: "Alphabet (Google)" }, { s: "AMZN", n: "Amazon" },
@@ -175,7 +175,7 @@ const I18N = {
     flow_title: "Monthly cash flow", flow_income: "Income", flow_expenses: "Expenses", flow_net: "Net / month",
     flow_savings_note: "+{x}/month more if you cut your tracked spending.",
     cat_cash: "Cash", cat_investment: "Investment",
-    asset_stocks: "Stocks", asset_usstock: "US Stocks", asset_bist: "Turkish (BIST)", asset_crypto: "Crypto", asset_deposit: "Deposit", asset_bonds: "Bonds", asset_realestate: "Real estate", asset_gold: "Gold", asset_cash: "Cash",
+    asset_stocks: "Stocks", asset_usstock: "US Stocks", asset_bist: "Turkish (BIST)", asset_crypto: "Crypto", asset_deposit: "Deposit", asset_bonds: "Bonds", asset_realestate: "Real estate", asset_gold: "Gold", asset_usd: "US Dollar", asset_cash: "Cash",
     stock_search_ph: "Search stock (e.g. Apple)", shares_ph: "Shares",
     nav_watchlist: "Watch", watch_title: "Watchlist", watch_sub: "Search and favorite assets to track them.",
     watch_search_ph: "Search gold, stocks, crypto…", watch_empty: "Search above and tap to add assets to your watchlist.",
@@ -290,7 +290,7 @@ const I18N = {
     flow_title: "Aylık nakit akışı", flow_income: "Gelir", flow_expenses: "Gider", flow_net: "Aylık net",
     flow_savings_note: "Takip ettiğin harcamaları kısarsan ayda +{x} daha.",
     cat_cash: "Nakit", cat_investment: "Yatırım",
-    asset_stocks: "Hisse", asset_usstock: "ABD Hisse", asset_bist: "Türk Hisse (BIST)", asset_crypto: "Kripto", asset_deposit: "Mevduat", asset_bonds: "Tahvil", asset_realestate: "Gayrimenkul", asset_gold: "Altın", asset_cash: "Nakit",
+    asset_stocks: "Hisse", asset_usstock: "ABD Hisse", asset_bist: "Türk Hisse (BIST)", asset_crypto: "Kripto", asset_deposit: "Mevduat", asset_bonds: "Tahvil", asset_realestate: "Gayrimenkul", asset_gold: "Altın", asset_usd: "Dolar (USD)", asset_cash: "Nakit",
     stock_search_ph: "Hisse ara (örn. THY)", shares_ph: "Adet",
     nav_watchlist: "Takip", watch_title: "Takip Listesi", watch_sub: "Varlık ara, favorile ve takip et.",
     watch_search_ph: "Altın, hisse, kripto ara…", watch_empty: "Yukarıdan ara ve takip listene varlık ekle.",
@@ -1223,6 +1223,22 @@ function updateGoldValue(row, id) {
   else if (perGram) node.innerHTML = `<small>@ ${formatMoney(unitPrice)}/${unit}</small>`;
   else node.textContent = "";
 }
+// USD held as an investment: the dollar amount is canonical; its app-currency
+// value is the live TL conversion (or 1:1 if the app is in USD).
+function usdHoldingValue(usd) { return state.currency === "TL" ? (usd || 0) * (usdTry || 0) : (usd || 0); }
+function updateUsdValue(row, id) {
+  const x = holdById(id);
+  const node = row.querySelector("[data-usd-value]");
+  if (!node || !x) return;
+  const usd = x.usd || 0;
+  if (usd && state.currency === "TL" && usdTry) {
+    node.innerHTML = `${formatMoney(usd * usdTry)} <small>$${formatThousands(usd)} @ ${CURRENCY_META.TL.symbol}${usdTry.toFixed(2)}</small>`;
+  } else if (usd) {
+    node.innerHTML = `${formatMoney(x.value || usd)}`;
+  } else {
+    node.textContent = "";
+  }
+}
 function updateCryptoValue(row, id) {
   const x = holdById(id);
   const node = row.querySelector("[data-coin-value]");
@@ -1276,7 +1292,11 @@ function makeHoldingRow(id) {
   const row = document.createElement("div");
   row.className = "cat-row port-row";
   row.dataset.hold = id;
-  const options = ASSET_TYPES.map((tp) => `<option value="${tp}" ${tp === at ? "selected" : ""}>${t("asset_" + tp)}</option>`).join("");
+  // "usd" (holding dollars as an investment) is only offered while the app is in
+  // TL; in USD mode it would just be cash. Keep it visible if already selected.
+  const options = ASSET_TYPES
+    .filter((tp) => tp !== "usd" || state.currency === "TL" || tp === at)
+    .map((tp) => `<option value="${tp}" ${tp === at ? "selected" : ""}>${t("asset_" + tp)}</option>`).join("");
   const typeSelect = `<select class="hold-type" data-hold-type="${id}" aria-label="asset type">${options}</select>`;
 
   if (at === "usstock" || at === "bist") {
@@ -1340,6 +1360,32 @@ function makeHoldingRow(id) {
       refreshIncome();
     });
     updateGoldValue(row, id);
+  } else if (at === "usd") {
+    const safeLabel = h.label ? h.label.replace(/"/g, "&quot;") : "";
+    row.innerHTML = `
+      <div class="port-namecell">
+        <input class="cat-name port-name" data-hold-name="${id}" value="${safeLabel}" placeholder="${t("asset_usd")}" />
+        ${typeSelect}
+      </div>
+      <div class="crypto-cell">
+        <div class="money-input money-input--sm usd-input"><span class="money-symbol">$</span><input type="text" inputmode="numeric" data-usd-amt="${id}" value="${h.usd ? formatThousands(h.usd) : ""}" placeholder="0" /></div>
+        <div class="crypto-value" data-usd-value="${id}"></div>
+      </div>
+      <button class="cat-remove" type="button" data-hold-del="${id}" aria-label="remove">×</button>`;
+    wireTypeSelect(row, id);
+    wireRemove(row, id);
+    row.querySelector("[data-hold-name]").addEventListener("input", (e) => { const x = holdById(id); if (x) x.label = e.target.value; saveState(); });
+    const u = row.querySelector("[data-usd-amt]");
+    u.addEventListener("input", () => {
+      const x = holdById(id);
+      x.usd = parseNumber(u.value);
+      x.value = usdHoldingValue(x.usd);
+      updateUsdValue(row, id);
+      refreshPortfolio();
+      refreshIncome();
+    });
+    u.addEventListener("blur", () => { const x = holdById(id); if (x && x.usd > 0) u.value = formatThousands(x.usd); });
+    updateUsdValue(row, id);
   } else {
     const safeLabel = h.label ? h.label.replace(/"/g, "&quot;") : "";
     const isInterest = at === "deposit" || at === "bonds";
@@ -1475,6 +1521,8 @@ async function refreshCryptoPrices() {
     } else if (h.assetType === "gold" && goldPriceGram > 0) {
       h.price = goldPriceGram;
       h.value = (h.grams || 0) * goldPriceGram;
+    } else if (h.assetType === "usd") {
+      h.value = usdHoldingValue(h.usd || 0);
     } else if ((h.assetType === "usstock" || h.assetType === "bist") && h.symbol) {
       const ys = h.assetType === "bist" ? h.symbol + ".IS" : h.symbol;
       const p = await getStockPrice(ys);
@@ -1775,7 +1823,7 @@ function clampN(v, lo, hi) { return v < lo ? lo : v > hi ? hi : v; }
 // Radius is proportional to how big the 24h move is relative to the biggest
 // mover currently in the list, so the largest gainer/loser is the largest
 // bubble and the smallest move is the smallest, with a clear spread.
-const BUBBLE_MIN_R = 18, BUBBLE_MAX_R = 40;
+const BUBBLE_MIN_R = 16, BUBBLE_MAX_R = 36;
 function bubbleRadius(ch, maxMag) {
   const mag = ch == null ? 0 : Math.abs(ch);
   const frac = maxMag > 0 ? Math.min(mag / maxMag, 1) : 0.35;
@@ -1793,7 +1841,7 @@ function paintBubble(b) {
 function syncBubbles() {
   if (!el.watchBubbles) return;
   el.watchBubblesSec.hidden = !state.watchlist.length;
-  if (!state.watchlist.length) { el.watchBubbles.innerHTML = ""; bubbleSim.bubbles = []; return; }
+  if (!state.watchlist.length) { stopBubbles(); el.watchBubbles.innerHTML = ""; bubbleSim.bubbles = []; return; }
   // Biggest absolute 24h move in the current set → drives proportional sizing.
   const maxMag = state.watchlist.reduce((m, w) => {
     const c = (watchData[w.key] || {}).chg24;
@@ -1819,8 +1867,9 @@ function syncBubbles() {
   bubbleSim.bubbles = keep;
   kickBubbles();
 }
-// Lay bubbles out once (no auto-motion): place any new ones, relax overlaps so
-// they sit packed but still, then render. They only move when the user drags them.
+// Place any new bubbles, un-overlap them, give them a gentle initial drift, then
+// run the damped physics loop (motion fades to rest). Bubbles also move when
+// dragged/flung and collide with each other; friction brings everything to a stop.
 function kickBubbles() {
   const host = el.watchBubbles;
   if (!host || host.offsetParent === null) return;
@@ -1834,48 +1883,98 @@ function kickBubbles() {
       b.place = false; placedNew = true;
     }
   }
-  if (placedNew) relaxBubbles(W, H); // only re-pack when a new bubble appeared
   for (const b of bubbleSim.bubbles) { b.x = clampN(b.x, b.r, W - b.r); b.y = clampN(b.y, b.r, H - b.r); }
+  if (placedNew) {
+    relaxBubbles(W, H);                 // pack without overlap on first appearance
+    for (const b of bubbleSim.bubbles) { // gentle drift that settles
+      const a = Math.random() * 6.283, s = 0.7 + Math.random() * 0.9;
+      b.vx = Math.cos(a) * s; b.vy = Math.sin(a) * s;
+    }
+  }
   renderBubbles();
+  startBubbles();
 }
 function renderBubbles() {
   for (const b of bubbleSim.bubbles) b.node.style.transform = `translate(${(b.x - b.r).toFixed(1)}px, ${(b.y - b.r).toFixed(1)}px)`;
 }
-// Push overlapping bubbles apart over synchronous passes. If `fixed` is given,
-// that bubble stays put (the one being dragged) and only the others give way.
-function relaxBubbles(W, H, fixed) {
+// One-time synchronous un-overlap pass (used for the initial layout).
+function relaxBubbles(W, H) {
   const bs = bubbleSim.bubbles;
-  const iters = fixed ? 10 : 140;
-  for (let it = 0; it < iters; it++) {
+  for (let it = 0; it < 140; it++) {
     for (let i = 0; i < bs.length; i++) for (let j = i + 1; j < bs.length; j++) {
       const a = bs[i], c = bs[j];
       let dx = c.x - a.x, dy = c.y - a.y, dist = Math.hypot(dx, dy) || 0.01, sep = a.r + c.r + 5 - dist;
       if (sep <= 0) continue;
       const nx = dx / dist, ny = dy / dist;
-      if (a === fixed) { c.x += nx * sep; c.y += ny * sep; }
-      else if (c === fixed) { a.x -= nx * sep; a.y -= ny * sep; }
-      else { a.x -= nx * sep / 2; a.y -= ny * sep / 2; c.x += nx * sep / 2; c.y += ny * sep / 2; }
+      a.x -= nx * sep / 2; a.y -= ny * sep / 2; c.x += nx * sep / 2; c.y += ny * sep / 2;
     }
-    for (const b of bs) { if (b !== fixed) { b.x = clampN(b.x, b.r, W - b.r); b.y = clampN(b.y, b.r, H - b.r); } }
+    for (const b of bs) { b.x = clampN(b.x, b.r, W - b.r); b.y = clampN(b.y, b.r, H - b.r); }
   }
 }
+// Damped physics step: integrate velocity with friction, bounce off walls, and
+// resolve collisions (transferring momentum). Loop sleeps once everything rests.
+function stepBubbles() {
+  const host = el.watchBubbles;
+  if (!host || host.offsetParent === null || !host.clientWidth || !host.clientHeight) {
+    bubbleSim.raf = requestAnimationFrame(stepBubbles); return; // view hidden → idle
+  }
+  const W = host.clientWidth, H = host.clientHeight, bs = bubbleSim.bubbles;
+  for (const b of bs) {
+    if (bubbleSim.drag === b) continue;
+    b.x += b.vx; b.y += b.vy;
+    b.vx *= 0.93; b.vy *= 0.93; // friction → settles
+    if (b.x < b.r) { b.x = b.r; b.vx = -b.vx * 0.6; } else if (b.x > W - b.r) { b.x = W - b.r; b.vx = -b.vx * 0.6; }
+    if (b.y < b.r) { b.y = b.r; b.vy = -b.vy * 0.6; } else if (b.y > H - b.r) { b.y = H - b.r; b.vy = -b.vy * 0.6; }
+    if (Math.abs(b.vx) < 0.05) b.vx = 0;
+    if (Math.abs(b.vy) < 0.05) b.vy = 0;
+  }
+  for (let i = 0; i < bs.length; i++) for (let j = i + 1; j < bs.length; j++) {
+    const a = bs[i], c = bs[j];
+    let dx = c.x - a.x, dy = c.y - a.y, dist = Math.hypot(dx, dy) || 0.01, min = a.r + c.r;
+    if (dist < min) {
+      const nx = dx / dist, ny = dy / dist, ov = min - dist;
+      const aF = bubbleSim.drag === a, cF = bubbleSim.drag === c;
+      if (aF) { c.x += nx * ov; c.y += ny * ov; }
+      else if (cF) { a.x -= nx * ov; a.y -= ny * ov; }
+      else { a.x -= nx * ov / 2; a.y -= ny * ov / 2; c.x += nx * ov / 2; c.y += ny * ov / 2; }
+      const diff = (c.vx * nx + c.vy * ny) - (a.vx * nx + a.vy * ny); // momentum transfer
+      if (!aF) { a.vx += diff * nx; a.vy += diff * ny; }
+      if (!cF) { c.vx -= diff * nx; c.vy -= diff * ny; }
+    }
+  }
+  let energy = 0;
+  for (const b of bs) {
+    if (bubbleSim.drag !== b) { b.x = clampN(b.x, b.r, W - b.r); b.y = clampN(b.y, b.r, H - b.r); }
+    energy += b.vx * b.vx + b.vy * b.vy;
+    b.node.style.transform = `translate(${(b.x - b.r).toFixed(1)}px, ${(b.y - b.r).toFixed(1)}px)`;
+  }
+  if (energy > 0.03 || bubbleSim.drag) bubbleSim.raf = requestAnimationFrame(stepBubbles);
+  else bubbleSim.raf = 0; // sleep until the next drag/kick
+}
+function startBubbles() { if (!bubbleSim.raf) bubbleSim.raf = requestAnimationFrame(stepBubbles); }
+function stopBubbles() { if (bubbleSim.raf) { cancelAnimationFrame(bubbleSim.raf); bubbleSim.raf = 0; } }
 function startBubbleDrag(b, e) {
   e.preventDefault();
   const rect = el.watchBubbles.getBoundingClientRect();
   bubbleSim.drag = b;
+  b.vx = 0; b.vy = 0;
   b.node.classList.add("is-drag");
   if (b.node.setPointerCapture) try { b.node.setPointerCapture(e.pointerId); } catch (err) {}
+  startBubbles(); // run physics so other bubbles get shoved while dragging
+  let lx = e.clientX, ly = e.clientY, fvx = 0, fvy = 0;
   const move = (ev) => {
+    fvx = ev.clientX - lx; fvy = ev.clientY - ly; lx = ev.clientX; ly = ev.clientY;
     b.x = clampN(ev.clientX - rect.left, b.r, rect.width - b.r);
     b.y = clampN(ev.clientY - rect.top, b.r, rect.height - b.r);
-    relaxBubbles(rect.width, rect.height, b); // shove others aside, keep dragged one under the finger
-    renderBubbles();
+    b.node.style.transform = `translate(${(b.x - b.r).toFixed(1)}px, ${(b.y - b.r).toFixed(1)}px)`;
   };
   const up = () => {
     document.removeEventListener("pointermove", move);
     document.removeEventListener("pointerup", up);
     b.node.classList.remove("is-drag");
+    b.vx = clampN(fvx, -30, 30) * 0.7; b.vy = clampN(fvy, -30, 30) * 0.7; // fling it
     bubbleSim.drag = null;
+    startBubbles();
   };
   document.addEventListener("pointermove", move);
   document.addEventListener("pointerup", up);
@@ -2014,7 +2113,9 @@ function setCurrency(cur) {
   if (cur === state.currency || !CURRENCY_META[cur]) return;
   state.currency = cur;
   el.inflation.value = formatRate(state.inflation[cur], false);
-  buildLayout(); refresh(); refreshExpenses(); refreshPortfolio(); refreshIncome();
+  // USD holdings convert differently per app currency; recompute before rendering.
+  state.portfolio.holdings.forEach((h) => { if (h.assetType === "usd") h.value = usdHoldingValue(h.usd || 0); });
+  buildLayout(); refresh(); refreshExpenses(); buildPortfolio(); refreshPortfolio(); refreshIncome();
   refreshCryptoPrices(); // refetch crypto prices in the new currency
   buildWatchlist(); refreshWatchData();
   updateSettingsActive();

@@ -1346,6 +1346,9 @@ body {
 .port-row .cat-amount, .port-row .crypto-cell { width: 132px; }
 .port-row .cat-amount input, .port-row .qty-field { font-size: 16px; text-align: right; }
 .port-row .money-input--sm { padding: 4px 12px; }
+.port-row .usd-input { width: 100%; padding: 4px 10px; }
+.port-row .usd-input input { font-size: 16px; text-align: right; min-width: 0; }
+.port-row .usd-input .money-symbol { font-size: 14px; }
 
 /* ============ Expenses (Gider) view ============ */
 .exp-sec-label { margin-bottom: 14px; }
@@ -1493,7 +1496,7 @@ body {
 
 /* ============ Crypto bubbles (floating, draggable physics field) ============ */
 .watch-bubbles-sec { padding: 8px; overflow: hidden; }
-.watch-bubbles { position: relative; width: 100%; height: clamp(190px, 30vh, 250px); overflow: hidden; }
+.watch-bubbles { position: relative; width: 100%; height: clamp(160px, 26vh, 212px); overflow: hidden; }
 .bubble {
   position: absolute; top: 0; left: 0;
   border-radius: 50%;
