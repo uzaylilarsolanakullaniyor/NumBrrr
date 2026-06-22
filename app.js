@@ -178,6 +178,7 @@ const I18N = {
     asset_stocks: "Stocks", asset_usstock: "US Stocks", asset_bist: "Turkish (BIST)", asset_crypto: "Crypto", asset_deposit: "Deposit", asset_bonds: "Bonds", asset_realestate: "Real estate", asset_gold: "Gold", asset_usd: "US Dollar", asset_cash: "Cash",
     stock_search_ph: "Search stock (e.g. Apple)", shares_ph: "Shares",
     nav_watchlist: "Watch", watch_title: "Watchlist", watch_sub: "Search and favorite assets to track them.",
+    bub_title: "Bubbles", bub_size: "Size = 24h move", bub_gainers: "Gainers", bub_losers: "Losers", bub_drag: "Drag",
     watch_search_ph: "Search gold, stocks, crypto…", watch_empty: "Search above and tap to add assets to your watchlist.",
     lbl_24h: "24h", lbl_1mo: "1M", lbl_1yr: "1Y",
     inc_from_portfolio: "+{x}/mo from portfolio",
@@ -293,6 +294,7 @@ const I18N = {
     asset_stocks: "Hisse", asset_usstock: "ABD Hisse", asset_bist: "Türk Hisse (BIST)", asset_crypto: "Kripto", asset_deposit: "Mevduat", asset_bonds: "Tahvil", asset_realestate: "Gayrimenkul", asset_gold: "Altın", asset_usd: "Dolar (USD)", asset_cash: "Nakit",
     stock_search_ph: "Hisse ara (örn. THY)", shares_ph: "Adet",
     nav_watchlist: "Takip", watch_title: "Takip Listesi", watch_sub: "Varlık ara, favorile ve takip et.",
+    bub_title: "Balonlar", bub_size: "Boyut = 24s hareket", bub_gainers: "Artanlar", bub_losers: "Düşenler", bub_drag: "Sürükle",
     watch_search_ph: "Altın, hisse, kripto ara…", watch_empty: "Yukarıdan ara ve takip listene varlık ekle.",
     lbl_24h: "24s", lbl_1mo: "1A", lbl_1yr: "1Y",
     inc_from_portfolio: "+{x}/ay portföyden",
@@ -1823,7 +1825,7 @@ function clampN(v, lo, hi) { return v < lo ? lo : v > hi ? hi : v; }
 // Radius is proportional to how big the 24h move is relative to the biggest
 // mover currently in the list, so the largest gainer/loser is the largest
 // bubble and the smallest move is the smallest, with a clear spread.
-const BUBBLE_MIN_R = 16, BUBBLE_MAX_R = 36;
+const BUBBLE_MIN_R = 26, BUBBLE_MAX_R = 52;
 function bubbleRadius(ch, maxMag) {
   const mag = ch == null ? 0 : Math.abs(ch);
   const frac = maxMag > 0 ? Math.min(mag / maxMag, 1) : 0.35;
@@ -1886,8 +1888,8 @@ function kickBubbles() {
   for (const b of bubbleSim.bubbles) { b.x = clampN(b.x, b.r, W - b.r); b.y = clampN(b.y, b.r, H - b.r); }
   if (placedNew) {
     relaxBubbles(W, H);                 // pack without overlap on first appearance
-    for (const b of bubbleSim.bubbles) { // gentle drift that settles
-      const a = Math.random() * 6.283, s = 0.7 + Math.random() * 0.9;
+    for (const b of bubbleSim.bubbles) { // start a gentle drift
+      const a = Math.random() * 6.283, s = 0.4 + Math.random() * 0.5;
       b.vx = Math.cos(a) * s; b.vy = Math.sin(a) * s;
     }
   }
@@ -1903,7 +1905,7 @@ function relaxBubbles(W, H) {
   for (let it = 0; it < 140; it++) {
     for (let i = 0; i < bs.length; i++) for (let j = i + 1; j < bs.length; j++) {
       const a = bs[i], c = bs[j];
-      let dx = c.x - a.x, dy = c.y - a.y, dist = Math.hypot(dx, dy) || 0.01, sep = a.r + c.r + 5 - dist;
+      let dx = c.x - a.x, dy = c.y - a.y, dist = Math.hypot(dx, dy) || 0.01, sep = a.r + c.r + 2 - dist;
       if (sep <= 0) continue;
       const nx = dx / dist, ny = dy / dist;
       a.x -= nx * sep / 2; a.y -= ny * sep / 2; c.x += nx * sep / 2; c.y += ny * sep / 2;
@@ -1911,22 +1913,23 @@ function relaxBubbles(W, H) {
     for (const b of bs) { b.x = clampN(b.x, b.r, W - b.r); b.y = clampN(b.y, b.r, H - b.r); }
   }
 }
-// Damped physics step: integrate velocity with friction, bounce off walls, and
-// resolve collisions (transferring momentum). Loop sleeps once everything rests.
+// Physics step: gentle perpetual drift (each bubble keeps a small ambient speed
+// so it never looks frozen), light friction, wall bounce, and collisions that
+// transfer momentum. A fling decays back down to the ambient drift. Never sleeps.
 function stepBubbles() {
+  bubbleSim.raf = requestAnimationFrame(stepBubbles);
   const host = el.watchBubbles;
-  if (!host || host.offsetParent === null || !host.clientWidth || !host.clientHeight) {
-    bubbleSim.raf = requestAnimationFrame(stepBubbles); return; // view hidden → idle
-  }
+  if (!host || host.offsetParent === null || !host.clientWidth || !host.clientHeight) return; // hidden → idle
   const W = host.clientWidth, H = host.clientHeight, bs = bubbleSim.bubbles;
   for (const b of bs) {
     if (bubbleSim.drag === b) continue;
     b.x += b.vx; b.y += b.vy;
-    b.vx *= 0.93; b.vy *= 0.93; // friction → settles
-    if (b.x < b.r) { b.x = b.r; b.vx = -b.vx * 0.6; } else if (b.x > W - b.r) { b.x = W - b.r; b.vx = -b.vx * 0.6; }
-    if (b.y < b.r) { b.y = b.r; b.vy = -b.vy * 0.6; } else if (b.y > H - b.r) { b.y = H - b.r; b.vy = -b.vy * 0.6; }
-    if (Math.abs(b.vx) < 0.05) b.vx = 0;
-    if (Math.abs(b.vy) < 0.05) b.vy = 0;
+    b.vx *= 0.992; b.vy *= 0.992; // very light friction
+    const sp = Math.hypot(b.vx, b.vy);
+    if (sp < 0.22) { const a = Math.random() * 6.283; b.vx += Math.cos(a) * 0.1; b.vy += Math.sin(a) * 0.1; } // keep a gentle drift alive
+    else if (sp > 6) { b.vx *= 6 / sp; b.vy *= 6 / sp; } // cap fling speed
+    if (b.x < b.r) { b.x = b.r; b.vx = Math.abs(b.vx) * 0.85 || 0.25; } else if (b.x > W - b.r) { b.x = W - b.r; b.vx = -(Math.abs(b.vx) * 0.85 || 0.25); }
+    if (b.y < b.r) { b.y = b.r; b.vy = Math.abs(b.vy) * 0.85 || 0.25; } else if (b.y > H - b.r) { b.y = H - b.r; b.vy = -(Math.abs(b.vy) * 0.85 || 0.25); }
   }
   for (let i = 0; i < bs.length; i++) for (let j = i + 1; j < bs.length; j++) {
     const a = bs[i], c = bs[j];
@@ -1942,14 +1945,10 @@ function stepBubbles() {
       if (!cF) { c.vx -= diff * nx; c.vy -= diff * ny; }
     }
   }
-  let energy = 0;
   for (const b of bs) {
     if (bubbleSim.drag !== b) { b.x = clampN(b.x, b.r, W - b.r); b.y = clampN(b.y, b.r, H - b.r); }
-    energy += b.vx * b.vx + b.vy * b.vy;
     b.node.style.transform = `translate(${(b.x - b.r).toFixed(1)}px, ${(b.y - b.r).toFixed(1)}px)`;
   }
-  if (energy > 0.03 || bubbleSim.drag) bubbleSim.raf = requestAnimationFrame(stepBubbles);
-  else bubbleSim.raf = 0; // sleep until the next drag/kick
 }
 function startBubbles() { if (!bubbleSim.raf) bubbleSim.raf = requestAnimationFrame(stepBubbles); }
 function stopBubbles() { if (bubbleSim.raf) { cancelAnimationFrame(bubbleSim.raf); bubbleSim.raf = 0; } }
