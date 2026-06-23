@@ -1495,7 +1495,7 @@ body {
 .veh-add-btn:hover { color: var(--text); border-color: rgba(124, 92, 255, 0.5); background: rgba(124, 92, 255, 0.08); }
 
 /* ============ Crypto bubbles (floating, draggable physics field) ============ */
-.watch-bubbles-sec { padding: 12px 12px 8px; overflow: hidden; }
+.watch-bubbles-sec { padding: 8px; overflow: hidden; }
 .bubbles-head { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; margin-bottom: 8px; }
 .bubbles-title {
   font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.12em;
@@ -1514,7 +1514,7 @@ body {
 .bub-leg.bub-up i { background: var(--good); box-shadow: 0 0 6px var(--good); }
 .bub-leg.bub-down i { background: #ff5c5c; box-shadow: 0 0 6px rgba(255, 92, 92, 0.7); }
 .bub-leg.bub-drag { color: var(--text-faint); }
-.watch-bubbles { position: relative; width: 100%; height: clamp(230px, 38vh, 320px); overflow: hidden; }
+.watch-bubbles { position: relative; width: 100%; height: clamp(180px, 30vh, 240px); overflow: hidden; }
 .bubble {
   position: absolute; top: 0; left: 0;
   border-radius: 50%;

@@ -473,6 +473,16 @@ function parseNumber(str) {
   const n = parseFloat(str.replace(/[^0-9.]/g, ""));
   return isNaN(n) ? 0 : n;
 }
+// For decimal inputs (rates, quantities, grams) a comma means the decimal point —
+// TR phone keyboards type "5,21". Money fields keep parseNumber (comma = grouping).
+function parseDecimal(str) {
+  if (typeof str !== "string") return Number(str) || 0;
+  let s = str.replace(/,/g, ".").replace(/[^0-9.]/g, "");
+  const i = s.indexOf(".");
+  if (i !== -1) s = s.slice(0, i + 1) + s.slice(i + 1).replace(/\./g, ""); // keep only the first dot
+  const n = parseFloat(s);
+  return isNaN(n) ? 0 : n;
+}
 function formatMoney(value, { compact = false } = {}) {
   const meta = CURRENCY_META[state.currency];
   if (!isFinite(value)) return "—";
@@ -493,9 +503,11 @@ function formatMoneyCcy(value, curKey, { compact = false } = {}) {
   }).format(value);
 }
 function formatThousands(n) { return new Intl.NumberFormat("en-US").format(Math.round(n)); }
+// Show a comma as the decimal separator for Turkish (round-trips with parseDecimal).
+function locDec(n) { const s = String(n); return state.lang === "tr" ? s.replace(".", ",") : s; }
 function formatRate(value, withSign = true) {
   const r = Math.round(value * 100) / 100;
-  return withSign ? r + "%" : String(r);
+  return withSign ? locDec(r) + "%" : locDec(r);
 }
 function effectiveRate(nominalPercent) {
   const infl = state.realMode ? state.inflation[state.currency] : 0;
@@ -645,7 +657,7 @@ function wireDynamicInputs() {
   el.cards.querySelectorAll("input[data-id]").forEach((input) => {
     input.addEventListener("input", () => {
       if (input.disabled) return;
-      state.rates[state.currency][input.dataset.id] = parseNumber(input.value);
+      state.rates[state.currency][input.dataset.id] = parseDecimal(input.value);
       refresh();
     });
   });
@@ -1200,7 +1212,7 @@ function wireStockRow(row, id, type) {
   search.addEventListener("blur", () => setTimeout(() => { dd.hidden = true; }, 150));
   sh.addEventListener("input", () => {
     const x = holdById(id);
-    x.shares = parseNumber(sh.value);
+    x.shares = parseDecimal(sh.value);
     x.value = stockValue(x);
     updateStockValue(row, id);
     refreshPortfolio(); refreshIncome();
@@ -1211,7 +1223,7 @@ function wireStockRow(row, id, type) {
 function goldOz() { return state.currency !== "TL"; }
 function goldFactor() { return goldOz() ? GRAMS_PER_OZ : 1; } // grams per display unit
 function goldUnit() { return goldOz() ? "oz" : "g"; }
-function fmtQty(n) { return Math.round(n * 10000) / 10000; }
+function fmtQty(n) { return locDec(Math.round(n * 10000) / 10000); }
 function updateGoldValue(row, id) {
   const x = holdById(id);
   const node = row.querySelector("[data-gold-value]");
@@ -1245,7 +1257,7 @@ function updateCryptoValue(row, id) {
   const x = holdById(id);
   const node = row.querySelector("[data-coin-value]");
   if (!node || !x) return;
-  if (x.price && x.qty) node.innerHTML = `${formatMoney(x.value)} <small>${x.qty} ${x.coinSymbol || ""} @ ${formatMoney(x.price)}</small>`;
+  if (x.price && x.qty) node.innerHTML = `${formatMoney(x.value)} <small>${fmtQty(x.qty)} ${x.coinSymbol || ""} @ ${formatMoney(x.price)}</small>`;
   else if (x.price) node.innerHTML = `<small>@ ${formatMoney(x.price)} / ${x.coinSymbol || ""}</small>`;
   else node.textContent = "";
 }
@@ -1279,7 +1291,7 @@ function wireCryptoRow(row, id) {
   search.addEventListener("blur", () => setTimeout(() => { dd.hidden = true; }, 150));
   qty.addEventListener("input", () => {
     const x = holdById(id);
-    x.qty = parseNumber(qty.value);
+    x.qty = parseDecimal(qty.value);
     x.value = (x.qty || 0) * (x.price || 0);
     updateCryptoValue(row, id);
     refreshPortfolio(); refreshIncome();
@@ -1312,7 +1324,7 @@ function makeHoldingRow(id) {
         ${typeSelect}
       </div>
       <div class="crypto-cell">
-        <input class="qty-field" type="text" inputmode="decimal" data-stock-shares="${id}" value="${h.shares ? h.shares : ""}" placeholder="${t("shares_ph")}" />
+        <input class="qty-field" type="text" inputmode="decimal" data-stock-shares="${id}" value="${h.shares ? fmtQty(h.shares) : ""}" placeholder="${t("shares_ph")}" />
         <div class="crypto-value" data-stock-value="${id}"></div>
       </div>
       <button class="cat-remove" type="button" data-hold-del="${id}" aria-label="remove">×</button>`;
@@ -1328,7 +1340,7 @@ function makeHoldingRow(id) {
         ${typeSelect}
       </div>
       <div class="crypto-cell">
-        <input class="qty-field" type="text" inputmode="decimal" data-coin-qty="${id}" value="${h.qty ? h.qty : ""}" placeholder="${t("qty_ph")}" />
+        <input class="qty-field" type="text" inputmode="decimal" data-coin-qty="${id}" value="${h.qty ? fmtQty(h.qty) : ""}" placeholder="${t("qty_ph")}" />
         <div class="crypto-value" data-coin-value="${id}"></div>
       </div>
       <button class="cat-remove" type="button" data-hold-del="${id}" aria-label="remove">×</button>`;
@@ -1353,7 +1365,7 @@ function makeHoldingRow(id) {
     const g = row.querySelector("[data-gold-grams]");
     g.addEventListener("input", () => {
       const x = holdById(id);
-      x.grams = parseNumber(g.value) * goldFactor(); // store canonical grams
+      x.grams = parseDecimal(g.value) * goldFactor(); // store canonical grams
       const p = goldPriceGram || x.price || 0;
       x.price = p;
       x.value = (x.grams || 0) * p;
@@ -2166,7 +2178,7 @@ el.expenses.addEventListener("input", () => { state.monthlyExpenses = parseNumbe
 el.expenses.addEventListener("blur", () => { if (state.monthlyExpenses > 0) el.expenses.value = formatThousands(state.monthlyExpenses); });
 
 el.realMode.addEventListener("change", () => { state.realMode = el.realMode.checked; el.inflationField.hidden = !state.realMode; refresh(); });
-el.inflation.addEventListener("input", () => { state.inflation[state.currency] = parseNumber(el.inflation.value); refresh(); });
+el.inflation.addEventListener("input", () => { state.inflation[state.currency] = parseDecimal(el.inflation.value); refresh(); });
 
 document.querySelectorAll("[data-lang]").forEach((b) => b.addEventListener("click", () => applyLanguage(b.dataset.lang)));
 document.querySelectorAll("[data-theme-pick]").forEach((b) => b.addEventListener("click", () => applyTheme(b.dataset.themePick)));
