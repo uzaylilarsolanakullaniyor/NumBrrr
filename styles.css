@@ -966,6 +966,7 @@ body {
 .theme-swatch--medieval { background: linear-gradient(135deg, #2a1d10 0%, #b8893a 55%, #e8dcc0 100%); }
 .theme-swatch--doge { background: linear-gradient(135deg, #e3c79a 0%, #f5b400 38%, #e84d8a 68%, #3aa0ff 100%); }
 .theme-swatch--vaporwave { background: linear-gradient(135deg, #2bf0ff 0%, #c34dff 50%, #ff3ca0 100%); }
+.theme-swatch--solana { background: linear-gradient(135deg, #9945ff 0%, #14f195 100%); }
 
 /* ============================================================
    THEME: Windows XP (Luna)
@@ -1251,6 +1252,56 @@ body {
 [data-theme="vaporwave"] .tab { color: #cdb8e8; }
 [data-theme="vaporwave"] .tab.is-active { color: #fff; background: linear-gradient(135deg, rgba(255, 60, 214, 0.4), rgba(43, 240, 255, 0.3)); box-shadow: 0 0 14px rgba(255, 60, 214, 0.5); }
 [data-theme="vaporwave"] .toast { background: rgba(26, 11, 46, 0.92); color: #fff; border: 1px solid #ff3ca0; }
+
+/* ---------- Solana theme (purple #9945FF + green #14F195 on dark) ---------- */
+[data-theme="solana"] {
+  --text: #f3f0ff; --text-dim: #c5bce6; --text-faint: #8b82b0;
+  --accent: #9945ff; --accent-2: #14f195; --good: #14f195; --warn: #ffb454;
+  --glass-bg: rgba(22, 16, 40, 0.6); --glass-bg-strong: rgba(28, 20, 52, 0.74);
+  --glass-border: rgba(153, 69, 255, 0.5); --glass-border-soft: rgba(20, 241, 149, 0.24);
+  --shadow: 0 0 26px rgba(153, 69, 255, 0.3);
+}
+[data-theme="solana"] body { color: var(--text); }
+[data-theme="solana"] .bg {
+  background:
+    radial-gradient(circle at 18% 12%, rgba(153, 69, 255, 0.38), transparent 46%),
+    radial-gradient(circle at 84% 84%, rgba(20, 241, 149, 0.24), transparent 46%),
+    linear-gradient(160deg, #0a0813 0%, #120a22 50%, #0a0f12 100%);
+}
+[data-theme="solana"] .glass, [data-theme="solana"] .card {
+  background: rgba(20, 14, 38, 0.6);
+  border: 1px solid rgba(153, 69, 255, 0.45);
+  box-shadow: 0 0 22px rgba(153, 69, 255, 0.22), inset 0 0 0 1px rgba(20, 241, 149, 0.12);
+  color: var(--text);
+}
+[data-theme="solana"] .card-accent { background: linear-gradient(90deg, #9945ff, #14f195); opacity: 1; }
+[data-theme="solana"] .logo-word, [data-theme="solana"] .view-title {
+  -webkit-text-fill-color: transparent;
+  background: linear-gradient(100deg, #b072ff 0%, #14f195 100%);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+[data-theme="solana"] .headline { background: linear-gradient(135deg, rgba(153, 69, 255, 0.2), rgba(20, 241, 149, 0.12)) !important; }
+[data-theme="solana"] .headline-tag { color: #14f195; text-shadow: 0 0 8px rgba(20, 241, 149, 0.5); }
+[data-theme="solana"] .headline-amount {
+  background: linear-gradient(100deg, #b072ff, #14f195);
+  -webkit-background-clip: text; background-clip: text; color: transparent; -webkit-text-fill-color: transparent;
+}
+[data-theme="solana"] .section-head h2 { color: #b98cff; }
+[data-theme="solana"] .money-input, [data-theme="solana"] .rate-input, [data-theme="solana"] .proj-card,
+[data-theme="solana"] .re-calc, [data-theme="solana"] .opt, [data-theme="solana"] .invest-pick select {
+  background: rgba(14, 9, 28, 0.6); border: 1px solid rgba(153, 69, 255, 0.34);
+}
+[data-theme="solana"] .rule-link, [data-theme="solana"] .add-cat {
+  background: linear-gradient(135deg, #9945ff, #14f195); border: none; color: #07120c;
+  box-shadow: 0 0 16px rgba(153, 69, 255, 0.45);
+}
+[data-theme="solana"] .tabbar {
+  background: rgba(16, 10, 30, 0.78); border: 1px solid rgba(153, 69, 255, 0.45);
+  box-shadow: 0 0 24px rgba(153, 69, 255, 0.28), inset 0 0 0 1px rgba(20, 241, 149, 0.14);
+}
+[data-theme="solana"] .tab { color: #c5bce6; }
+[data-theme="solana"] .tab.is-active { color: #fff; background: linear-gradient(135deg, rgba(153, 69, 255, 0.45), rgba(20, 241, 149, 0.28)); box-shadow: 0 0 14px rgba(153, 69, 255, 0.45); }
+[data-theme="solana"] .toast { background: rgba(16, 10, 30, 0.92); color: #fff; border: 1px solid #9945ff; }
 
 /* ============ First-run onboarding overlay ============ */
 .onboard {
