@@ -179,7 +179,6 @@ const I18N = {
     asset_stocks: "Stocks", asset_usstock: "US Stocks", asset_bist: "Turkish (BIST)", asset_crypto: "Crypto", asset_deposit: "Deposit", asset_bonds: "Bonds", asset_realestate: "Real estate", asset_gold: "Gold", asset_usd: "US Dollar", asset_cash: "Cash",
     stock_search_ph: "Search stock (e.g. Apple)", shares_ph: "Shares",
     nav_watchlist: "Watch", watch_title: "Watchlist", watch_sub: "Search and favorite assets to track them.",
-    bub_title: "Bubbles", bub_size: "Size = 24h move", bub_gainers: "Gainers", bub_losers: "Losers", bub_drag: "Drag",
     watch_search_ph: "Search gold, stocks, crypto…", watch_empty: "Search above and tap to add assets to your watchlist.",
     lbl_24h: "24h", lbl_1mo: "1M", lbl_1yr: "1Y",
     inc_from_portfolio: "+{x}/mo from portfolio",
@@ -214,13 +213,6 @@ const I18N = {
       gold: { name: "Gold (in TL)", sub: "Gold priced in lira" },
       bist: { name: "BIST 100", sub: "Borsa Istanbul avg." },
       eurobond: { name: "Eurobond / FX deposit", sub: "FX-linked return" },
-    },
-    cat: {
-      cigarettes: "Cigarettes", alcohol: "Alcohol", subscriptions: "Digital subscriptions",
-      subscriptions_hint: "Netflix, Spotify, YouTube Premium, etc.",
-      eatingout: "Eating out / restaurants", delivery: "Food delivery", coffee: "Daily coffee",
-      gaming: "Gaming subs + in-game purchases", fuel: "Fuel / gas",
-      shopping: "Shopping",
     },
   },
 
@@ -296,7 +288,6 @@ const I18N = {
     asset_stocks: "Hisse", asset_usstock: "ABD Hisse", asset_bist: "Türk Hisse (BIST)", asset_crypto: "Kripto", asset_deposit: "Mevduat", asset_bonds: "Tahvil", asset_realestate: "Gayrimenkul", asset_gold: "Altın", asset_usd: "Dolar (USD)", asset_cash: "Nakit",
     stock_search_ph: "Hisse ara (örn. THY)", shares_ph: "Adet",
     nav_watchlist: "Takip", watch_title: "Takip Listesi", watch_sub: "Varlık ara, favorile ve takip et.",
-    bub_title: "Balonlar", bub_size: "Boyut = 24s hareket", bub_gainers: "Artanlar", bub_losers: "Düşenler", bub_drag: "Sürükle",
     watch_search_ph: "Altın, hisse, kripto ara…", watch_empty: "Yukarıdan ara ve takip listene varlık ekle.",
     lbl_24h: "24s", lbl_1mo: "1A", lbl_1yr: "1Y",
     inc_from_portfolio: "+{x}/ay portföyden",
@@ -331,13 +322,6 @@ const I18N = {
       gold: { name: "Altın (TL)", sub: "Lira cinsinden altın" },
       bist: { name: "BIST 100", sub: "Borsa İstanbul ort." },
       eurobond: { name: "Eurobond / Döviz mevduatı", sub: "Dövize bağlı getiri" },
-    },
-    cat: {
-      cigarettes: "Sigara", alcohol: "Alkol", subscriptions: "Dijital abonelikler",
-      subscriptions_hint: "Netflix, Spotify, YouTube Premium vb.",
-      eatingout: "Dışarıda yemek / restoran", delivery: "Yemek siparişi", coffee: "Günlük kahve",
-      gaming: "Oyun abonelikleri + oyun içi harcama", fuel: "Yakıt harcamaları",
-      shopping: "Alışveriş",
     },
   },
 };
@@ -401,9 +385,7 @@ function instNote(inst) {
   if (inst.historical) return t("note_historical");
   return "";
 }
-function catLabel(id) { return L().cat[id] || I18N.en.cat[id] || id; }
 function incLabel(id) { return (L().inc && L().inc[id]) || I18N.en.inc[id] || id; }
-function catHint(id) { const k = id + "_hint"; return L().cat[k] || I18N.en.cat[k] || ""; }
 
 // ---- Elements ----
 const el = {
@@ -808,15 +790,23 @@ function rollExpenseMonth() {
   e.month = now;
 }
 
-// Total spent this month = PAID recurring bills + this month's logged spends.
-// An unpaid recurring bill is only an upcoming reminder, not yet a real expense,
-// so it doesn't count until marked paid. This is the only figure that counts as
-// expenses for the Income and Portfolio views; the Home page's
-// state.monthlyExpenses stays local to the Home freedom calculator.
+// Spent so far this month = PAID recurring bills + this month's logged spends.
+// Shown as the Expenses view's "this month" total — an unpaid bill is only an
+// upcoming reminder, not yet a real spend.
 function expensesTotal() {
   const e = state.expenses;
   let total = 0;
   (e.recurring || []).forEach((r) => { if (r.paid) total += r.amount || 0; });
+  (e.oneoff || []).forEach((o) => (total += o.amount || 0));
+  return total + vehiclesMonthlyTotal();
+}
+// Monthly expense level = ALL recurring bills (fixed monthly obligations, paid or
+// not) + this month's spends + vehicle costs. Used by the Income freedom check and
+// the Portfolio cash flow, so an unpaid rent doesn't make you look "financially free".
+function monthlyBurn() {
+  const e = state.expenses;
+  let total = 0;
+  (e.recurring || []).forEach((r) => (total += r.amount || 0));
   (e.oneoff || []).forEach((o) => (total += o.amount || 0));
   return total + vehiclesMonthlyTotal();
 }
@@ -1625,8 +1615,8 @@ function refreshPortfolio() {
   // --- Monthly cash flow (Income incl. portfolio yield − Expenses) ---
   const py = portfolioYield();
   const income = incomeManualTotal() + py.interest + py.rental;
-  // Expenses come from the Expenses (Gider) view only, not the Home page.
-  const exp = expensesTotal();
+  // Monthly burn (all recurring + this month + vehicles), not just what's paid yet.
+  const exp = monthlyBurn();
   const net = income - exp;
   el.flowIncome.textContent = formatMoney(income);
   el.flowExpenses.textContent = "−" + formatMoney(exp);
@@ -1775,8 +1765,8 @@ function refreshIncome() {
   noteFor("rental", py.rental);
 
   const active = total - passive;
-  // Expenses come from the Expenses (Gider) view only, not the Home page.
-  const exp = expensesTotal();
+  // Use the full monthly burn so unpaid recurring bills still count toward freedom.
+  const exp = monthlyBurn();
 
   el.incTotal.textContent = formatMoney(total);
   el.incBreakdown.textContent = `${t("passive_label")}: ${formatMoney(passive)} · ${t("active_label")}: ${formatMoney(active)}`;
@@ -2142,9 +2132,8 @@ function updateObActive() {
   document.querySelectorAll(".ob-lang").forEach((b) => b.classList.toggle("is-active", b.dataset.obLang === obLang));
 }
 function showOnboarding() {
-  // Pre-select sensible defaults from the browser locale.
-  const navLang = (navigator.language || "en").toLowerCase();
-  if (navLang.startsWith("tr")) { obCountry = "TR"; obLang = "tr"; }
+  // Default to USA + English; the user can switch.
+  obCountry = "US"; obLang = "en";
   applyLanguage(obLang);
   updateObActive();
   document.getElementById("onboard").hidden = false;
@@ -2208,6 +2197,7 @@ document.querySelectorAll("[data-theme-pick]").forEach((b) => b.addEventListener
     if (name === "portfolio") refreshPortfolio();
     if (name === "income") refreshIncome();
     if (name === "watch") { refreshWatchData(); kickBubbles(); }
+    else stopBubbles(); // pause the bubble animation loop off the Watch view
     window.scrollTo({ top: 0, behavior: "auto" });
   }
   tabs.forEach((tab) => {
