@@ -86,7 +86,6 @@ body {
 /* Only the Liquid Glass theme shows the money rain */
 [data-theme="xp"] .money-rain,
 [data-theme="medieval"] .money-rain,
-[data-theme="doge"] .money-rain,
 [data-theme="vaporwave"] .money-rain { display: none; }
 
 /* ---------- Layout shell ---------- */
@@ -1138,6 +1137,13 @@ body {
 [data-theme="doge"] h1, [data-theme="doge"] h2, [data-theme="doge"] h3, [data-theme="doge"] .card-title { font-family: "Comic Sans MS", "Comic Sans", cursive; }
 [data-theme="doge"] .bg {
   background: radial-gradient(1200px 800px at 70% 8%, #f5e7c4 0%, transparent 60%), linear-gradient(135deg, #efe0bd 0%, #e4c98f 100%);
+}
+/* Floating Doge coins instead of the money emoji */
+[data-theme="doge"] .money {
+  color: transparent; display: inline-block;
+  width: 1.3em; height: 1.3em;
+  background: url("logo/DOGE.png") center / contain no-repeat;
+  filter: drop-shadow(0 2px 5px rgba(120, 80, 10, 0.3));
 }
 [data-theme="doge"] .blob {
   display: block; width: auto; height: auto; border-radius: 0; background: none; filter: none; opacity: 0.9;
