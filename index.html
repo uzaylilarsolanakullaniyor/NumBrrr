@@ -41,7 +41,6 @@
 
     <div class="view-intro">
       <h2 class="view-title" data-i18n="home_title">Freedom</h2>
-      <p class="subtagline" data-i18n="home_sub">See how much to save so passive returns cover your expenses.</p>
     </div>
 
     <!-- Controls -->
@@ -285,7 +284,6 @@
     <div class="view" id="view-portfolio">
       <div class="view-intro">
         <h2 class="view-title" data-i18n="portfolio_title">Your portfolio</h2>
-        <p class="subtagline" data-i18n="portfolio_sub">Add what you own and see your allocation.</p>
       </div>
 
       <section class="glass savings-result port-total-card" aria-label="Total portfolio value">
@@ -323,7 +321,6 @@
     <div class="view" id="view-income" hidden>
       <div class="view-intro">
         <h2 class="view-title" data-i18n="income_title">Your income</h2>
-        <p class="subtagline" data-i18n="income_sub">Add your income. Mark the passive ones, only they count toward freedom.</p>
       </div>
 
       <section class="glass savings-panel" aria-label="Income sources">
@@ -354,7 +351,6 @@
     <div class="view" id="view-watch" hidden>
       <div class="view-intro">
         <h2 class="view-title" data-i18n="watch_title">Watchlist</h2>
-        <p class="subtagline" data-i18n="watch_sub">Search and favorite assets to track them.</p>
       </div>
 
       <!-- Crypto-bubbles overview (sized + colored by 24h change) -->
@@ -427,6 +423,23 @@
       </div>
 
       <button class="onboard-start" id="obStart" type="button" data-i18n="onb_start">Continue</button>
+    </div>
+  </div>
+
+  <!-- ============ FIRST-RUN SECTION GUIDE (shown once) ============ -->
+  <div class="guide" id="guide" hidden>
+    <div class="guide-card glass">
+      <button class="guide-close" id="guideClose" type="button" aria-label="close">×</button>
+      <h2 class="guide-title" data-i18n="guide_title">Quick guide</h2>
+      <p class="guide-intro" data-i18n="guide_intro">What each tab does:</p>
+      <div class="guide-list">
+        <div class="guide-item"><span class="guide-ico">💼</span><div class="guide-txt"><b data-i18n="nav_portfolio">Portfolio</b><p data-i18n="guide_portfolio">—</p></div></div>
+        <div class="guide-item"><span class="guide-ico">👛</span><div class="guide-txt"><b data-i18n="nav_income">Income</b><p data-i18n="guide_income">—</p></div></div>
+        <div class="guide-item"><span class="guide-ico">🧾</span><div class="guide-txt"><b data-i18n="nav_savings">Expenses</b><p data-i18n="guide_expenses">—</p></div></div>
+        <div class="guide-item"><span class="guide-ico">🎯</span><div class="guide-txt"><b data-i18n="nav_home">Freedom</b><p data-i18n="guide_freedom">—</p></div></div>
+        <div class="guide-item"><span class="guide-ico">⭐</span><div class="guide-txt"><b data-i18n="nav_watchlist">Watch</b><p data-i18n="guide_watch">—</p></div></div>
+      </div>
+      <button class="onboard-start" id="guideStart" type="button" data-i18n="guide_ok">Got it</button>
     </div>
   </div>
 

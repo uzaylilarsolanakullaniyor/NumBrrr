@@ -163,6 +163,12 @@ const I18N = {
     settings_title: "Settings", language: "Language", theme: "Theme", country: "Country", sound: "Sound", sound_fx: "Sound effects",
     onb_title: "Welcome to NumBrrr", onb_sub: "Pick your country and language to get started. You can change these anytime in Settings.",
     onb_country: "Country", onb_language: "Language", onb_start: "Continue",
+    guide_title: "Quick guide", guide_intro: "A quick look at what each tab is for:", guide_ok: "Got it",
+    guide_portfolio: "Add what you own (stocks, crypto, gold, USD, cash) to see your allocation and monthly cash flow.",
+    guide_income: "Add your monthly income and mark the passive ones (rent, interest) — only those count toward freedom.",
+    guide_expenses: "Log this month's spending, set recurring bills with payment reminders, and add your vehicles.",
+    guide_freedom: "See how much to save so passive returns alone cover your expenses (the 4% rule).",
+    guide_watch: "Search and favorite assets to follow their price, plus the live crypto bubbles.",
     theme_glass: "Liquid Glass", theme_glass_desc: "Modern frosted glass (default)",
     theme_xp: "Windows XP", theme_xp_desc: "Nostalgic early-2000s Luna blue",
     theme_medieval: "Medieval", theme_medieval_desc: "Gritty 15th-century parchment & iron",
@@ -272,6 +278,12 @@ const I18N = {
     settings_title: "Ayarlar", language: "Dil", theme: "Tema", country: "Ülke", sound: "Ses", sound_fx: "Ses efektleri",
     onb_title: "NumBrrr'a hoş geldin", onb_sub: "Başlamak için ülkeni ve dilini seç. Bunları istediğin zaman Ayarlar'dan değiştirebilirsin.",
     onb_country: "Ülke", onb_language: "Dil", onb_start: "Devam",
+    guide_title: "Hızlı rehber", guide_intro: "Her sekme kısaca ne işe yarar:", guide_ok: "Anladım",
+    guide_portfolio: "Sahip olduklarını ekle (hisse, kripto, altın, dolar, nakit); dağılımını ve aylık nakit akışını gör.",
+    guide_income: "Aylık gelirini ekle ve pasif olanları (kira, faiz) işaretle — özgürlüğe yalnızca onlar sayılır.",
+    guide_expenses: "Bu ayki harcamalarını gir, düzenli faturalarını ödeme hatırlatmalı kur, araçlarını ekle.",
+    guide_freedom: "Pasif getirinin tek başına giderlerini karşılaması için ne kadar biriktirmen gerektiğini gör (%4 kuralı).",
+    guide_watch: "Varlık ara ve favorile; fiyatlarını ve canlı kripto balonlarını izle.",
     theme_glass: "Sıvı Cam", theme_glass_desc: "Modern buzlu cam (varsayılan)",
     theme_xp: "Windows XP", theme_xp_desc: "Nostaljik 2000'ler Luna mavisi",
     theme_medieval: "Ortaçağ", theme_medieval_desc: "Sert 15. yüzyıl parşömen ve demir",
@@ -2149,10 +2161,20 @@ function finishOnboarding() {
   setCurrency(COUNTRIES[obCountry].currency);
   try { localStorage.setItem("numbr_onboarded", "1"); } catch (e) {}
   document.getElementById("onboard").hidden = true;
+  showGuide(); // first-run section guide right after onboarding
 }
 document.querySelectorAll(".ob-country").forEach((b) => b.addEventListener("click", () => { obCountry = b.dataset.obCountry; updateObActive(); }));
 document.querySelectorAll(".ob-lang").forEach((b) => b.addEventListener("click", () => { obLang = b.dataset.obLang; applyLanguage(obLang); updateObActive(); }));
 document.getElementById("obStart").addEventListener("click", finishOnboarding);
+
+// ---- First-run section guide (what each tab does; shown once) ----
+function showGuide() { const g = document.getElementById("guide"); if (g) g.hidden = false; }
+function dismissGuide() {
+  const g = document.getElementById("guide"); if (g) g.hidden = true;
+  try { localStorage.setItem("numbr_guide_seen", "1"); } catch (e) {}
+}
+document.getElementById("guideClose").addEventListener("click", dismissGuide);
+document.getElementById("guideStart").addEventListener("click", dismissGuide);
 
 // ---- Sound effects (Web Audio, synthesized; respects the Sound setting) ----
 let audioCtx = null;
@@ -2333,6 +2355,7 @@ soundToggle.checked = state.sound;
 applyLanguage(state.lang); // builds layout + savings, applies all translations
 
 if (isFirstRun) showOnboarding();
+else { try { if (!localStorage.getItem("numbr_guide_seen")) showGuide(); } catch (e) {} }
 wireWatchSearch();
 refreshCryptoPrices(); // fetch live crypto prices (works on the deployed site)
 refreshWatchData(); // fetch performance for any saved watchlist items

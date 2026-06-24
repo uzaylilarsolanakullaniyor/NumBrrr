@@ -1347,6 +1347,41 @@ body {
 @keyframes ob-fade { from { opacity: 0; } to { opacity: 1; } }
 @keyframes ob-rise { from { opacity: 0; transform: translateY(14px) scale(0.98); } to { opacity: 1; transform: none; } }
 
+/* ============ First-run section guide ============ */
+.guide {
+  position: fixed; inset: 0; z-index: 100;
+  display: grid; place-items: center; padding: 22px;
+  background: rgba(3, 4, 8, 0.72);
+  -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
+  animation: ob-fade 0.25s ease both;
+}
+.guide[hidden] { display: none; }
+.guide-card {
+  position: relative;
+  width: 100%; max-width: 460px; padding: 26px 22px 22px;
+  max-height: calc(100vh - 44px); overflow-y: auto;
+  animation: ob-rise 0.3s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+.guide-close {
+  position: absolute; top: 12px; right: 12px;
+  width: 32px; height: 32px; border-radius: 50%;
+  border: 1px solid var(--glass-border-soft); background: rgba(255, 255, 255, 0.05);
+  color: var(--text-dim); font-size: 20px; line-height: 1; cursor: pointer;
+  transition: color 0.18s ease, background 0.18s ease;
+}
+.guide-close:hover { color: var(--text); background: rgba(255, 255, 255, 0.12); }
+.guide-title { margin: 2px 0 4px; font-family: "Sora", sans-serif; font-size: 22px; font-weight: 800; }
+.guide-intro { margin: 0 0 16px; color: var(--text-dim); font-size: 14px; }
+.guide-list { display: flex; flex-direction: column; gap: 14px; margin-bottom: 20px; }
+.guide-item { display: flex; gap: 12px; align-items: flex-start; }
+.guide-ico {
+  flex: none; width: 38px; height: 38px; display: grid; place-items: center;
+  font-size: 19px; border-radius: 11px;
+  background: rgba(124, 92, 255, 0.14); border: 1px solid var(--glass-border-soft);
+}
+.guide-txt b { display: block; font-size: 15px; font-weight: 700; color: var(--text); margin-bottom: 2px; }
+.guide-txt p { margin: 0; font-size: 13px; color: var(--text-dim); line-height: 1.45; }
+
 /* ============ Portfolio total + currency toggle ============ */
 .port-total-card { padding: 20px 22px; }
 .port-total-head { display: flex; align-items: center; gap: 10px; }
