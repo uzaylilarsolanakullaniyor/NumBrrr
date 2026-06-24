@@ -173,7 +173,7 @@ const I18N = {
     nav_portfolio: "Portfolio",
     portfolio_title: "Your portfolio", portfolio_sub: "Add what you own and see your allocation.",
     holding_ph: "Holding name", add_holding: "+ Add holding", total_value: "Total portfolio value",
-    flow_title: "Monthly cash flow", flow_income: "Income", flow_expenses: "Expenses", flow_net: "Net / month",
+    flow_title: "Monthly cash flow", flow_income: "Income", flow_expenses: "Expenses", flow_net: "Net / month", flow_last_month: "Last month: {x}",
     flow_savings_note: "+{x}/month more if you cut your tracked spending.",
     cat_cash: "Cash", cat_investment: "Investment",
     asset_stocks: "Stocks", asset_usstock: "US Stocks", asset_bist: "Turkish (BIST)", asset_crypto: "Crypto", asset_deposit: "Deposit", asset_bonds: "Bonds", asset_realestate: "Real estate", asset_gold: "Gold", asset_usd: "US Dollar", asset_cash: "Cash",
@@ -282,7 +282,7 @@ const I18N = {
     nav_portfolio: "Portföy",
     portfolio_title: "Portföyün", portfolio_sub: "Sahip olduklarını ekle, dağılımını gör.",
     holding_ph: "Varlık adı", add_holding: "+ Varlık ekle", total_value: "Toplam portföy değeri",
-    flow_title: "Aylık nakit akışı", flow_income: "Gelir", flow_expenses: "Gider", flow_net: "Aylık net",
+    flow_title: "Aylık nakit akışı", flow_income: "Gelir", flow_expenses: "Gider", flow_net: "Aylık net", flow_last_month: "Geçen ay: {x}",
     flow_savings_note: "Takip ettiğin harcamaları kısarsan ayda +{x} daha.",
     cat_cash: "Nakit", cat_investment: "Yatırım",
     asset_stocks: "Hisse", asset_usstock: "ABD Hisse", asset_bist: "Türk Hisse (BIST)", asset_crypto: "Kripto", asset_deposit: "Mevduat", asset_bonds: "Tahvil", asset_realestate: "Gayrimenkul", asset_gold: "Altın", asset_usd: "Dolar (USD)", asset_cash: "Nakit",
@@ -434,6 +434,7 @@ const el = {
   flowNet: document.getElementById("flowNet"),
   flowNetRow: document.getElementById("flowNetRow"),
   flowSavings: document.getElementById("flowSavings"),
+  flowLastMonth: document.getElementById("flowLastMonth"),
   // income view
   incList: document.getElementById("incList"),
   addIncome: document.getElementById("addIncome"),
@@ -1621,6 +1622,10 @@ function refreshPortfolio() {
   const net = income - exp;
   el.flowIncome.textContent = formatMoney(income);
   el.flowExpenses.textContent = "−" + formatMoney(exp);
+  // last month's total expense (from the Expenses history), shown as a small note
+  const lastMonth = (state.expenses.history || [])[0];
+  el.flowLastMonth.hidden = !lastMonth;
+  if (lastMonth) el.flowLastMonth.textContent = t("flow_last_month", { x: formatMoney(lastMonth.total) });
   el.flowNet.textContent = formatMoney(net);
   el.flowNetRow.classList.toggle("is-pos", net >= 0);
   el.flowNetRow.classList.toggle("is-neg", net < 0);
