@@ -93,7 +93,7 @@ body {
 /* Only the Liquid Glass theme shows the money rain */
 [data-theme="xp"] .money-rain,
 [data-theme="medieval"] .money-rain,
-[data-theme="vaporwave"] .money-rain { display: none; }
+[data-theme="neon"] .money-rain { display: none; }
 
 /* ---------- Layout shell ---------- */
 .shell {
@@ -991,7 +991,7 @@ body {
 .theme-swatch--xp { background: linear-gradient(180deg, #3a6ea5 0%, #7cb0e0 48%, #8ec64f 52%, #5ba32f 100%); }
 .theme-swatch--medieval { background: linear-gradient(135deg, #2a1d10 0%, #b8893a 55%, #e8dcc0 100%); }
 .theme-swatch--doge { background: linear-gradient(135deg, #e3c79a 0%, #f5b400 38%, #e84d8a 68%, #3aa0ff 100%); }
-.theme-swatch--vaporwave { background: linear-gradient(135deg, #2bf0ff 0%, #c34dff 50%, #ff3ca0 100%); }
+.theme-swatch--neon { background: linear-gradient(135deg, #2bf0ff 0%, #c34dff 50%, #ff3ca0 100%); }
 .theme-swatch--solana { background: linear-gradient(135deg, #9945ff 0%, #14f195 100%); }
 
 /* ============================================================
@@ -1227,65 +1227,59 @@ body {
 [data-theme="doge"] .toast { background: #fffdf3; color: #3a2e16; border: 2px solid #f3b94d; }
 
 /* ============================================================
-   THEME: Vaporwave (A E S T H E T I C)
+   THEME: Neon (A E S T H E T I C)
    ============================================================ */
-[data-theme="vaporwave"] {
+[data-theme="neon"] {
   --text: #f3e9ff; --text-dim: #cdb8e8; --text-faint: #9a86c0;
   --accent: #ff3ca0; --accent-2: #2bf0ff; --good: #2bffb0; --warn: #ffd166;
   --glass-bg: rgba(40, 16, 66, 0.55); --glass-bg-strong: rgba(50, 20, 80, 0.7);
   --glass-border: rgba(255, 60, 214, 0.5); --glass-border-soft: rgba(43, 240, 255, 0.28);
   --shadow: 0 0 28px rgba(255, 60, 214, 0.35);
 }
-[data-theme="vaporwave"] body { color: var(--text); }
-[data-theme="vaporwave"] .bg {
-  background: linear-gradient(180deg, #1a0b2e 0%, #46115f 26%, #8a1f7a 42%, #ff5fa2 51%, #2a0f45 54%, #160826 100%);
+[data-theme="neon"] body { color: var(--text); }
+[data-theme="neon"] .bg {
+  background: #160826 url("themes/Neon/neon2.jpg") center center / cover no-repeat;
 }
-[data-theme="vaporwave"] .blob-3, [data-theme="vaporwave"] .blob-4 { display: none; }
-[data-theme="vaporwave"] .blob-1 {
-  display: block; width: 300px; height: 300px; left: 50%; top: 7%; transform: translateX(-50%);
-  background: linear-gradient(180deg, #ffe07a 0%, #ff77d4 55%, #c34dff 100%);
-  border-radius: 50%; filter: none; opacity: 0.92; animation: none;
-  box-shadow: 0 0 80px rgba(255, 119, 212, 0.6);
+/* Dark wash so the glass cards stay readable over the photo */
+[data-theme="neon"] .bg::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(22, 8, 38, 0.5) 0%, rgba(22, 8, 38, 0.28) 42%, rgba(22, 8, 38, 0.62) 100%);
 }
-[data-theme="vaporwave"] .blob-2 {
-  display: block; width: 300%; height: 60%; left: -100%; bottom: -2%; top: auto; right: auto;
-  background:
-    repeating-linear-gradient(90deg, transparent 0 56px, rgba(43, 240, 255, 0.6) 56px 58px),
-    repeating-linear-gradient(0deg, transparent 0 56px, rgba(43, 240, 255, 0.6) 56px 58px);
-  transform: perspective(280px) rotateX(74deg); transform-origin: bottom center;
-  filter: none; opacity: 0.4; border-radius: 0; animation: none;
-}
-[data-theme="vaporwave"] .glass, [data-theme="vaporwave"] .card {
+[data-theme="neon"] .blob-1, [data-theme="neon"] .blob-2,
+[data-theme="neon"] .blob-3, [data-theme="neon"] .blob-4 { display: none; }
+[data-theme="neon"] .glass, [data-theme="neon"] .card {
   background: rgba(36, 14, 58, 0.55);
   border: 1px solid rgba(255, 60, 214, 0.55);
   box-shadow: 0 0 22px rgba(255, 60, 214, 0.28), inset 0 0 0 1px rgba(43, 240, 255, 0.2);
   color: var(--text);
 }
-[data-theme="vaporwave"] .card-accent { background: linear-gradient(90deg, #2bf0ff, #ff3ca0); opacity: 1; }
-[data-theme="vaporwave"] .logo-word, [data-theme="vaporwave"] .view-title {
+[data-theme="neon"] .card-accent { background: linear-gradient(90deg, #2bf0ff, #ff3ca0); opacity: 1; }
+[data-theme="neon"] .logo-word, [data-theme="neon"] .view-title {
   -webkit-text-fill-color: initial; background: none; color: #fff;
   text-shadow: 0 0 10px #ff3ca0, 0 0 22px #2bf0ff; letter-spacing: 0.06em;
 }
-[data-theme="vaporwave"] .headline { background: linear-gradient(135deg, rgba(255, 60, 214, 0.18), rgba(43, 240, 255, 0.12)) !important; }
-[data-theme="vaporwave"] .headline-tag { color: #2bf0ff; text-shadow: 0 0 8px rgba(43, 240, 255, 0.6); }
-[data-theme="vaporwave"] .headline-amount { color: #fff; text-shadow: 0 0 14px #ff3ca0; -webkit-text-fill-color: initial; }
-[data-theme="vaporwave"] .section-head h2 { color: #ff8fde; }
-[data-theme="vaporwave"] .money-input, [data-theme="vaporwave"] .rate-input, [data-theme="vaporwave"] .proj-card,
-[data-theme="vaporwave"] .re-calc, [data-theme="vaporwave"] .opt, [data-theme="vaporwave"] .invest-pick select {
+[data-theme="neon"] .headline { background: linear-gradient(135deg, rgba(255, 60, 214, 0.18), rgba(43, 240, 255, 0.12)) !important; }
+[data-theme="neon"] .headline-tag { color: #2bf0ff; text-shadow: 0 0 8px rgba(43, 240, 255, 0.6); }
+[data-theme="neon"] .headline-amount { color: #fff; text-shadow: 0 0 14px #ff3ca0; -webkit-text-fill-color: initial; }
+[data-theme="neon"] .section-head h2 { color: #ff8fde; }
+[data-theme="neon"] .money-input, [data-theme="neon"] .rate-input, [data-theme="neon"] .proj-card,
+[data-theme="neon"] .re-calc, [data-theme="neon"] .opt, [data-theme="neon"] .invest-pick select {
   background: rgba(20, 8, 40, 0.55); border: 1px solid rgba(43, 240, 255, 0.4);
 }
-[data-theme="vaporwave"] .rule-link, [data-theme="vaporwave"] .add-cat {
+[data-theme="neon"] .rule-link, [data-theme="neon"] .add-cat {
   background: linear-gradient(135deg, #ff3ca0, #c34dff); border: 1px solid #2bf0ff; color: #fff;
   box-shadow: 0 0 16px rgba(255, 60, 214, 0.5);
 }
-[data-theme="vaporwave"] .toggle-pill { background: linear-gradient(135deg, #ff3ca0, #2bf0ff); box-shadow: 0 0 12px rgba(255, 60, 214, 0.5); }
-[data-theme="vaporwave"] .tabbar {
+[data-theme="neon"] .toggle-pill { background: linear-gradient(135deg, #ff3ca0, #2bf0ff); box-shadow: 0 0 12px rgba(255, 60, 214, 0.5); }
+[data-theme="neon"] .tabbar {
   background: rgba(26, 11, 46, 0.75); border: 1px solid rgba(255, 60, 214, 0.5);
   box-shadow: 0 0 26px rgba(255, 60, 214, 0.35), inset 0 0 0 1px rgba(43, 240, 255, 0.2);
 }
-[data-theme="vaporwave"] .tab { color: #cdb8e8; }
-[data-theme="vaporwave"] .tab.is-active { color: #fff; background: linear-gradient(135deg, rgba(255, 60, 214, 0.4), rgba(43, 240, 255, 0.3)); box-shadow: 0 0 14px rgba(255, 60, 214, 0.5); }
-[data-theme="vaporwave"] .toast { background: rgba(26, 11, 46, 0.92); color: #fff; border: 1px solid #ff3ca0; }
+[data-theme="neon"] .tab { color: #cdb8e8; }
+[data-theme="neon"] .tab.is-active { color: #fff; background: linear-gradient(135deg, rgba(255, 60, 214, 0.4), rgba(43, 240, 255, 0.3)); box-shadow: 0 0 14px rgba(255, 60, 214, 0.5); }
+[data-theme="neon"] .toast { background: rgba(26, 11, 46, 0.92); color: #fff; border: 1px solid #ff3ca0; }
 
 /* ---------- Solana theme (purple #9945FF + green #14F195 on dark) ---------- */
 [data-theme="solana"] {

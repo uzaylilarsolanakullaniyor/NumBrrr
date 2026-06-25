@@ -173,7 +173,7 @@ const I18N = {
     theme_xp: "Windows XP", theme_xp_desc: "Nostalgic early-2000s Luna blue",
     theme_medieval: "Medieval", theme_medieval_desc: "Gritty 15th-century parchment & iron",
     theme_doge: "Doge", theme_doge_desc: "such wow · much finance · very meme",
-    theme_vaporwave: "Vaporwave", theme_vaporwave_desc: "80s neon dream · A E S T H E T I C",
+    theme_neon: "Neon", theme_neon_desc: "80s neon dream · A E S T H E T I C",
     theme_solana: "Solana", theme_solana_desc: "Purple & green · degen mode",
     more_soon: "More features coming soon ✨",
     nav_portfolio: "Portfolio",
@@ -288,7 +288,7 @@ const I18N = {
     theme_xp: "Windows XP", theme_xp_desc: "Nostaljik 2000'ler Luna mavisi",
     theme_medieval: "Ortaçağ", theme_medieval_desc: "Sert 15. yüzyıl parşömen ve demir",
     theme_doge: "Doge", theme_doge_desc: "çok vov · büyük para · efsane meme",
-    theme_vaporwave: "Vaporwave", theme_vaporwave_desc: "80'ler neon rüyası · A E S T H E T I C",
+    theme_neon: "Neon", theme_neon_desc: "80'ler neon rüyası · A E S T H E T I C",
     theme_solana: "Solana", theme_solana_desc: "Mor & yeşil · degen modu",
     more_soon: "Yeni özellikler yakında ✨",
     nav_portfolio: "Portföy",
@@ -2297,7 +2297,7 @@ function loadState() {
   try { s = JSON.parse(localStorage.getItem("numbr_state") || "null"); } catch (e) { return; }
   if (!s) return;
   if (s.lang && I18N[s.lang]) state.lang = s.lang;
-  if (s.theme) state.theme = s.theme;
+  if (s.theme) state.theme = s.theme === "vaporwave" ? "neon" : s.theme;
   if (s.currency && CURRENCY_META[s.currency]) state.currency = s.currency;
   if (typeof s.monthlyExpenses === "number") state.monthlyExpenses = s.monthlyExpenses;
   if (typeof s.realMode === "boolean") state.realMode = s.realMode;
@@ -2342,7 +2342,7 @@ try {
   const savedTheme = localStorage.getItem("numbr_theme");
   const savedCur = localStorage.getItem("numbr_currency");
   if (savedLang && I18N[savedLang]) state.lang = savedLang;
-  if (savedTheme) state.theme = savedTheme;
+  if (savedTheme) state.theme = savedTheme === "vaporwave" ? "neon" : savedTheme;
   if (savedCur && CURRENCY_META[savedCur]) state.currency = savedCur;
 } catch (e) {}
 loadState(); // full saved snapshot takes precedence over the legacy per-key values
