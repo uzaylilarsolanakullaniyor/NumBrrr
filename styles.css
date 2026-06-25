@@ -1238,7 +1238,7 @@ body {
 }
 [data-theme="neon"] body { color: var(--text); }
 [data-theme="neon"] .bg {
-  background: #160826 url("themes/Neon/neon2.jpg") center center / cover no-repeat;
+  background: #160826 url("Themes/Neon/neon2.jpg") center center / cover no-repeat;
 }
 /* Dark wash so the glass cards stay readable over the photo */
 [data-theme="neon"] .bg::after {
