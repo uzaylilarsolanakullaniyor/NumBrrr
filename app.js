@@ -187,7 +187,7 @@ const I18N = {
     asset_stocks: "Stocks", asset_usstock: "US Stocks", asset_bist: "Turkish (BIST)", asset_crypto: "Crypto", asset_deposit: "Deposit", asset_bonds: "Bonds", asset_realestate: "Real estate", asset_gold: "Gold", asset_usd: "US Dollar", asset_cash: "Cash",
     stock_search_ph: "Search stock (e.g. Apple)", shares_ph: "Shares",
     nav_watchlist: "Watch", watch_title: "Watchlist", watch_sub: "Search and favorite assets to track them.",
-    watch_search_ph: "Search gold, stocks, crypto…", watch_empty: "Search above and tap to add assets to your watchlist.",
+    watch_search_ph: "Search gold, stocks, crypto…", watch_empty: "Search above and tap to add assets to your watchlist.", watch_chart: "Open chart on TradingView",
     lbl_24h: "24h", lbl_1mo: "1M", lbl_1yr: "1Y",
     inc_from_portfolio: "+{x}/mo from portfolio",
     net_tax: "Net (−15% tax)", coin_search_ph: "Search coin (e.g. Solana)", qty_ph: "Qty", coin_loading: "Loading live prices…", grams_ph: "Grams", oz_ph: "Ounces",
@@ -302,7 +302,7 @@ const I18N = {
     asset_stocks: "Hisse", asset_usstock: "ABD Hisse", asset_bist: "Türk Hisse (BIST)", asset_crypto: "Kripto", asset_deposit: "Mevduat", asset_bonds: "Tahvil", asset_realestate: "Gayrimenkul", asset_gold: "Altın", asset_usd: "Dolar (USD)", asset_cash: "Nakit",
     stock_search_ph: "Hisse ara (örn. THY)", shares_ph: "Adet",
     nav_watchlist: "Takip", watch_title: "Takip Listesi", watch_sub: "Varlık ara, favorile ve takip et.",
-    watch_search_ph: "Altın, hisse, kripto ara…", watch_empty: "Yukarıdan ara ve takip listene varlık ekle.",
+    watch_search_ph: "Altın, hisse, kripto ara…", watch_empty: "Yukarıdan ara ve takip listene varlık ekle.", watch_chart: "TradingView'de grafiği aç",
     lbl_24h: "24s", lbl_1mo: "1A", lbl_1yr: "1Y",
     inc_from_portfolio: "+{x}/ay portföyden",
     net_tax: "Net (stopaj −%15)", coin_search_ph: "Coin ara (örn. Solana)", qty_ph: "Adet", coin_loading: "Canlı fiyatlar yükleniyor…", grams_ph: "Gram", oz_ph: "Ons",
@@ -1872,6 +1872,19 @@ function watchPriceLabel(w) {
   if (w.type === "gold") return sym + fmtPrice(d.price * goldFactor()) + "/" + goldUnit();
   return sym + fmtPrice(d.price);
 }
+// Map a watchlist item to a TradingView symbol and open its chart in a new tab.
+function tradingViewSymbol(w) {
+  const sym = (w.sym || w.key || "").toUpperCase().replace(/[^A-Z0-9]/g, "");
+  if (w.type === "gold") return "TVC:GOLD";
+  if (w.type === "crypto") return "BINANCE:" + sym + "USDT";
+  if (w.type === "bist") return "BIST:" + sym;
+  return sym; // US stocks: TradingView resolves the bare ticker
+}
+function openTradingView(w) {
+  const s = tradingViewSymbol(w);
+  if (!s) return;
+  window.open("https://www.tradingview.com/chart/?symbol=" + encodeURIComponent(s), "_blank", "noopener,noreferrer");
+}
 // ---- Crypto bubbles: floating, draggable physics field ----
 // One circle per watched asset, sized by 24h-move magnitude, colored by direction.
 // Bubbles drift, collide, bounce off the walls, and can be dragged/flung.
@@ -2053,6 +2066,9 @@ function buildWatchlist() {
         </div>
         <div class="watch-perf">
           ${chgHtml(t("lbl_24h"), d.chg24)}${chgHtml(t("lbl_1mo"), d.chg1mo)}${chgHtml(t("lbl_1yr"), d.chg1y)}
+          <button class="watch-chart" type="button" data-wchart="${w.type}|${w.key}" aria-label="${t("watch_chart")}" title="${t("watch_chart")}">
+            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19V5"/><path d="M4 19h16"/><path d="M8 16l3.5-4 3 3L20 8"/></svg>
+          </button>
           <button class="watch-del" type="button" data-wdel="${w.type}|${w.key}" aria-label="remove">×</button>
         </div>
       </div>
@@ -2061,6 +2077,12 @@ function buildWatchlist() {
   el.watchList.querySelectorAll("[data-wdel]").forEach((b) => b.addEventListener("click", () => {
     const idx = b.dataset.wdel.indexOf("|");
     removeWatch(b.dataset.wdel.slice(0, idx), b.dataset.wdel.slice(idx + 1));
+  }));
+  el.watchList.querySelectorAll("[data-wchart]").forEach((b) => b.addEventListener("click", () => {
+    const idx = b.dataset.wchart.indexOf("|");
+    const type = b.dataset.wchart.slice(0, idx), key = b.dataset.wchart.slice(idx + 1);
+    const w = state.watchlist.find((x) => x.type === type && x.key === key);
+    if (w) openTradingView(w);
   }));
   el.watchList.querySelectorAll("[data-wgrip]").forEach((g) => g.addEventListener("pointerdown", startWatchReorder));
 }
