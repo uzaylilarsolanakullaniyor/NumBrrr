@@ -97,10 +97,12 @@ const BIST_STOCKS = [
   { s: "BRSAN", n: "Borusan Boru" }, { s: "SMRTG", n: "Smart Güneş" }, { s: "GWIND", n: "Galata Wind" }, { s: "REEDR", n: "Reeder" },
 ];
 const WITHHOLD_PCT = 15; // approx. withholding tax (stopaj) on deposit/bond interest
-let cryptoMarkets = []; // top coins for the active currency: [{ id, symbol, name, price }]
+let cryptoMarkets = []; // top coins for the active currency: [{ id, symbol, name, price, chg24 }]
 let goldPriceGram = 0; // per-gram gold price in the active currency
+let goldChg24 = null;  // gold 24h % move
 const GRAMS_PER_OZ = 31.1034768;
 let usdTry = 0; // TRY per 1 USD (for converting stock prices to the active currency)
+let usdTryChg24 = null; // USD/TRY 24h % move
 let watchData = {}; // key -> { price, ccy, chg24, chg1mo, chg1y } for watchlist items
 
 // ============================================================
@@ -436,6 +438,7 @@ const el = {
   portList: document.getElementById("portList"),
   addHolding: document.getElementById("addHolding"),
   portTotal: document.getElementById("portTotal"),
+  port24h: document.getElementById("port24h"),
   portCcyToggle: document.getElementById("portCcyToggle"),
   portChart: document.getElementById("portChart"),
   portDonut: document.getElementById("portDonut"),
@@ -1197,10 +1200,10 @@ function wireStockRow(row, id, type) {
         search.value = item.n; dd.hidden = true;
         updateStockValue(row, id, true); // show loading
         const ys = type === "bist" ? item.s + ".IS" : item.s;
-        getStockPrice(ys).then((p) => {
+        getStockPrice(ys).then((q) => {
           const y = holdById(id);
           if (!y || y.symbol !== item.s) return;
-          if (p != null) y.nativePrice = p;
+          if (q && q.price != null) { y.nativePrice = q.price; y.chg24 = q.chg24; }
           y.value = stockValue(y);
           updateStockValue(row, id);
           refreshPortfolio(); refreshIncome();
@@ -1277,7 +1280,7 @@ function wireCryptoRow(row, id) {
         e.preventDefault();
         const c = cryptoMarkets.find((x) => x.id === b.dataset.coinId);
         const x = holdById(id);
-        x.coinId = c.id; x.coinName = c.name; x.coinSymbol = c.symbol; x.price = c.price; x.label = c.name;
+        x.coinId = c.id; x.coinName = c.name; x.coinSymbol = c.symbol; x.price = c.price; x.label = c.name; x.chg24 = c.chg24;
         x.value = (x.qty || 0) * c.price;
         search.value = c.name; dd.hidden = true;
         updateCryptoValue(row, id);
@@ -1430,35 +1433,41 @@ function makeHoldingRow(id) {
 // ---- Live crypto prices (CoinGecko, client-side; works on the deployed site) ----
 async function loadCryptoMarkets() {
   const vs = state.currency === "TL" ? "try" : "usd";
-  const key = "numbr_crypto_" + vs;
+  const key = "numbr_crypto2_" + vs;
   try { const c = JSON.parse(localStorage.getItem(key) || "null"); if (c && Date.now() - c.t < 24 * 3600 * 1000) { cryptoMarkets = c.data; return; } } catch (e) {}
   try {
-    const res = await fetch(`https://api.coingecko.com/api/v3/coins/markets?vs_currency=${vs}&order=market_cap_desc&per_page=50&page=1&sparkline=false`);
+    const res = await fetch(`https://api.coingecko.com/api/v3/coins/markets?vs_currency=${vs}&order=market_cap_desc&per_page=50&page=1&sparkline=false&price_change_percentage=24h`);
     if (!res.ok) return;
     const json = await res.json();
-    cryptoMarkets = json.map((c) => ({ id: c.id, symbol: (c.symbol || "").toUpperCase(), name: c.name, price: c.current_price }));
+    cryptoMarkets = json.map((c) => ({ id: c.id, symbol: (c.symbol || "").toUpperCase(), name: c.name, price: c.current_price, chg24: c.price_change_percentage_24h_in_currency }));
     try { localStorage.setItem(key, JSON.stringify({ t: Date.now(), data: cryptoMarkets })); } catch (e) {}
   } catch (e) { /* offline / local file:// — silently ignore, works once deployed */ }
 }
 // Live gold price (per gram) via PAX Gold (1 PAXG ≈ 1 troy oz), client-side, daily-cached.
 async function loadGoldPrice() {
   const vs = state.currency === "TL" ? "try" : "usd";
-  const key = "numbr_gold_" + vs;
-  try { const c = JSON.parse(localStorage.getItem(key) || "null"); if (c && Date.now() - c.t < 24 * 3600 * 1000) { goldPriceGram = c.v; return; } } catch (e) {}
+  const key = "numbr_gold2_" + vs;
+  try { const c = JSON.parse(localStorage.getItem(key) || "null"); if (c && Date.now() - c.t < 24 * 3600 * 1000) { goldPriceGram = c.v; goldChg24 = c.chg; return; } } catch (e) {}
   try {
-    const res = await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=pax-gold&vs_currencies=${vs}`);
+    const res = await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=pax-gold&vs_currencies=${vs}&include_24hr_change=true`);
     if (!res.ok) return;
     const j = await res.json();
-    const oz = j["pax-gold"] && j["pax-gold"][vs];
-    if (oz) { goldPriceGram = oz / GRAMS_PER_OZ; try { localStorage.setItem(key, JSON.stringify({ t: Date.now(), v: goldPriceGram })); } catch (e) {} }
+    const g = j["pax-gold"];
+    const oz = g && g[vs];
+    if (oz) {
+      goldPriceGram = oz / GRAMS_PER_OZ;
+      goldChg24 = (g && typeof g[vs + "_24h_change"] === "number") ? g[vs + "_24h_change"] : null;
+      try { localStorage.setItem(key, JSON.stringify({ t: Date.now(), v: goldPriceGram, chg: goldChg24 })); } catch (e) {}
+    }
   } catch (e) { /* offline / local — works once deployed */ }
 }
 // Live stock price via Yahoo Finance (through a CORS proxy; works on the deployed site).
+// Returns { price, chg24 } (chg24 may be null) or null on failure.
 async function fetchYahoo(symbol) {
   // 1) Same-origin serverless function — reliable on the deployed (Vercel) site.
   try {
     const r = await fetch(`/api/quote?symbol=${encodeURIComponent(symbol)}`);
-    if (r.ok) { const j = await r.json(); if (typeof j.price === "number") return j.price; }
+    if (r.ok) { const j = await r.json(); if (typeof j.price === "number") return { price: j.price, chg24: typeof j.chg24 === "number" ? j.chg24 : null }; }
   } catch (e) { /* not deployed / local — fall back to public proxies */ }
   // 2) Public CORS proxies (fallback, mainly for local preview).
   const y = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}?interval=1d&range=1d`;
@@ -1468,8 +1477,8 @@ async function fetchYahoo(symbol) {
       const res = await fetch(url);
       if (!res.ok) continue;
       const j = await res.json();
-      const m = j && j.chart && j.chart.result && j.chart.result[0] && j.chart.result[0].meta;
-      if (m && typeof m.regularMarketPrice === "number") return m.regularMarketPrice;
+      const parsed = parseYahooChart(j);
+      if (parsed && parsed.price != null) return { price: parsed.price, chg24: typeof parsed.chg24 === "number" ? parsed.chg24 : null };
     } catch (e) { /* try next proxy */ }
   }
   return null;
@@ -1499,18 +1508,19 @@ async function fetchStockData(symbol) {
   }
   return null;
 }
+// Returns { price, chg24 } (chg24 may be null) or null.
 async function getStockPrice(yahooSymbol) {
-  const key = "numbr_stk_" + yahooSymbol;
-  try { const c = JSON.parse(localStorage.getItem(key) || "null"); if (c && Date.now() - c.t < 24 * 3600 * 1000) return c.v; } catch (e) {}
+  const key = "numbr_stk2_" + yahooSymbol;
+  try { const c = JSON.parse(localStorage.getItem(key) || "null"); if (c && Date.now() - c.t < 24 * 3600 * 1000) return { price: c.price, chg24: c.chg24 }; } catch (e) {}
   const v = await fetchYahoo(yahooSymbol);
-  if (v != null) { try { localStorage.setItem(key, JSON.stringify({ t: Date.now(), v })); } catch (e) {} }
-  return v;
+  if (v && v.price != null) { try { localStorage.setItem(key, JSON.stringify({ t: Date.now(), price: v.price, chg24: v.chg24 })); } catch (e) {} return v; }
+  return null;
 }
 async function loadUsdTry() {
-  const key = "numbr_usdtry";
-  try { const c = JSON.parse(localStorage.getItem(key) || "null"); if (c && Date.now() - c.t < 24 * 3600 * 1000) { usdTry = c.v; return; } } catch (e) {}
+  const key = "numbr_usdtry2";
+  try { const c = JSON.parse(localStorage.getItem(key) || "null"); if (c && Date.now() - c.t < 24 * 3600 * 1000) { usdTry = c.v; usdTryChg24 = c.chg; return; } } catch (e) {}
   const v = await fetchYahoo("TRY=X");
-  if (v) { usdTry = v; try { localStorage.setItem(key, JSON.stringify({ t: Date.now(), v })); } catch (e) {} }
+  if (v && v.price) { usdTry = v.price; usdTryChg24 = v.chg24; try { localStorage.setItem(key, JSON.stringify({ t: Date.now(), v: usdTry, chg: usdTryChg24 })); } catch (e) {} }
 }
 // Convert a stock's native-currency value into the app's active currency.
 function stockValue(h) {
@@ -1530,16 +1540,19 @@ async function refreshCryptoPrices() {
   for (const h of state.portfolio.holdings) {
     if (h.assetType === "crypto" && h.coinId) {
       const m = cryptoMarkets.find((x) => x.id === h.coinId);
-      if (m) { h.price = m.price; h.value = (h.qty || 0) * m.price; }
+      if (m) { h.price = m.price; h.value = (h.qty || 0) * m.price; h.chg24 = m.chg24; }
     } else if (h.assetType === "gold" && goldPriceGram > 0) {
       h.price = goldPriceGram;
       h.value = (h.grams || 0) * goldPriceGram;
+      h.chg24 = goldChg24;
     } else if (h.assetType === "usd") {
       h.value = usdHoldingValue(h.usd || 0);
+      // In TL the $ holding moves with USD/TRY; in USD mode it's just cash (flat).
+      h.chg24 = state.currency === "TL" ? usdTryChg24 : 0;
     } else if ((h.assetType === "usstock" || h.assetType === "bist") && h.symbol) {
       const ys = h.assetType === "bist" ? h.symbol + ".IS" : h.symbol;
-      const p = await getStockPrice(ys);
-      if (p != null) h.nativePrice = p;
+      const q = await getStockPrice(ys);
+      if (q && q.price != null) { h.nativePrice = q.price; h.chg24 = q.chg24; }
       h.value = stockValue(h);
     }
   }
@@ -1614,6 +1627,33 @@ function renderPortTotal(totalNative) {
   if (isTL) el.portCcyToggle.textContent = state.portTotalUSD ? "₺ TL" : "$ USD";
 }
 
+// 24h portfolio move: sum the last-24h delta of holdings that have a known % move
+// (crypto/gold/stocks/USD). Cash, deposits and bonds are flat, so they add 0.
+// Shown small next to the total. Hidden when no priced asset has 24h data.
+function renderPort24h(totalNative) {
+  if (!el.port24h) return;
+  let abs = 0; // 24h change in the app's native currency
+  let hasData = false;
+  for (const h of state.portfolio.holdings) {
+    const c = h.chg24;
+    if (typeof c === "number" && isFinite(c) && c > -100 && h.value) {
+      abs += h.value - h.value / (1 + c / 100);
+      hasData = true;
+    }
+  }
+  if (!hasData || totalNative <= 0) { el.port24h.hidden = true; el.port24h.textContent = ""; return; }
+  const prev = totalNative - abs;
+  const pct = prev > 0 ? (abs / prev) * 100 : 0;
+  const up = abs >= 0;
+  const showUSD = state.currency === "TL" && state.portTotalUSD && usdTry > 0;
+  const money = Math.abs(showUSD ? abs / usdTry : abs);
+  const sign = up ? "+" : "−";
+  const moneyTxt = showUSD ? formatMoneyCcy(money, "USD") : formatMoney(money);
+  el.port24h.hidden = false;
+  el.port24h.className = "port-24h " + (up ? "is-pos" : "is-neg");
+  el.port24h.innerHTML = `${sign}${Math.abs(pct).toFixed(1)}% <span class="port-24h-amt">${sign}${moneyTxt}</span> <span class="port-24h-lbl">${t("lbl_24h")}</span>`;
+}
+
 function refreshPortfolio() {
   saveState();
   const meta = CURRENCY_META[state.currency];
@@ -1639,6 +1679,7 @@ function refreshPortfolio() {
   // --- Holdings total + donut (categorized Cash / Investment) ---
   const total = state.portfolio.holdings.reduce((sum, h) => sum + (h.value || 0), 0);
   renderPortTotal(total);
+  renderPort24h(total);
 
   const segs = state.portfolio.holdings.filter((h) => h.value > 0);
   if (!segs.length) {
