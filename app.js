@@ -1915,8 +1915,11 @@ function openTradingView(w) {
   if (!s) return;
   const modal = document.getElementById("tvModal");
   const frame = document.getElementById("tvFrame");
-  if (!modal || !frame) {
-    window.open("https://www.tradingview.com/chart/?symbol=" + encodeURIComponent(s), "_blank", "noopener,noreferrer");
+  const fullUrl = "https://www.tradingview.com/chart/?symbol=" + encodeURIComponent(s);
+  // The free embedded widget has no Borsa İstanbul data (it errors out and falls
+  // back to a default chart), so BIST symbols open on TradingView in a new tab.
+  if (!modal || !frame || w.type === "bist") {
+    window.open(fullUrl, "_blank", "noopener,noreferrer");
     return;
   }
   const dark = !["xp", "doge", "medieval"].includes(state.theme);
@@ -1925,9 +1928,10 @@ function openTradingView(w) {
     encodeURIComponent(s) + "&interval=D&hidesidetoolbar=0&symboledit=0&saveimage=0&toolbarbg=rgba(0,0,0,0)" +
     "&studies=[]&theme=" + (dark ? "dark" : "light") + "&style=1&timezone=Etc/UTC&withdateranges=1&hideideas=1&locale=" + locale;
   const title = document.getElementById("tvTitle");
-  if (title) title.textContent = w.name + (w.sym ? " · " + String(w.sym).toUpperCase() : "");
+  const sym = w.sym ? String(w.sym).toUpperCase() : "";
+  if (title) title.textContent = [w.name, sym].filter(Boolean).join(" · ");
   const openLink = document.getElementById("tvOpen");
-  if (openLink) openLink.href = "https://www.tradingview.com/chart/?symbol=" + encodeURIComponent(s);
+  if (openLink) openLink.href = fullUrl;
   modal.hidden = false;
 }
 function closeChartModal() {
@@ -2306,7 +2310,8 @@ function renderTopPerformers() {
   }).join("");
   listEl.querySelectorAll("[data-tv]").forEach((b) => b.addEventListener("click", () => {
     const p = b.dataset.tv.split("|");
-    openTradingView({ type: p[0], key: p[1], sym: p[2] });
+    const item = (topPerfData || []).find((c) => c.type === p[0] && c.key === p[1]);
+    openTradingView({ type: p[0], key: p[1], sym: p[2], name: item ? item.name : p[2] });
   }));
 }
 function wireWatchSearch() {
