@@ -96,6 +96,12 @@ const BIST_STOCKS = [
   { s: "ULKER", n: "Ülker" }, { s: "TAVHL", n: "TAV Havalimanları" }, { s: "EKGYO", n: "Emlak Konut GYO" }, { s: "ASTOR", n: "Astor Enerji" },
   { s: "BRSAN", n: "Borusan Boru" }, { s: "SMRTG", n: "Smart Güneş" }, { s: "GWIND", n: "Galata Wind" }, { s: "REEDR", n: "Reeder" },
 ];
+// BIST 30 (XU030) constituents — used for the 1-year performance leaderboard in TR.
+const BIST30 = [
+  "AKBNK", "GARAN", "ISCTR", "YKBNK", "VAKBN", "THYAO", "PGSUS", "BIMAS", "MGROS", "ASELS",
+  "KCHOL", "SAHOL", "EREGL", "KRDMD", "SISE", "TUPRS", "PETKM", "SASA", "FROTO", "TOASO",
+  "ARCLK", "TCELL", "TTKOM", "ENKAI", "ALARK", "KOZAL", "GUBRF", "HEKTS", "OYAKC", "ASTOR",
+];
 const WITHHOLD_PCT = 15; // approx. withholding tax (stopaj) on deposit/bond interest
 let cryptoMarkets = []; // top coins for the active currency: [{ id, symbol, name, price, chg24 }]
 let goldPriceGram = 0; // per-gram gold price in the active currency
@@ -2145,7 +2151,7 @@ async function refreshWatchData() {
 }
 
 // ---- Best 1-year performers (fixed pool: top-10 crypto, top-10 US stocks, gold,
-// silver, and top-10 BIST when on TL). Ranked by 1y return, best 10 shown. ----
+// silver, and the BIST 30 when on TL). Ranked by 1y return, best 10 shown. ----
 let topPerfData = null;      // ranked list currently shown
 let topPerfBuiltFor = null;  // currency it was built for (rebuild on change)
 async function getStock1y(ysym) {
@@ -2195,7 +2201,11 @@ async function buildTopPerformers() {
   US_STOCKS.slice(0, 10).forEach((s) => jobs.push({ type: "usstock", key: s.s, sym: s.s, name: s.n, ysym: s.s, ccy: "USD" }));
   jobs.push({ type: "gold", key: "gold", sym: "XAU", name: t("asset_gold"), ysym: "GC=F", ccy: "USD" });
   jobs.push({ type: "silver", key: "silver", sym: "XAG", name: t("asset_silver"), ysym: "SI=F", ccy: "USD" });
-  if (isTL) BIST_STOCKS.slice(0, 10).forEach((s) => jobs.push({ type: "bist", key: s.s, sym: s.s, name: s.n, ysym: s.s + ".IS", ccy: "TRY" }));
+  if (isTL) {
+    const bistName = {};
+    BIST_STOCKS.forEach((s) => (bistName[s.s] = s.n));
+    BIST30.forEach((sym) => jobs.push({ type: "bist", key: sym, sym, name: bistName[sym] || sym, ysym: sym + ".IS", ccy: "TRY" }));
+  }
 
   // Per-job timeout so one stuck quote can't hang the whole leaderboard.
   const withTimeout = (p, ms) => Promise.race([p, new Promise((res) => setTimeout(() => res(null), ms))]);
