@@ -382,6 +382,21 @@
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
+  <!-- ============ TRADINGVIEW CHART POPUP ============ -->
+  <div class="tv-modal" id="tvModal" hidden>
+    <div class="tv-backdrop" id="tvBackdrop"></div>
+    <div class="tv-card glass" role="dialog" aria-modal="true" aria-label="Chart">
+      <div class="tv-head">
+        <span class="tv-title" id="tvTitle"></span>
+        <button class="tv-close" id="tvClose" type="button" aria-label="close">×</button>
+      </div>
+      <div class="tv-frame-wrap">
+        <iframe id="tvFrame" class="tv-frame" title="TradingView chart" frameborder="0" allowtransparency="true" scrolling="no" loading="lazy"></iframe>
+      </div>
+      <a class="tv-open" id="tvOpen" target="_blank" rel="noopener noreferrer" data-i18n="watch_chart_full">Open full chart on TradingView ↗</a>
+    </div>
+  </div>
+
   <!-- ============ FIRST-RUN ONBOARDING (shown once) ============ -->
   <div class="onboard" id="onboard" hidden>
     <div class="onboard-card glass">

@@ -982,6 +982,48 @@ body {
 }
 .toast.show { opacity: 1; transform: translate(-50%, 0); }
 
+/* ---------- TradingView chart popup ---------- */
+.tv-modal {
+  position: fixed; inset: 0; z-index: 200;
+  display: flex; align-items: center; justify-content: center;
+  padding: 16px;
+}
+.tv-modal[hidden] { display: none; }
+.tv-backdrop {
+  position: absolute; inset: 0;
+  background: rgba(6, 9, 24, 0.62);
+  -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
+  animation: tv-fade 0.2s ease;
+}
+.tv-card {
+  position: relative;
+  width: min(680px, 100%);
+  height: min(560px, 82vh);
+  display: flex; flex-direction: column;
+  padding: 14px 14px 10px;
+  border-radius: 20px;
+  animation: tv-pop 0.24s cubic-bezier(0.34, 1.4, 0.64, 1);
+}
+.tv-head { display: flex; align-items: center; gap: 10px; padding: 2px 4px 10px; }
+.tv-title { flex: 1; min-width: 0; font-size: 15px; font-weight: 700; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tv-close {
+  flex: none; width: 30px; height: 30px; border-radius: 9px;
+  border: 1px solid var(--glass-border-soft); background: rgba(255, 255, 255, 0.05);
+  color: var(--text-dim); font-size: 18px; line-height: 1; cursor: pointer;
+  transition: color 0.18s ease, background 0.18s ease, border-color 0.18s ease;
+}
+.tv-close:hover { color: #ff8a8a; border-color: rgba(255, 120, 120, 0.5); background: rgba(255, 120, 120, 0.12); }
+.tv-frame-wrap { flex: 1; min-height: 0; border-radius: 12px; overflow: hidden; background: rgba(0, 0, 0, 0.25); }
+.tv-frame { width: 100%; height: 100%; display: block; border: 0; }
+.tv-open {
+  display: block; text-align: center; margin-top: 8px; padding: 4px;
+  font-size: 12.5px; font-weight: 600; color: var(--text-faint); text-decoration: none;
+  transition: color 0.18s ease;
+}
+.tv-open:hover { color: var(--accent-2); }
+@keyframes tv-fade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes tv-pop { from { opacity: 0; transform: scale(0.94); } to { opacity: 1; transform: scale(1); } }
+
 /* ---------- Responsive ---------- */
 @media (max-width: 620px) {
   .shell { padding: 22px 14px calc(108px + env(safe-area-inset-bottom)); gap: 16px; }
