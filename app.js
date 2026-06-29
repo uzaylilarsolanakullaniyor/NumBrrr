@@ -1908,10 +1908,34 @@ function tradingViewSymbol(w) {
   if (w.type === "bist") return "BIST:" + sym;
   return sym; // US stocks: TradingView resolves the bare ticker
 }
+// Open the chart inside the app as a popup with an embedded TradingView widget,
+// instead of leaving the site for a new tab.
 function openTradingView(w) {
   const s = tradingViewSymbol(w);
   if (!s) return;
-  window.open("https://www.tradingview.com/chart/?symbol=" + encodeURIComponent(s), "_blank", "noopener,noreferrer");
+  const modal = document.getElementById("tvModal");
+  const frame = document.getElementById("tvFrame");
+  if (!modal || !frame) {
+    window.open("https://www.tradingview.com/chart/?symbol=" + encodeURIComponent(s), "_blank", "noopener,noreferrer");
+    return;
+  }
+  const dark = !["xp", "doge", "medieval"].includes(state.theme);
+  const locale = state.lang === "tr" ? "tr" : "en";
+  frame.src = "https://s.tradingview.com/widgetembed/?frameElementId=tvFrame&symbol=" +
+    encodeURIComponent(s) + "&interval=D&hidesidetoolbar=0&symboledit=0&saveimage=0&toolbarbg=rgba(0,0,0,0)" +
+    "&studies=[]&theme=" + (dark ? "dark" : "light") + "&style=1&timezone=Etc/UTC&withdateranges=1&hideideas=1&locale=" + locale;
+  const title = document.getElementById("tvTitle");
+  if (title) title.textContent = w.name + (w.sym ? " · " + String(w.sym).toUpperCase() : "");
+  const openLink = document.getElementById("tvOpen");
+  if (openLink) openLink.href = "https://www.tradingview.com/chart/?symbol=" + encodeURIComponent(s);
+  modal.hidden = false;
+}
+function closeChartModal() {
+  const modal = document.getElementById("tvModal");
+  if (!modal || modal.hidden) return;
+  modal.hidden = true;
+  const frame = document.getElementById("tvFrame");
+  if (frame) frame.src = "about:blank"; // stop the embedded chart when closed
 }
 // ---- Crypto bubbles: floating, draggable physics field ----
 // One circle per watched asset, sized by 24h-move magnitude, colored by direction.
@@ -2099,11 +2123,13 @@ function buildWatchlist() {
         </div>
         <div class="watch-perf">
           ${chgHtml(t("lbl_24h"), d.chg24)}${chgHtml(t("lbl_1mo"), d.chg1mo)}${chgHtml(t("lbl_1yr"), d.chg1y)}
-          ${ccyBtn}
-          <button class="watch-chart" type="button" data-wchart="${w.type}|${w.key}" aria-label="${t("watch_chart")}" title="${t("watch_chart")}">
-            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19V5"/><path d="M4 19h16"/><path d="M8 16l3.5-4 3 3L20 8"/></svg>
-          </button>
-          <button class="watch-del" type="button" data-wdel="${w.type}|${w.key}" aria-label="remove">×</button>
+          <div class="watch-actions">
+            ${ccyBtn}
+            <button class="watch-chart" type="button" data-wchart="${w.type}|${w.key}" aria-label="${t("watch_chart")}" title="${t("watch_chart")}">
+              <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19V5"/><path d="M4 19h16"/><path d="M8 16l3.5-4 3 3L20 8"/></svg>
+            </button>
+            <button class="watch-del" type="button" data-wdel="${w.type}|${w.key}" aria-label="remove">×</button>
+          </div>
         </div>
       </div>
     </div>`;
@@ -2381,6 +2407,13 @@ function dismissGuide() {
 }
 document.getElementById("guideClose").addEventListener("click", dismissGuide);
 document.getElementById("guideStart").addEventListener("click", dismissGuide);
+
+// Chart popup close handlers (button, backdrop, Escape).
+const tvCloseBtn = document.getElementById("tvClose");
+const tvBackdrop = document.getElementById("tvBackdrop");
+if (tvCloseBtn) tvCloseBtn.addEventListener("click", closeChartModal);
+if (tvBackdrop) tvBackdrop.addEventListener("click", closeChartModal);
+document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeChartModal(); });
 
 // ---- Sound effects (Web Audio, synthesized; respects the Sound setting) ----
 let audioCtx = null;

@@ -799,8 +799,9 @@ body {
 .perf-chip .perf-lbl { color: var(--text-faint); margin-right: 2px; }
 .perf-chip.up { color: var(--good); border-color: color-mix(in srgb, var(--good) 40%, transparent); background: color-mix(in srgb, var(--good) 12%, transparent); }
 .perf-chip.down { color: #ff6b6b; border-color: rgba(255, 107, 107, 0.4); background: rgba(255, 107, 107, 0.1); }
+.watch-actions { margin-left: auto; display: inline-flex; align-items: center; gap: 7px; }
 .watch-ccy {
-  margin-left: auto; min-width: 30px; height: 26px; padding: 0 7px; border-radius: 8px; flex: none;
+  min-width: 30px; height: 26px; padding: 0 7px; border-radius: 8px; flex: none;
   display: inline-flex; align-items: center; justify-content: center;
   border: 1px solid var(--glass-border-soft); background: transparent; color: var(--text-dim);
   font: inherit; font-size: 13px; font-weight: 800; cursor: pointer;
@@ -812,7 +813,7 @@ body {
   background: color-mix(in srgb, var(--accent-2) 12%, transparent);
 }
 .watch-chart {
-  margin-left: auto; width: 26px; height: 26px; border-radius: 8px; flex: none;
+  width: 26px; height: 26px; border-radius: 8px; flex: none;
   display: inline-flex; align-items: center; justify-content: center;
   border: 1px solid var(--glass-border-soft); background: transparent; color: var(--text-dim);
   cursor: pointer; transition: color 0.18s ease, border-color 0.18s ease, background 0.18s ease;
