@@ -2028,7 +2028,7 @@ function tradingViewSymbol(w) {
   if (w.type === "gold" || w.type === "goldoz") return "TVC:GOLD";
   if (w.type === "silver") return "TVC:SILVER";
   if (w.type === "index") return "TVC:" + sym; // TVC:SPX / TVC:NDX / TVC:DJI
-  if (w.type === "crypto") return "BINANCE:" + sym + "USDT";
+  if (w.type === "crypto") return "CRYPTO:" + sym + "USD"; // TradingView's aggregated index — far broader than a single exchange's USDT pairs
   if (w.type === "bist") return "BIST:" + sym;
   return sym; // US stocks: TradingView resolves the bare ticker
 }
