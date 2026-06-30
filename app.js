@@ -293,7 +293,7 @@ const I18N = {
     flow_title: "Monthly cash flow", flow_income: "Income", flow_expenses: "Expenses", flow_net: "Net / month", flow_last_month: "Last month: {x}",
     flow_savings_note: "+{x}/month more if you cut your tracked spending.",
     cat_cash: "Cash", cat_investment: "Investment",
-    asset_stocks: "Stocks", asset_usstock: "US Stocks", asset_bist: "Turkish (BIST)", asset_crypto: "Crypto", asset_deposit: "Deposit", asset_bonds: "Bonds", asset_realestate: "Real estate", asset_gold: "Gold", asset_usd: "US Dollar", asset_cash: "Cash",
+    asset_stocks: "Stocks", asset_usstock: "US Stocks", asset_bist: "Turkish (BIST)", asset_crypto: "Crypto", asset_deposit: "Deposit", asset_bonds: "Bonds", asset_realestate: "Real estate", asset_gold: "Gold", asset_gold_oz: "Gold (oz)", asset_usd: "US Dollar", asset_cash: "Cash",
     stock_search_ph: "Search stock (e.g. Apple)", shares_ph: "Shares",
     nav_watchlist: "Watch", watch_title: "Watchlist", watch_sub: "Search and favorite assets to track them.",
     watch_search_ph: "Search gold, stocks, crypto…", watch_empty: "Search above and tap to add assets to your watchlist.", watch_chart: "Open chart on TradingView",
@@ -412,7 +412,7 @@ const I18N = {
     flow_title: "Aylık nakit akışı", flow_income: "Gelir", flow_expenses: "Gider", flow_net: "Aylık net", flow_last_month: "Geçen ay: {x}",
     flow_savings_note: "Takip ettiğin harcamaları kısarsan ayda +{x} daha.",
     cat_cash: "Nakit", cat_investment: "Yatırım",
-    asset_stocks: "Hisse", asset_usstock: "ABD Hisse", asset_bist: "Türk Hisse (BIST)", asset_crypto: "Kripto", asset_deposit: "Mevduat", asset_bonds: "Tahvil", asset_realestate: "Gayrimenkul", asset_gold: "Altın", asset_usd: "Dolar (USD)", asset_cash: "Nakit",
+    asset_stocks: "Hisse", asset_usstock: "ABD Hisse", asset_bist: "Türk Hisse (BIST)", asset_crypto: "Kripto", asset_deposit: "Mevduat", asset_bonds: "Tahvil", asset_realestate: "Gayrimenkul", asset_gold: "Altın", asset_gold_oz: "Ons Altın", asset_usd: "Dolar (USD)", asset_cash: "Nakit",
     stock_search_ph: "Hisse ara (örn. THY)", shares_ph: "Adet",
     nav_watchlist: "Takip", watch_title: "Takip Listesi", watch_sub: "Varlık ara, favorile ve takip et.",
     watch_search_ph: "Altın, hisse, kripto ara…", watch_empty: "Yukarıdan ara ve takip listene varlık ekle.", watch_chart: "TradingView'de grafiği aç",
@@ -1961,7 +1961,10 @@ function refreshIncome() {
 //  Watchlist
 // ============================================================
 function watchSearchPool() {
-  const pool = [{ type: "gold", key: "gold", name: t("asset_gold"), sym: "XAU", tag: t("asset_gold") }];
+  const pool = [
+    { type: "gold", key: "gold", name: t("asset_gold"), sym: "XAU", tag: t("asset_gold") },
+    { type: "goldoz", key: "goldoz", name: t("asset_gold_oz"), sym: "XAU", tag: t("asset_gold") },
+  ];
   US_STOCKS.forEach((s) => pool.push({ type: "usstock", key: s.s, name: s.n, sym: s.s, tag: t("asset_usstock") }));
   BIST_STOCKS.forEach((s) => pool.push({ type: "bist", key: s.s, name: s.n, sym: s.s, tag: t("asset_bist") }));
   cryptoMarkets.forEach((c) => pool.push({ type: "crypto", key: c.id, name: c.name, sym: c.symbol, tag: t("asset_crypto") }));
@@ -1996,8 +1999,9 @@ function watchDisplayCcy(w) {
 function watchPriceLabel(w) {
   const d = watchData[w.key];
   if (!d || d.price == null) return "…";
-  const suffix = w.type === "gold" ? "/" + goldUnit() : "";
-  let value = w.type === "gold" ? d.price * goldFactor() : d.price;
+  let suffix = "", value = d.price;
+  if (w.type === "gold") { value = d.price * goldFactor(); suffix = "/" + goldUnit(); }
+  else if (w.type === "goldoz") { value = d.price * GRAMS_PER_OZ; suffix = "/oz"; } // always per ounce
   const native = watchNativeCcy(w);
   let ccy = native;
   if (watchFlipped(w) && usdTry > 0) {
@@ -2009,7 +2013,7 @@ function watchPriceLabel(w) {
 // Map a watchlist item to a TradingView symbol and open its chart in a new tab.
 function tradingViewSymbol(w) {
   const sym = (w.sym || w.key || "").toUpperCase().replace(/[^A-Z0-9]/g, "");
-  if (w.type === "gold") return "TVC:GOLD";
+  if (w.type === "gold" || w.type === "goldoz") return "TVC:GOLD";
   if (w.type === "silver") return "TVC:SILVER";
   if (w.type === "index") return "TVC:" + sym; // TVC:SPX / TVC:NDX / TVC:DJI
   if (w.type === "crypto") return "BINANCE:" + sym + "USDT";
@@ -2297,15 +2301,17 @@ async function refreshWatchData() {
   if (!state.watchlist.length) return;
   const vs = state.currency === "TL" ? "try" : "usd";
   const ids = state.watchlist.filter((w) => w.type === "crypto").map((w) => w.key);
-  if (state.watchlist.some((w) => w.type === "gold")) ids.push("pax-gold");
+  if (state.watchlist.some((w) => w.type === "gold" || w.type === "goldoz")) ids.push("pax-gold");
   if (ids.length) {
     try {
       const r = await fetch(`https://api.coingecko.com/api/v3/coins/markets?vs_currency=${vs}&ids=${ids.join(",")}&price_change_percentage=24h,30d,1y`);
       if (r.ok) {
         (await r.json()).forEach((c) => {
           const d = { price: c.current_price, chg24: c.price_change_percentage_24h_in_currency, chg1mo: c.price_change_percentage_30d_in_currency, chg1y: c.price_change_percentage_1y_in_currency };
-          if (c.id === "pax-gold") watchData["gold"] = Object.assign({}, d, { price: c.current_price / GRAMS_PER_OZ });
-          else watchData[c.id] = d;
+          if (c.id === "pax-gold") {
+            const g = Object.assign({}, d, { price: c.current_price / GRAMS_PER_OZ }); // per-gram in active ccy
+            watchData["gold"] = g; watchData["goldoz"] = g; // ounce row derives from the same data
+          } else watchData[c.id] = d;
         });
       }
     } catch (e) {}
