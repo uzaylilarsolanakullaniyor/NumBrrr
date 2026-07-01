@@ -63,11 +63,18 @@ body {
   border-radius: 50%;
   filter: blur(80px);
   opacity: 0.2;
+  /* slow ambient drift; transform-only so it stays on the GPU */
+  animation: blobDrift 26s ease-in-out infinite alternate;
 }
-.blob-1 { width: 460px; height: 460px; background: #7d6bff; top: -120px; left: -80px; }
-.blob-2 { width: 520px; height: 520px; background: #3fcfe6; bottom: -160px; right: -120px; opacity: 0.15; }
-.blob-3 { width: 360px; height: 360px; background: #ff6fae; top: 40%; left: 55%; opacity: 0.10; }
-.blob-4 { width: 300px; height: 300px; background: #34d8a0; top: 15%; right: 18%; opacity: 0.09; }
+@keyframes blobDrift {
+  0% { transform: translate3d(0, 0, 0) scale(1); }
+  50% { transform: translate3d(42px, -28px, 0) scale(1.08); }
+  100% { transform: translate3d(-30px, 24px, 0) scale(0.95); }
+}
+.blob-1 { width: 460px; height: 460px; background: #7d6bff; top: -120px; left: -80px; opacity: 0.24; }
+.blob-2 { width: 520px; height: 520px; background: #3fcfe6; bottom: -160px; right: -120px; opacity: 0.17; animation-duration: 32s; animation-delay: -9s; }
+.blob-3 { width: 360px; height: 360px; background: #ff6fae; top: 40%; left: 55%; opacity: 0.12; animation-duration: 23s; animation-delay: -14s; }
+.blob-4 { width: 300px; height: 300px; background: #34d8a0; top: 15%; right: 18%; opacity: 0.11; animation-duration: 37s; animation-delay: -5s; }
 
 /* ---------- Floating winged money (Liquid Glass theme only) ----------
    Sits at z-index -1 (behind in-flow content, in front of .bg), so the
@@ -108,12 +115,18 @@ body {
 
 /* ---------- Glass primitive ---------- */
 .glass {
-  background: var(--glass-bg);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.09) 0%, rgba(255, 255, 255, 0.02) 40%, rgba(255, 255, 255, 0) 100%),
+    var(--glass-bg);
   border: 1px solid var(--glass-border-soft);
   border-radius: var(--radius-lg);
-  -webkit-backdrop-filter: blur(22px) saturate(150%);
-  backdrop-filter: blur(22px) saturate(150%);
-  box-shadow: var(--shadow), inset 0 1px 0 rgba(255,255,255,0.12);
+  -webkit-backdrop-filter: blur(24px) saturate(170%);
+  backdrop-filter: blur(24px) saturate(170%);
+  box-shadow:
+    var(--shadow),
+    inset 0 1px 0.5px rgba(255, 255, 255, 0.22),
+    inset 0 -1px 1px rgba(255, 255, 255, 0.04),
+    inset 0 0 0 0.5px rgba(255, 255, 255, 0.04);
   /* own compositing layer → frosted cards repaint atomically, no text artifacts */
   will-change: transform;
 }
@@ -1078,10 +1091,19 @@ body {
   cursor: pointer;
   transition: color 0.25s ease, transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
-.tab svg { width: 22px; height: 22px; display: block; transition: filter 0.25s ease; }
+.tab svg { width: 22px; height: 22px; display: block; flex: none; transition: filter 0.25s ease; }
+.tab span { max-width: 100%; overflow: hidden; text-overflow: ellipsis; }
 .tab > * { position: relative; z-index: 1; }
 .tab:hover { color: var(--text-dim); }
 .tab:active { transform: scale(0.9); }
+/* Springy icon bounce on tap (class added + removed in JS) */
+.tab.is-bouncing svg { animation: tab-bounce 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); }
+@keyframes tab-bounce {
+  0% { transform: scale(1); }
+  35% { transform: scale(0.8) translateY(1.5px); }
+  70% { transform: scale(1.15) translateY(-1.5px); }
+  100% { transform: scale(1); }
+}
 .tab.is-active {
   color: #fff;
 }
@@ -1210,8 +1232,9 @@ body {
   .crypto-cell { width: 116px; }
   .proj { gap: 8px; }
   .proj-card { padding: 13px 6px; }
-  .tabbar { gap: 1px; padding: 6px; }
-  .tab { min-width: 38px; font-size: 9.5px; padding: 8px 2px 6px; }
+  /* fill the screen width so 7 tabs share space evenly instead of shrink-wrapping */
+  .tabbar { gap: 0; padding: 6px; width: calc(100% - 28px); }
+  .tab { min-width: 0; font-size: 9px; letter-spacing: 0; padding: 8px 1px 6px; }
   .tab svg { width: 19px; height: 19px; }
   .bar-row { grid-template-columns: 1fr; gap: 7px; }
   .bar-name { display: flex; justify-content: space-between; align-items: baseline; }
@@ -1860,6 +1883,7 @@ body {
 .veh-plate::placeholder { color: var(--text-faint); font-weight: 600; }
 .veh-plate:focus { outline: none; border-bottom-color: color-mix(in srgb, var(--accent) 55%, transparent); }
 .veh-monthly { font-size: 12.5px; font-weight: 700; color: var(--good); white-space: nowrap; }
+.veh-lastmonth { margin-top: 2px; font-size: 11.5px; font-weight: 600; color: var(--text-faint); text-align: right; }
 .veh-del { flex: none; }
 .veh-sub { margin-top: 12px; }
 .veh-sub-head {

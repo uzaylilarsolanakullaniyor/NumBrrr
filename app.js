@@ -289,8 +289,7 @@ const I18N = {
     theme_solana: "Solana", theme_solana_desc: "Purple & green · degen mode",
     more_soon: "More features coming soon ✨",
     nav_car: "My car",
-    car_title: "My car", car_sub: "Plan a route, track fuel cost and trip expenses.",
-    car_sub_us: "Track your car's costs and payment reminders.",
+    car_title: "My car",
     car_route: "Route", car_from: "From", car_to: "To", car_pick_province: "Select province",
     car_center: "Center (province seat)", car_need_provinces: "Pick origin and destination province.", car_district: "District",
     car_calc: "Calculate route", car_calculating: "Calculating…",
@@ -433,8 +432,7 @@ const I18N = {
     theme_solana: "Solana", theme_solana_desc: "Mor & yeşil · degen modu",
     more_soon: "Yeni özellikler yakında ✨",
     nav_car: "Aracım",
-    car_title: "Aracım", car_sub: "Rota planla, yakıt maliyetini ve yolculuk harcamalarını takip et.",
-    car_sub_us: "Araç masraflarını ve ödeme hatırlatmalarını takip et.",
+    car_title: "Aracım",
     car_route: "Rota", car_from: "Nereden", car_to: "Nereye", car_pick_province: "İl seç",
     car_center: "Merkez (il merkezi)", car_need_provinces: "Kalkış ve varış ilini seç.", car_district: "İlçe",
     car_calc: "Rotayı hesapla", car_calculating: "Hesaplanıyor…",
@@ -620,7 +618,6 @@ const el = {
   carHistList: document.getElementById("carHistList"),
   carRouteSec: document.getElementById("carRouteSec"),
   carHistSec: document.getElementById("carHistSec"),
-  carSub: document.getElementById("carSub"),
   // portfolio view
   portList: document.getElementById("portList"),
   addHolding: document.getElementById("addHolding"),
@@ -990,7 +987,8 @@ function rollExpenseMonth() {
   if (e.history.length > 36) e.history.length = 36;
   e.oneoff = [];
   (e.recurring || []).forEach((r) => (r.paid = false));
-  (state.vehicles || []).forEach((v) => (v.oneoff = [])); // reset per-vehicle spends too
+  // Reset per-vehicle spends too, remembering each car's total for "last month".
+  (state.vehicles || []).forEach((v) => { v.lastMonthSpent = vehMonthlyTotal(v); v.oneoff = []; });
   e.month = now;
 }
 
@@ -1204,6 +1202,11 @@ function refreshVehicles() {
     if (!card) return;
     const tEl = card.querySelector("[data-veh-total]");
     if (tEl) tEl.textContent = `${t("veh_monthly")}: ${formatMoney(vehMonthlyTotal(v))}`;
+    const lm = card.querySelector("[data-veh-lastmonth]");
+    if (lm) {
+      lm.hidden = !(v.lastMonthSpent > 0);
+      if (!lm.hidden) lm.textContent = t("flow_last_month", { x: formatMoney(v.lastMonthSpent) });
+    }
     (v.sched || []).forEach((s) => {
       const row = card.querySelector(`[data-vsched="${s.id}"]`);
       if (row) updateVehSchedStatus(row, s);
@@ -1226,6 +1229,7 @@ function makeVehicleCard(v) {
       <span class="veh-monthly" data-veh-total></span>
       <button class="cat-remove veh-del" type="button" data-veh-del aria-label="remove">×</button>
     </div>
+    <div class="veh-lastmonth" data-veh-lastmonth hidden></div>
     <div class="car-prof-grid veh-specs">
       <label class="car-field"><span>${t("car_fuel_type")}</span><select class="car-select" data-veh-fuel>${fuelOpts}</select></label>
       <label class="car-field"><span>${t("car_consumption")} <small>${t("car_consumption_hint")}</small></span>
@@ -1534,7 +1538,6 @@ function buildCarHub() {
   const isTR = state.currency === "TL";
   el.carRouteSec.hidden = !isTR;
   el.carHistSec.hidden = !isTR;
-  el.carSub.textContent = t(isTR ? "car_sub" : "car_sub_us");
   buildVehicles();
   refreshVehicles();
   if (!isTR) return;
@@ -3114,7 +3117,7 @@ document.querySelectorAll("[data-theme-pick]").forEach((b) => b.addEventListener
     document.getElementById("view-income").hidden = name !== "income";
     document.getElementById("view-watch").hidden = name !== "watch";
     if (name === "savings") { rollExpenseMonth(); buildExpenses(); }
-    if (name === "car") buildCarHub();
+    if (name === "car") { rollExpenseMonth(); buildCarHub(); }
     if (name === "portfolio") refreshPortfolio();
     if (name === "income") refreshIncome();
     if (name === "watch") { refreshWatchData(); buildTopPerformers(); buildTrPanel(); kickBubbles(); }
@@ -3123,7 +3126,10 @@ document.querySelectorAll("[data-theme-pick]").forEach((b) => b.addEventListener
     window.scrollTo({ top: 0, behavior: "auto" });
   }
   tabs.forEach((tab) => {
+    tab.addEventListener("animationend", () => tab.classList.remove("is-bouncing"));
     tab.addEventListener("click", () => {
+      // restart the icon bounce even on rapid re-taps
+      tab.classList.remove("is-bouncing"); void tab.offsetWidth; tab.classList.add("is-bouncing");
       if (tab.hasAttribute("data-soon")) { showToast(t("more_soon")); return; }
       const view = tab.dataset.view;
       if (!view) return;
@@ -3170,6 +3176,7 @@ function loadState() {
   if (Array.isArray(s.vehicles)) {
     state.vehicles = s.vehicles.map((v) => ({
       id: v.id, plate: v.plate || "", fuel: v.fuel || "gas", consumption: v.consumption || 0, price: v.price || 0,
+      lastMonthSpent: v.lastMonthSpent || 0,
       sched: v.sched || [], oneoff: v.oneoff || [],
       schedSeq: v.schedSeq || (v.sched ? v.sched.length : 0), expSeq: v.expSeq || (v.oneoff ? v.oneoff.length : 0),
     }));
