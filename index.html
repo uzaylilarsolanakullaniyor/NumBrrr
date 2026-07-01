@@ -189,11 +189,21 @@
     <div class="view" id="view-car" hidden>
       <div class="view-intro">
         <h2 class="view-title" data-i18n="car_title">My car</h2>
-        <p class="subtagline" data-i18n="car_sub">Plan a route, track fuel cost and trip expenses.</p>
+        <p class="subtagline" id="carSub" data-i18n="car_sub">Plan a route, track fuel cost and trip expenses.</p>
       </div>
 
-      <!-- Route planner -->
-      <section class="glass car-panel" aria-label="Route">
+      <!-- My car(s): brand-model + fuel specs (used for route cost) + payment reminders
+           + logged costs. Costs still count toward monthly expenses (Gider). -->
+      <section class="glass car-panel exp-vehicles" aria-label="My car">
+        <h3 class="settings-label exp-sec-label" data-i18n="veh_title">My car</h3>
+        <div id="vehList"></div>
+        <button class="add-cat" id="addVehicle" type="button" data-i18n="veh_add">+ Add car</button>
+      </section>
+      <datalist id="vehSchedList"></datalist>
+      <datalist id="vehCatList"></datalist>
+
+      <!-- Route planner (Türkiye-only: provinces, radar counts and OSRM routing are TR data) -->
+      <section class="glass car-panel" id="carRouteSec" aria-label="Route" hidden>
         <h3 class="settings-label" data-i18n="car_route">Route</h3>
         <div class="car-route-inputs">
           <div class="car-loc">
@@ -217,18 +227,8 @@
         <button class="add-cat car-save-trip" id="carSaveTrip" type="button" data-i18n="car_save_trip" hidden>Save trip</button>
       </section>
 
-      <!-- My car(s): brand-model + fuel specs (used for route cost) + payment reminders
-           + logged costs. Costs still count toward monthly expenses (Gider). -->
-      <section class="glass car-panel exp-vehicles" aria-label="My car">
-        <h3 class="settings-label exp-sec-label" data-i18n="veh_title">My car</h3>
-        <div id="vehList"></div>
-        <button class="add-cat" id="addVehicle" type="button" data-i18n="veh_add">+ Add car</button>
-      </section>
-      <datalist id="vehSchedList"></datalist>
-      <datalist id="vehCatList"></datalist>
-
-      <!-- Trip history (with running total) -->
-      <section class="glass car-panel" aria-label="Trip history">
+      <!-- Trip history (with running total; Türkiye-only, tied to the route planner) -->
+      <section class="glass car-panel" id="carHistSec" aria-label="Trip history" hidden>
         <h3 class="settings-label" data-i18n="car_history">Trip history</h3>
         <div id="carHistList"></div>
       </section>

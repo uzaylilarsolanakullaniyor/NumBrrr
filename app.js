@@ -290,6 +290,7 @@ const I18N = {
     more_soon: "More features coming soon ✨",
     nav_car: "My car",
     car_title: "My car", car_sub: "Plan a route, track fuel cost and trip expenses.",
+    car_sub_us: "Track your car's costs and payment reminders.",
     car_route: "Route", car_from: "From", car_to: "To", car_pick_province: "Select province",
     car_center: "Center (province seat)", car_need_provinces: "Pick origin and destination province.", car_district: "District",
     car_calc: "Calculate route", car_calculating: "Calculating…",
@@ -433,6 +434,7 @@ const I18N = {
     more_soon: "Yeni özellikler yakında ✨",
     nav_car: "Aracım",
     car_title: "Aracım", car_sub: "Rota planla, yakıt maliyetini ve yolculuk harcamalarını takip et.",
+    car_sub_us: "Araç masraflarını ve ödeme hatırlatmalarını takip et.",
     car_route: "Rota", car_from: "Nereden", car_to: "Nereye", car_pick_province: "İl seç",
     car_center: "Merkez (il merkezi)", car_need_provinces: "Kalkış ve varış ilini seç.", car_district: "İlçe",
     car_calc: "Rotayı hesapla", car_calculating: "Hesaplanıyor…",
@@ -616,6 +618,9 @@ const el = {
   carResults: document.getElementById("carResults"),
   carSaveTrip: document.getElementById("carSaveTrip"),
   carHistList: document.getElementById("carHistList"),
+  carRouteSec: document.getElementById("carRouteSec"),
+  carHistSec: document.getElementById("carHistSec"),
+  carSub: document.getElementById("carSub"),
   // portfolio view
   portList: document.getElementById("portList"),
   addHolding: document.getElementById("addHolding"),
@@ -1524,12 +1529,19 @@ function fillDistrictSelect(sel, pName, val) {
 function buildCarHub() {
   const h = state.vehicleHub;
   if (!el.carFromP) return;
+  // Route planner + trip history are Türkiye-only (TR provinces, radar counts, OSRM
+  // over TR roads); in USD mode the view keeps just the car cards.
+  const isTR = state.currency === "TL";
+  el.carRouteSec.hidden = !isTR;
+  el.carHistSec.hidden = !isTR;
+  el.carSub.textContent = t(isTR ? "car_sub" : "car_sub_us");
+  buildVehicles();
+  refreshVehicles();
+  if (!isTR) return;
   fillProvinceSelect(el.carFromP, h.fromP);
   fillProvinceSelect(el.carToP, h.toP);
   fillDistrictSelect(el.carFromD, h.fromP, h.fromD);
   fillDistrictSelect(el.carToD, h.toP, h.toD);
-  buildVehicles();
-  refreshVehicles();
   renderCarRoute();
   buildCarHistory();
 }
@@ -2962,7 +2974,7 @@ function setCurrency(cur) {
   el.inflation.value = formatRate(state.inflation[cur], false);
   // USD holdings convert differently per app currency; recompute before rendering.
   state.portfolio.holdings.forEach((h) => { if (h.assetType === "usd") h.value = usdHoldingValue(h.usd || 0); });
-  buildLayout(); refresh(); refreshExpenses(); buildPortfolio(); refreshPortfolio(); refreshIncome();
+  buildLayout(); refresh(); refreshExpenses(); buildCarHub(); buildPortfolio(); refreshPortfolio(); refreshIncome();
   refreshCryptoPrices(); // refetch crypto prices in the new currency
   buildWatchlist(); refreshWatchData();
   updateSettingsActive();
