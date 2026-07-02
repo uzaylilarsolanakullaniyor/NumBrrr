@@ -2258,28 +2258,49 @@ function refreshPortfolio() {
     .join("");
 }
 
-// ---- Donut slice selection (tap a slice → it grows + center shows the %) ----
+// ---- Donut slice selection (tap a slice → it grows + center shows the %;
+// on desktop hovering a slice does the same, falling back to the tapped one) ----
 let donutSel = null;
+let donutHover = null;
 function updateDonutSel() {
   const center = document.getElementById("donutCenter");
+  const active = donutHover || donutSel;
   let sel = null;
   el.portDonut.querySelectorAll(".donut-seg").forEach((c) => {
-    const on = c.dataset.seg === donutSel;
+    const on = c.dataset.seg === active;
     c.classList.toggle("is-sel", on);
     if (on) sel = c;
   });
   el.portDonut.classList.toggle("has-sel", !!sel);
-  if (!sel) { center.hidden = true; return; }
+  if (!sel) { center.hidden = true; center.dataset.for = ""; return; }
   const pct = parseFloat(sel.dataset.pct) || 0;
   center.querySelector(".dc-pct").textContent = locDec(pct >= 10 ? Math.round(pct) : Math.round(pct * 10) / 10) + "%";
   center.querySelector(".dc-name").textContent = sel.dataset.name;
   center.hidden = false;
-  center.classList.remove("pop"); void center.offsetWidth; center.classList.add("pop");
+  // pop only when the shown slice changes (not on every mouse move)
+  if (center.dataset.for !== active) {
+    center.dataset.for = active;
+    center.classList.remove("pop"); void center.offsetWidth; center.classList.add("pop");
+  }
 }
 el.portDonut.addEventListener("click", (e) => {
   const seg = e.target.closest && e.target.closest(".donut-seg");
   if (!seg) { donutSel = null; updateDonutSel(); return; }
   donutSel = donutSel === seg.dataset.seg ? null : seg.dataset.seg;
+  updateDonutSel();
+});
+// Mouse-only hover (touch keeps the tap behavior)
+el.portDonut.addEventListener("pointerover", (e) => {
+  if (e.pointerType && e.pointerType !== "mouse") return;
+  const seg = e.target.closest && e.target.closest(".donut-seg");
+  if (!seg) return;
+  donutHover = seg.dataset.seg;
+  updateDonutSel();
+});
+el.portDonut.addEventListener("pointerout", (e) => {
+  if (e.pointerType && e.pointerType !== "mouse") return;
+  if (!(e.target.closest && e.target.closest(".donut-seg"))) return;
+  donutHover = null;
   updateDonutSel();
 });
 
