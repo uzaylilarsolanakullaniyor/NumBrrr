@@ -2213,6 +2213,7 @@ function refreshPortfolio() {
     el.portEmpty.hidden = false;
     el.portDonut.innerHTML = "";
     el.portLegend.innerHTML = "";
+    donutSel = null; updateDonutSel();
     return;
   }
   el.portChart.hidden = false;
@@ -2225,12 +2226,16 @@ function refreshPortfolio() {
   const ring = segs
     .map((h) => {
       const pct = (h.value / total) * 100;
-      const circle = `<circle cx="21" cy="21" r="15.915" fill="none" stroke="${colorOf[h.id]}" stroke-width="6" stroke-dasharray="${pct} ${100 - pct}" stroke-dashoffset="${25 - cum}" />`;
+      const name = h.label && h.label.trim() ? escapeHtml(h.label.trim()) : t("holding_ph");
+      const circle = `<circle class="donut-seg" data-seg="${h.id}" data-pct="${pct}" data-name="${name}" cx="21" cy="21" r="15.915" fill="none" stroke="${colorOf[h.id]}" stroke-width="6" stroke-dasharray="${pct} ${100 - pct}" stroke-dashoffset="${25 - cum}" />`;
       cum += pct;
       return circle;
     })
     .join("");
   el.portDonut.innerHTML = `<circle cx="21" cy="21" r="15.915" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="6" />${ring}`;
+  // keep a slice selected across re-renders only while it still exists
+  if (donutSel && !segs.some((h) => h.id === donutSel)) donutSel = null;
+  updateDonutSel();
 
   // Legend grouped by asset type with subtotals
   el.portLegend.innerHTML = ASSET_TYPES
@@ -2250,6 +2255,31 @@ function refreshPortfolio() {
     })
     .join("");
 }
+
+// ---- Donut slice selection (tap a slice → it grows + center shows the %) ----
+let donutSel = null;
+function updateDonutSel() {
+  const center = document.getElementById("donutCenter");
+  let sel = null;
+  el.portDonut.querySelectorAll(".donut-seg").forEach((c) => {
+    const on = c.dataset.seg === donutSel;
+    c.classList.toggle("is-sel", on);
+    if (on) sel = c;
+  });
+  el.portDonut.classList.toggle("has-sel", !!sel);
+  if (!sel) { center.hidden = true; return; }
+  const pct = parseFloat(sel.dataset.pct) || 0;
+  center.querySelector(".dc-pct").textContent = locDec(pct >= 10 ? Math.round(pct) : Math.round(pct * 10) / 10) + "%";
+  center.querySelector(".dc-name").textContent = sel.dataset.name;
+  center.hidden = false;
+  center.classList.remove("pop"); void center.offsetWidth; center.classList.add("pop");
+}
+el.portDonut.addEventListener("click", (e) => {
+  const seg = e.target.closest && e.target.closest(".donut-seg");
+  if (!seg) { donutSel = null; updateDonutSel(); return; }
+  donutSel = donutSel === seg.dataset.seg ? null : seg.dataset.seg;
+  updateDonutSel();
+});
 
 // ============================================================
 //  Income
@@ -3057,7 +3087,7 @@ document.addEventListener("click", (e) => {
   const t = e.target;
   if (t.closest(".cat-remove, .watch-del")) sfx("remove");
   else if (t.closest(".add-cat, .veh-add-btn, .coin-opt")) sfx("add");
-  else if (t.closest(".opt, .exp-paid, .net-tax-btn, .port-ccy-toggle, .exp-hist-toggle, .switch, .watch-grip")) sfx("toggle");
+  else if (t.closest(".opt, .exp-paid, .net-tax-btn, .port-ccy-toggle, .exp-hist-toggle, .switch, .watch-grip, .donut-seg")) sfx("toggle");
   else if (t.closest(".tab")) sfx("tap");
 }, true);
 

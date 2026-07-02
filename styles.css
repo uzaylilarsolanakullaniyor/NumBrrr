@@ -876,9 +876,33 @@ body {
 /* ---------- Portfolio donut ---------- */
 .port-chart { display: flex; align-items: center; justify-content: center; gap: 24px; flex-wrap: wrap; }
 .port-chart[hidden] { display: none; }
-.donut-wrap { flex: none; }
+.donut-wrap { flex: none; position: relative; }
 .donut { width: clamp(184px, 50vw, 220px); height: clamp(184px, 50vw, 220px); display: block; }
-.donut circle { transition: stroke-dasharray 0.5s ease, stroke-dashoffset 0.5s ease; }
+.donut circle {
+  transition:
+    stroke-dasharray 0.5s ease, stroke-dashoffset 0.5s ease,
+    stroke-width 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.3s ease;
+}
+/* Tap a slice → it grows, the rest dim, the % pops in the middle */
+.donut-seg { cursor: pointer; pointer-events: stroke; }
+.donut.has-sel .donut-seg { opacity: 0.3; }
+.donut.has-sel .donut-seg.is-sel { opacity: 1; stroke-width: 8.5; }
+.donut-center {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
+  text-align: center; pointer-events: none;
+}
+.donut-center[hidden] { display: none; }
+.donut-center .dc-pct { font-family: "Sora", sans-serif; font-size: 27px; font-weight: 800; color: #fff; line-height: 1; }
+.donut-center .dc-name {
+  font-size: 12px; font-weight: 600; color: var(--text-dim);
+  max-width: 58%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.donut-center.pop { animation: dc-pop 0.35s cubic-bezier(0.34, 1.56, 0.64, 1); }
+@keyframes dc-pop {
+  0% { transform: scale(0.7); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
 .donut-legend { flex: 1; min-width: 190px; display: flex; flex-direction: column; gap: 10px; }
 .leg-item { display: flex; align-items: center; gap: 10px; font-size: 13.5px; }
 .leg-dot { width: 12px; height: 12px; border-radius: 4px; flex: none; }
