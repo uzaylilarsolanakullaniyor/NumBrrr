@@ -2010,8 +2010,8 @@ body {
   --glass-border: #3b4046;
   --glass-border-soft: #2f3336;
   --text: #e7e9ea;
-  --text-dim: #9ba1a6;
-  --text-faint: #71767b;
+  --text-dim: #b0b8bd;
+  --text-faint: #8b98a5;
   --accent: #1d9bf0;
   --accent-2: #1d9bf0;
   --good: #00ba7c;
@@ -2078,3 +2078,18 @@ body {
 }
 [data-theme="black"] .tab.is-active svg { filter: none; }
 [data-theme="black"] .toast { background: #16181c; border: 1px solid #2f3336; }
+/* Glass-era navy/purple tints -> flat black + X blue */
+[data-theme="black"] .coin-dropdown {
+  background: #0a0a0a;
+  border: 1px solid #2f3336;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.7);
+}
+[data-theme="black"] .car-cost {
+  background: rgba(29, 155, 240, 0.08);
+  border-color: rgba(29, 155, 240, 0.35);
+}
+[data-theme="black"] .port-ccy-toggle { background: #16181c; }
+[data-theme="black"] .onboard-start { box-shadow: 0 8px 24px rgba(29, 155, 240, 0.3); }
+[data-theme="black"] .headline-tag { color: #1d9bf0; }
