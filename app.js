@@ -287,7 +287,7 @@ const I18N = {
     theme_doge: "Doge", theme_doge_desc: "such wow · much finance · very meme",
     theme_neon: "Neon", theme_neon_desc: "80s neon dream · A E S T H E T I C",
     theme_solana: "Solana", theme_solana_desc: "Purple & green · degen mode",
-    theme_black: "X · Black", theme_black_desc: "Pure black · minimal",
+    theme_black: "Black Theme", theme_black_desc: "Pure black · minimal",
     more_soon: "More features coming soon ✨",
     nav_car: "My car",
     car_title: "My car",
@@ -431,7 +431,7 @@ const I18N = {
     theme_doge: "Doge", theme_doge_desc: "çok vov · büyük para · efsane meme",
     theme_neon: "Neon", theme_neon_desc: "80'ler neon rüyası · A E S T H E T I C",
     theme_solana: "Solana", theme_solana_desc: "Mor & yeşil · degen modu",
-    theme_black: "X · Siyah", theme_black_desc: "Simsiyah · minimal",
+    theme_black: "Siyah Tema", theme_black_desc: "Simsiyah · minimal",
     more_soon: "Yeni özellikler yakında ✨",
     nav_car: "Aracım",
     car_title: "Aracım",
@@ -510,7 +510,7 @@ const I18N = {
 // ---- State ----
 const state = {
   lang: "en",
-  theme: "glass",
+  theme: "black",
   currency: "USD",
   monthlyExpenses: 3000,
   realMode: false,
@@ -2821,13 +2821,61 @@ function rankTopPerf(candidates) {
     .sort((a, b) => b.chg1y - a.chg1y)
     .slice(0, 15);
 }
+// Names are attached client-side so gold/silver/BIST labels stay localized.
+function decorateTopPerfNames(items) {
+  const usName = {}; US_STOCKS.forEach((s) => (usName[s.s] = s.n));
+  const bistName = {}; BIST_STOCKS.forEach((s) => (bistName[s.s] = s.n));
+  const idxName = { spx: "S&P 500", ndx: "Nasdaq 100", dji: "Dow Jones" };
+  return items.map((it) => Object.assign({}, it, {
+    name: it.type === "crypto" ? (it.name || it.sym)
+      : it.type === "usstock" ? (usName[it.key] || it.key)
+      : it.type === "index" ? (idxName[it.key] || it.sym)
+      : it.type === "gold" ? t("asset_gold")
+      : it.type === "silver" ? t("asset_silver")
+      : it.type === "bist" ? (bistName[it.key] || it.key)
+      : (it.name || it.sym),
+  }));
+}
+
 async function buildTopPerformers() {
   const listEl = document.getElementById("topPerfList");
   if (!listEl) return;
   if (topPerfData && topPerfBuiltFor === state.currency) { renderTopPerformers(); return; }
-  if (topPerfBuiltFor !== state.currency || !listEl.children.length) listEl.innerHTML = `<div class="top-perf-msg">${t("top_perf_loading")}</div>`;
   const built = state.currency; // guard against currency changing mid-fetch
+  const today = new Date().toISOString().slice(0, 10);
+  const cacheKey = "numbr_topperf_" + built;
+  // Same-day cache: the list is ready the moment the app opens, zero fetches.
+  try {
+    const c = JSON.parse(localStorage.getItem(cacheKey) || "null");
+    if (c && c.day === today && Array.isArray(c.items) && c.items.length) {
+      topPerfBuiltFor = built;
+      topPerfData = decorateTopPerfNames(c.items);
+      renderTopPerformers();
+      return;
+    }
+  } catch (e) {}
+  if (topPerfBuiltFor !== built || !listEl.children.length) listEl.innerHTML = `<div class="top-perf-msg">${t("top_perf_loading")}</div>`;
   topPerfBuiltFor = built;
+  // Server-computed daily leaderboard (Vercel CDN caches it for a day and
+  // refreshes it by itself, so this is one cheap request, not ~35 quotes).
+  try {
+    const r = await Promise.race([fetch(`/api/topperf?market=${built === "TL" ? "TR" : "US"}`), new Promise((res) => setTimeout(() => res(null), 9000))]);
+    if (r && r.ok) {
+      const j = await r.json();
+      if (Array.isArray(j.items) && j.items.length) {
+        if (topPerfBuiltFor !== built) return;
+        try { localStorage.setItem(cacheKey, JSON.stringify({ day: today, items: j.items })); } catch (e) {}
+        topPerfData = decorateTopPerfNames(j.items);
+        renderTopPerformers();
+        return;
+      }
+    }
+  } catch (e) {}
+  if (topPerfBuiltFor !== built) return;
+  await buildTopPerformersClient(built); // fallback: compute in the browser (local dev / endpoint down)
+}
+
+async function buildTopPerformersClient(built) {
   const isTL = built === "TL";
 
   // Gather every source, then render once. Showing the crypto-only batch first
