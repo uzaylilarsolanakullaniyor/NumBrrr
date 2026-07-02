@@ -2093,3 +2093,22 @@ body {
 [data-theme="black"] .port-ccy-toggle { background: #16181c; }
 [data-theme="black"] .onboard-start { box-shadow: 0 8px 24px rgba(29, 155, 240, 0.3); }
 [data-theme="black"] .headline-tag { color: #1d9bf0; }
+
+/* ---------- New IPOs (Türkiye-only, Watch view) ---------- */
+.ipo-list {
+  display: flex; flex-direction: column; gap: 7px;
+  max-height: 318px; overflow-y: auto;
+  padding-right: 2px;
+}
+.ipo-row {
+  display: flex; align-items: center; gap: 11px; width: 100%; text-align: left;
+  padding: 10px 13px; border-radius: 13px; flex: none;
+  background: rgba(255, 255, 255, 0.04); border: 1px solid var(--glass-border-soft);
+  color: var(--text); font: inherit; cursor: pointer;
+  transition: border-color 0.18s ease, background 0.18s ease, transform 0.12s ease;
+}
+.ipo-row:hover { border-color: var(--glass-border); background: rgba(255, 255, 255, 0.07); }
+.ipo-row:active { transform: scale(0.99); }
+.ipo-sym { flex: none; min-width: 58px; font-size: 13px; font-weight: 800; color: var(--accent-2); }
+.ipo-name { flex: 1; min-width: 0; font-size: 13.5px; font-weight: 600; color: var(--text-dim); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ipo-note { margin: 12px 0 0; font-size: 11.5px; font-weight: 600; color: var(--text-faint); }

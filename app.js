@@ -323,6 +323,7 @@ const I18N = {
     nav_watchlist: "Watch", watch_title: "Watchlist", watch_sub: "Search and favorite assets to track them.",
     watch_search_ph: "Search gold, stocks, crypto…", watch_empty: "Search above and tap to add assets to your watchlist.", watch_chart: "Open chart on TradingView",
     top_perf_title: "This year's top performers", asset_silver: "Silver", top_perf_loading: "Ranking the past year…",
+    ipo_title: "New IPOs (BIST)", ipo_note: "Listed in the last 2 years · BIST HALKA ARZ index (KAP)",
     watch_ccy: "Show price in USD / TL", watch_chart_full: "Open full chart on TradingView ↗",
     tr_index: "Borsa Istanbul", tr_forex: "Currencies", tr_gold: "Gold (TRY)",
     gold_gram: "Gram Gold", gold_quarter: "Quarter Gold", gold_half: "Half Gold", gold_full: "Full Gold",
@@ -467,6 +468,7 @@ const I18N = {
     nav_watchlist: "Takip", watch_title: "Takip Listesi", watch_sub: "Varlık ara, favorile ve takip et.",
     watch_search_ph: "Altın, hisse, kripto ara…", watch_empty: "Yukarıdan ara ve takip listene varlık ekle.", watch_chart: "TradingView'de grafiği aç",
     top_perf_title: "Son 1 yılın yıldızları", asset_silver: "Gümüş", top_perf_loading: "Son 1 yıl sıralanıyor…",
+    ipo_title: "Yeni Halka Arzlar", ipo_note: "Son 2 yılda halka arz olanlar · BIST HALKA ARZ endeksi (KAP)",
     watch_ccy: "Fiyatı dolar / TL göster", watch_chart_full: "TradingView'de tam grafiği aç ↗",
     tr_index: "Borsa İstanbul", tr_forex: "Döviz", tr_gold: "Altın (TL)",
     gold_gram: "Gram Altın", gold_quarter: "Çeyrek Altın", gold_half: "Yarım Altın", gold_full: "Tam Altın",
@@ -2974,6 +2976,44 @@ function renderTopPerformers() {
   }));
 }
 
+// ---- New IPOs (Türkiye-only): XHARZ index members via /api/ipo, daily ----
+// Same-day localStorage cache -> instant render; endpoint is CDN-cached a day
+// on Vercel. Section stays hidden when there's no data (e.g. local dev) or in
+// USD mode. Tapping a row opens the TradingView chart.
+async function buildIpoList() {
+  const sec = document.getElementById("ipoSec"), listEl = document.getElementById("ipoList");
+  if (!sec) return;
+  if (state.currency !== "TL") { sec.hidden = true; return; }
+  const today = new Date().toISOString().slice(0, 10);
+  let items = null;
+  try {
+    const c = JSON.parse(localStorage.getItem("numbr_ipo") || "null");
+    if (c && c.day === today && Array.isArray(c.items) && c.items.length) items = c.items;
+  } catch (e) {}
+  if (!items) {
+    try {
+      const r = await Promise.race([fetch("/api/ipo"), new Promise((res) => setTimeout(() => res(null), 9000))]);
+      if (r && r.ok) {
+        const j = await r.json();
+        if (Array.isArray(j.items) && j.items.length) {
+          items = j.items;
+          try { localStorage.setItem("numbr_ipo", JSON.stringify({ day: today, items })); } catch (e) {}
+        }
+      }
+    } catch (e) {}
+  }
+  if (state.currency !== "TL" || !items || !items.length) { sec.hidden = true; return; }
+  sec.hidden = false;
+  listEl.innerHTML = items.map((it) => `
+    <button class="ipo-row" type="button" data-ipo="${escapeHtml(it.sym)}" data-name="${escapeHtml(it.name)}" title="${t("watch_chart")}">
+      <span class="ipo-sym">${escapeHtml(it.sym)}</span>
+      <span class="ipo-name">${escapeHtml(it.name)}</span>
+    </button>`).join("");
+  listEl.querySelectorAll("[data-ipo]").forEach((b) => b.addEventListener("click", () => {
+    openTradingView({ type: "bist", key: b.dataset.ipo, sym: b.dataset.ipo, name: b.dataset.name });
+  }));
+}
+
 // ---- Turkey panel: live FX rates + gram/quarter gold in lira (TL mode only) ----
 // Standard Turkish gold coins as a multiple of the 24k gram price (metal content).
 const GOLD_COIN_MULT = { gram: 1, quarter: 1.6, half: 3.2, full: 6.4 };
@@ -3221,7 +3261,7 @@ document.querySelectorAll("[data-theme-pick]").forEach((b) => b.addEventListener
     if (name === "car") { rollExpenseMonth(); buildCarHub(); }
     if (name === "portfolio") refreshPortfolio();
     if (name === "income") refreshIncome();
-    if (name === "watch") { refreshWatchData(); buildTopPerformers(); buildTrPanel(); kickBubbles(); }
+    if (name === "watch") { refreshWatchData(); buildTopPerformers(); buildTrPanel(); buildIpoList(); kickBubbles(); }
     else stopBubbles(); // pause the bubble animation loop off the Watch view
     if (name === "settings") preloadThemeWallpapers(); // user is about to pick a theme
     window.scrollTo({ top: 0, behavior: "auto" });
