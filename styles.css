@@ -1045,8 +1045,8 @@ body {
   gap: 4px;
   width: auto;
   max-width: calc(100% - 28px);
-  padding: 8px;
-  border-radius: 28px;
+  padding: 7px;
+  border-radius: 27px;
   background:
     linear-gradient(180deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.02) 38%, rgba(255, 255, 255, 0) 100%),
     rgba(18, 22, 42, 0.42);
@@ -1083,15 +1083,15 @@ body {
   background: transparent;
   color: var(--text-faint);
   font: inherit;
-  font-size: 10.5px;
+  font-size: 10px;
   font-weight: 600;
   letter-spacing: 0.01em;
-  padding: 10px 4px 8px;
+  padding: 9px 4px 7px;
   border-radius: 20px;
   cursor: pointer;
   transition: color 0.25s ease, transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
-.tab svg { width: 24px; height: 24px; display: block; flex: none; transition: filter 0.25s ease; }
+.tab svg { width: 23px; height: 23px; display: block; flex: none; transition: filter 0.25s ease; }
 .tab span { max-width: 100%; overflow: hidden; text-overflow: ellipsis; }
 .tab > * { position: relative; z-index: 1; }
 .tab:hover { color: var(--text-dim); }
