@@ -39,10 +39,6 @@
     <!-- ============ HOME VIEW (Freedom calculator) ============ -->
     <div class="view" id="view-home" hidden>
 
-    <div class="view-intro">
-      <h2 class="view-title" data-i18n="home_title">Freedom</h2>
-    </div>
-
     <!-- Controls -->
     <section class="glass controls" aria-label="Inputs">
       <div class="control-row">
@@ -138,7 +134,6 @@
     <!-- ============ EXPENSES VIEW (Gider) ============ -->
     <div class="view" id="view-savings" hidden>
       <div class="view-intro">
-        <h2 class="view-title" data-i18n="cut_title">Expenses</h2>
         <p class="subtagline" id="expMonthLabel">—</p>
       </div>
 
@@ -187,10 +182,6 @@
 
     <!-- ============ ARACIM VIEW (car hub) ============ -->
     <div class="view" id="view-car" hidden>
-      <div class="view-intro">
-        <h2 class="view-title" data-i18n="car_title">My car</h2>
-      </div>
-
       <!-- My car(s): brand-model + fuel specs (used for route cost) + payment reminders
            + logged costs. Costs still count toward monthly expenses (Gider). -->
       <section class="glass car-panel exp-vehicles" aria-label="My car">
@@ -235,10 +226,6 @@
 
     <!-- ============ SETTINGS VIEW ============ -->
     <div class="view" id="view-settings" hidden>
-      <div class="view-intro">
-        <h2 class="view-title" data-i18n="settings_title">Settings</h2>
-      </div>
-
       <section class="glass settings-group">
         <h3 class="settings-label" data-i18n="country">Country</h3>
         <div class="settings-options settings-options--lang">
@@ -301,10 +288,6 @@
 
     <!-- ============ PORTFOLIO VIEW ============ -->
     <div class="view" id="view-portfolio">
-      <div class="view-intro">
-        <h2 class="view-title" data-i18n="portfolio_title">Your portfolio</h2>
-      </div>
-
       <section class="glass savings-result port-total-card" aria-label="Total portfolio value">
         <div class="savings-total">
           <div class="port-total-head">
@@ -345,10 +328,6 @@
 
     <!-- ============ INCOME VIEW ============ -->
     <div class="view" id="view-income" hidden>
-      <div class="view-intro">
-        <h2 class="view-title" data-i18n="income_title">Your income</h2>
-      </div>
-
       <section class="glass savings-panel" aria-label="Income sources">
         <div class="savings-list" id="incList"></div>
         <button class="add-cat" id="addIncome" type="button" data-i18n="add_income">+ Add income</button>
@@ -375,10 +354,6 @@
 
     <!-- ============ WATCHLIST VIEW ============ -->
     <div class="view" id="view-watch" hidden>
-      <div class="view-intro">
-        <h2 class="view-title" data-i18n="watch_title">Watchlist</h2>
-      </div>
-
       <section class="glass watch-panel" aria-label="Watchlist">
         <div class="coin-search watch-search-wrap">
           <input id="watchSearch" class="watch-search" type="text" autocomplete="off" placeholder="Search gold, stocks, crypto…" />
