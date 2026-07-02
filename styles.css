@@ -877,7 +877,7 @@ body {
 .port-chart { display: flex; align-items: center; justify-content: center; gap: 24px; flex-wrap: wrap; }
 .port-chart[hidden] { display: none; }
 .donut-wrap { flex: none; position: relative; }
-.donut { width: clamp(184px, 50vw, 220px); height: clamp(184px, 50vw, 220px); display: block; }
+.donut { width: clamp(204px, 56vw, 252px); height: clamp(204px, 56vw, 252px); display: block; }
 .donut circle {
   transition:
     stroke-dasharray 0.5s ease, stroke-dashoffset 0.5s ease,
