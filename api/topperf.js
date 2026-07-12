@@ -24,12 +24,26 @@ const SKIP = new Set([
 ]);
 
 const UA = { headers: { "User-Agent": "Mozilla/5.0 (compatible; NumBrrr/1.0)" } };
-const withTimeout = (p, ms) => Promise.race([p, new Promise((res) => setTimeout(() => res(null), ms))]);
+async function mapLimit(items, limit, fn) {
+  const out = new Array(items.length);
+  let next = 0;
+  async function worker() {
+    while (next < items.length) {
+      const i = next++;
+      out[i] = await fn(items[i]);
+    }
+  }
+  await Promise.all(Array.from({ length: Math.min(limit, items.length) }, worker));
+  return out;
+}
 
 async function yahoo1y(ysym) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 7000);
   try {
     const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(ysym)}?interval=1d&range=1y`;
-    const r = await fetch(url, UA);
+    const r = await fetch(url, { ...UA, signal: controller.signal });
+    if (!r.ok) return null;
     const j = await r.json();
     const result = j && j.chart && j.chart.result && j.chart.result[0];
     const meta = result && result.meta;
@@ -39,6 +53,7 @@ async function yahoo1y(ysym) {
     const chg1y = valid.length && price != null ? (price / valid[0] - 1) * 100 : null;
     return price != null && chg1y != null ? { price, chg1y } : null;
   } catch (e) { return null; }
+  finally { clearTimeout(timer); }
 }
 
 async function topCrypto() {
@@ -63,12 +78,12 @@ module.exports = async (req, res) => {
   if (market === "TR") BIST30.forEach((s) => jobs.push({ type: "bist", key: s, sym: s, ysym: s + ".IS", ccy: "TRY" }));
 
   const [crypto, fx, quotes] = await Promise.all([
-    withTimeout(topCrypto(), 7000),
-    market === "TR" ? withTimeout(yahoo1y("TRY=X"), 7000) : Promise.resolve(null),
-    Promise.all(jobs.map(async (j) => {
-      const d = await withTimeout(yahoo1y(j.ysym), 7000);
+    topCrypto(),
+    market === "TR" ? yahoo1y("TRY=X") : Promise.resolve(null),
+    mapLimit(jobs, 6, async (j) => {
+      const d = await yahoo1y(j.ysym);
       return d ? Object.assign({}, j, d) : null;
-    })),
+    }),
   ]);
 
   const items = [];

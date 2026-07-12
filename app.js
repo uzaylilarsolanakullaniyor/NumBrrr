@@ -692,6 +692,9 @@ function formatMoneyCcy(value, curKey, { compact = false } = {}) {
   }).format(value);
 }
 function formatThousands(n) { return new Intl.NumberFormat("en-US").format(Math.round(n)); }
+function localDateKey(d = new Date()) {
+  return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+}
 // Show a comma as the decimal separator for Turkish (round-trips with parseDecimal).
 function locDec(n) { const s = String(n); return state.lang === "tr" ? s.replace(".", ",") : s; }
 function formatRate(value, withSign = true) {
@@ -1044,7 +1047,7 @@ function makeRecRow(r) {
   row.className = "cat-row exp-row";
   row.dataset.rec = r.id;
   row.innerHTML = `
-    <input class="cat-name exp-cat" list="expCatList" data-rec-cat="${r.id}" value="${(r.cat || "").replace(/"/g, "&quot;")}" placeholder="${t("exp_cat_ph")}" />
+    <input class="cat-name exp-cat" list="expCatList" data-rec-cat="${escapeHtml(r.id)}" value="${escapeHtml(r.cat || "")}" placeholder="${escapeHtml(t("exp_cat_ph"))}" />
     <div class="exp-day"><span class="exp-day-pre">📅</span><input class="exp-dayfield" inputmode="numeric" data-rec-day="${r.id}" value="${r.dueDay || ""}" placeholder="${t("exp_day_ph")}" maxlength="2" /></div>
     <div class="money-input money-input--sm cat-amount"><span class="money-symbol exp-symbol">${sym}</span><input type="text" inputmode="numeric" data-rec-amt="${r.id}" value="${r.amount ? formatThousands(r.amount) : ""}" placeholder="0" /></div>
     <button class="cat-remove" type="button" data-rec-del="${r.id}" aria-label="remove">×</button>`;
@@ -1069,7 +1072,7 @@ function makeOneRow(o) {
   row.dataset.one = o.id;
   row.innerHTML = `
     <div class="exp-day"><input class="exp-dayfield" inputmode="numeric" data-one-day="${o.id}" value="${o.day || ""}" placeholder="${t("exp_day_ph")}" maxlength="2" /></div>
-    <input class="cat-name exp-cat" list="expCatList" data-one-cat="${o.id}" value="${(o.cat || "").replace(/"/g, "&quot;")}" placeholder="${t("exp_cat_ph")}" />
+    <input class="cat-name exp-cat" list="expCatList" data-one-cat="${escapeHtml(o.id)}" value="${escapeHtml(o.cat || "")}" placeholder="${escapeHtml(t("exp_cat_ph"))}" />
     <div class="money-input money-input--sm cat-amount"><span class="money-symbol exp-symbol">${sym}</span><input type="text" inputmode="numeric" data-one-amt="${o.id}" value="${o.amount ? formatThousands(o.amount) : ""}" placeholder="0" /></div>
     <button class="cat-remove" type="button" data-one-del="${o.id}" aria-label="remove">×</button>`;
 
@@ -1229,7 +1232,7 @@ function makeVehicleCard(v) {
   card.innerHTML = `
     <div class="veh-head">
       ${multi ? `<button class="car-prof-pick veh-active" type="button" data-veh-active aria-label="${t("car_active")}"></button>` : ""}
-      <input class="veh-plate" data-veh-plate value="${(v.plate || "").replace(/"/g, "&quot;")}" placeholder="${t("car_model_ph")}" />
+      <input class="veh-plate" data-veh-plate value="${escapeHtml(v.plate || "")}" placeholder="${escapeHtml(t("car_model_ph"))}" />
       <span class="veh-monthly" data-veh-total></span>
       <button class="cat-remove veh-del" type="button" data-veh-del aria-label="remove">×</button>
     </div>
@@ -1297,7 +1300,7 @@ function makeVehSchedRow(v, s) {
   row.dataset.vsched = s.id;
   row.innerHTML = `
     <button class="exp-paid" type="button" data-vs-paid aria-label="${t("exp_paid")}">✓</button>
-    <input class="cat-name veh-sched-label" list="vehSchedList" data-vs-label value="${(s.label || "").replace(/"/g, "&quot;")}" placeholder="${t("veh_label_ph")}" />
+    <input class="cat-name veh-sched-label" list="vehSchedList" data-vs-label value="${escapeHtml(s.label || "")}" placeholder="${escapeHtml(t("veh_label_ph"))}" />
     <input type="date" class="veh-date" data-vs-date value="${s.date || ""}" />
     <div class="money-input money-input--sm veh-amt"><span class="money-symbol exp-symbol">${sym}</span><input type="text" inputmode="numeric" data-vs-amt value="${s.amount ? formatThousands(s.amount) : ""}" placeholder="0" /></div>
     <button class="cat-remove" type="button" data-vs-del aria-label="remove">×</button>`;
@@ -1332,7 +1335,7 @@ function makeVehExpRow(v, o) {
   row.dataset.vexp = o.id;
   row.innerHTML = `
     <div class="exp-day"><input class="exp-dayfield" inputmode="numeric" data-vx-day value="${o.day || ""}" placeholder="${t("exp_day_ph")}" maxlength="2" /></div>
-    <input class="cat-name exp-cat" list="vehCatList" data-vx-cat value="${(o.cat || "").replace(/"/g, "&quot;")}" placeholder="${t("exp_cat_ph")}" />
+    <input class="cat-name exp-cat" list="vehCatList" data-vx-cat value="${escapeHtml(o.cat || "")}" placeholder="${escapeHtml(t("exp_cat_ph"))}" />
     <div class="money-input money-input--sm cat-amount"><span class="money-symbol exp-symbol">${sym}</span><input type="text" inputmode="numeric" data-vx-amt value="${o.amount ? formatThousands(o.amount) : ""}" placeholder="0" /></div>
     <button class="cat-remove" type="button" data-vx-del aria-label="remove">×</button>`;
 
@@ -1618,7 +1621,7 @@ function saveCarTrip() {
   const veh = activeVehicle();
   const costOne = fuelCost(r.km, veh);
   h.trips.unshift({
-    id: "ct" + ++h.seq, date: new Date().toISOString().slice(0, 10),
+    id: "ct" + ++h.seq, date: localDateKey(),
     from: r.from, to: r.to, km: r.km, mins: r.mins,
     radar: r.radar, corridor: r.corridor, checkpoint: r.checkpoint,
     fuelOne: costOne, fuelRound: costOne == null ? null : costOne * 2,
@@ -1640,7 +1643,7 @@ function buildCarHistory() {
     const round = tr.fuelRound == null ? "—" : formatMoney(tr.fuelRound);
     row.innerHTML = `
       <div class="car-trip-main">
-        <div class="car-trip-route"><b>${tr.from} → ${tr.to}</b><span class="car-trip-date">${tr.date}</span></div>
+        <div class="car-trip-route"><b>${escapeHtml(tr.from)} → ${escapeHtml(tr.to)}</b><span class="car-trip-date">${escapeHtml(tr.date)}</span></div>
         <div class="car-trip-meta">${fmtKm(tr.km)} · ${fmtDuration(tr.mins)} · ${t("car_radar")} ${tr.radar} · ${t("car_checkpoint")} ${tr.checkpoint}</div>
       </div>
       <div class="car-trip-right">
@@ -1846,7 +1849,7 @@ function makeHoldingRow(id) {
   const typeSelect = `<select class="hold-type" data-hold-type="${id}" aria-label="asset type">${options}</select>`;
 
   if (at === "usstock" || at === "bist") {
-    const stockName = h.stockName ? h.stockName.replace(/"/g, "&quot;") : "";
+    const stockName = escapeHtml(h.stockName || "");
     row.innerHTML = `
       <div class="port-namecell">
         <div class="coin-search">
@@ -1862,7 +1865,7 @@ function makeHoldingRow(id) {
       <button class="cat-remove" type="button" data-hold-del="${id}" aria-label="remove">×</button>`;
     wireStockRow(row, id, at);
   } else if (at === "crypto") {
-    const coinName = h.coinName ? h.coinName.replace(/"/g, "&quot;") : "";
+    const coinName = escapeHtml(h.coinName || "");
     row.innerHTML = `
       <div class="port-namecell">
         <div class="coin-search">
@@ -1880,7 +1883,7 @@ function makeHoldingRow(id) {
     wireRemove(row, id);
     wireCryptoRow(row, id);
   } else if (at === "gold") {
-    const safeLabel = h.label ? h.label.replace(/"/g, "&quot;") : "";
+    const safeLabel = escapeHtml(h.label || "");
     row.innerHTML = `
       <div class="port-namecell">
         <input class="cat-name port-name" data-hold-name="${id}" value="${safeLabel}" placeholder="${t("asset_gold")}" />
@@ -1907,7 +1910,7 @@ function makeHoldingRow(id) {
     });
     updateGoldValue(row, id);
   } else if (at === "usd") {
-    const safeLabel = h.label ? h.label.replace(/"/g, "&quot;") : "";
+    const safeLabel = escapeHtml(h.label || "");
     row.innerHTML = `
       <div class="port-namecell">
         <input class="cat-name port-name" data-hold-name="${id}" value="${safeLabel}" placeholder="${t("asset_usd")}" />
@@ -1933,7 +1936,7 @@ function makeHoldingRow(id) {
     u.addEventListener("blur", () => { const x = holdById(id); if (x && x.usd > 0) u.value = formatThousands(x.usd); });
     updateUsdValue(row, id);
   } else {
-    const safeLabel = h.label ? h.label.replace(/"/g, "&quot;") : "";
+    const safeLabel = escapeHtml(h.label || "");
     const isInterest = at === "deposit" || at === "bonds";
     const netBtn = isInterest
       ? `<button type="button" class="net-tax-btn ${h.netTax ? "is-on" : ""}" data-hold-net="${id}">${t("net_tax")}</button>`
@@ -2102,7 +2105,10 @@ function addHolding() {
 }
 
 const PIE_COLORS = ["#7c5cff", "#21d4fd", "#2ee6a6", "#ffb454", "#ff7eb6", "#ffd54a", "#4f8cff", "#ff5ca8"];
-function escapeHtml(s) { return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
+function escapeHtml(s) {
+  return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+}
 
 // Annual return rate (%) for a holding's asset type, currency-aware.
 function assetRate(type, cur) {
@@ -2231,7 +2237,7 @@ function refreshPortfolio() {
     .map((h) => {
       const pct = (h.value / total) * 100;
       const name = h.label && h.label.trim() ? escapeHtml(h.label.trim()) : t("holding_ph");
-      const circle = `<circle class="donut-seg" data-seg="${h.id}" data-pct="${pct}" data-name="${name}" cx="21" cy="21" r="15.915" fill="none" stroke="${colorOf[h.id]}" stroke-width="6" stroke-dasharray="${pct} ${100 - pct}" stroke-dashoffset="${25 - cum}" />`;
+      const circle = `<circle class="donut-seg" data-seg="${escapeHtml(h.id)}" data-pct="${pct}" data-name="${escapeHtml(name)}" cx="21" cy="21" r="15.915" fill="none" stroke="${colorOf[h.id]}" stroke-width="6" stroke-dasharray="${pct} ${100 - pct}" stroke-dashoffset="${25 - cum}" />`;
       cum += pct;
       return circle;
     })
@@ -2326,7 +2332,7 @@ function makeIncomeRow(id, isCustom) {
   row.dataset.inc = id;
 
   const labelHtml = isCustom
-    ? `<input class="cat-name" data-inc-name="${id}" value="${label ? label.replace(/"/g, "&quot;") : ""}" placeholder="${t("income_ph")}" />`
+    ? `<input class="cat-name" data-inc-name="${escapeHtml(id)}" value="${escapeHtml(label || "")}" placeholder="${escapeHtml(t("income_ph"))}" />`
     : label;
 
   // Type badge: fixed (read-only) for preset categories, clickable only for custom ones.
@@ -2865,7 +2871,7 @@ async function buildTopPerformers() {
   if (!listEl) return;
   if (topPerfData && topPerfBuiltFor === state.currency) { renderTopPerformers(); return; }
   const built = state.currency; // guard against currency changing mid-fetch
-  const today = new Date().toISOString().slice(0, 10);
+  const today = localDateKey();
   const cacheKey = "numbr_topperf_" + built;
   // Same-day cache: the list is ready the moment the app opens, zero fetches.
   try {
@@ -2984,7 +2990,7 @@ async function buildIpoList() {
   const sec = document.getElementById("ipoSec"), listEl = document.getElementById("ipoList");
   if (!sec) return;
   if (state.currency !== "TL") { sec.hidden = true; return; }
-  const today = new Date().toISOString().slice(0, 10);
+  const today = localDateKey();
   let items = null;
   try {
     const c = JSON.parse(localStorage.getItem("numbr_ipo") || "null");
@@ -3304,9 +3310,26 @@ function loadState() {
   if (typeof s.monthlyExpenses === "number") state.monthlyExpenses = s.monthlyExpenses;
   if (typeof s.realMode === "boolean") state.realMode = s.realMode;
   if (typeof s.sound === "boolean") state.sound = s.sound;
-  if (s.inflation) state.inflation = s.inflation;
-  if (s.rates) state.rates = s.rates;
-  if (s.realEstate) state.realEstate = s.realEstate;
+  if (s.inflation && typeof s.inflation === "object") {
+    ["USD", "TL"].forEach((cur) => { if (Number.isFinite(s.inflation[cur])) state.inflation[cur] = s.inflation[cur]; });
+  }
+  if (s.rates && typeof s.rates === "object") {
+    ["USD", "TL"].forEach((cur) => {
+      if (!s.rates[cur] || typeof s.rates[cur] !== "object") return;
+      INSTRUMENTS[cur].forEach((inst) => { if (Number.isFinite(s.rates[cur][inst.id])) state.rates[cur][inst.id] = s.rates[cur][inst.id]; });
+    });
+  }
+  if (s.realEstate && typeof s.realEstate === "object") {
+    ["USD", "TL"].forEach((cur) => {
+      const re = s.realEstate[cur];
+      if (!re || typeof re !== "object") return;
+      state.realEstate[cur] = {
+        propertyValue: Number.isFinite(re.propertyValue) ? Math.max(0, re.propertyValue) : 0,
+        monthlyRent: Number.isFinite(re.monthlyRent) ? Math.max(0, re.monthlyRent) : 0,
+        netYield: !!re.netYield,
+      };
+    });
+  }
   if (s.expenses && Array.isArray(s.expenses.recurring)) {
     const e = s.expenses;
     state.expenses = {
@@ -3343,9 +3366,30 @@ function loadState() {
       });
     }
   }
-  if (s.income) state.income = s.income;
-  if (s.portfolio) state.portfolio = s.portfolio;
-  if (Array.isArray(s.watchlist)) state.watchlist = s.watchlist;
+  if (s.income && typeof s.income === "object") {
+    const amounts = s.income.amounts && typeof s.income.amounts === "object" ? s.income.amounts : {};
+    const passive = s.income.passive && typeof s.income.passive === "object" ? s.income.passive : {};
+    const custom = Array.isArray(s.income.custom) ? s.income.custom.filter((c) => c && typeof c.id === "string") : [];
+    state.income = { amounts: {}, passive: {}, custom, seq: Number.isFinite(s.income.seq) ? s.income.seq : custom.length };
+    INCOME_CATEGORIES.forEach((c) => {
+      state.income.amounts[c.id] = Number.isFinite(amounts[c.id]) ? amounts[c.id] : 0;
+      state.income.passive[c.id] = typeof passive[c.id] === "boolean" ? passive[c.id] : c.passive;
+    });
+    custom.forEach((c) => {
+      state.income.amounts[c.id] = Number.isFinite(amounts[c.id]) ? amounts[c.id] : 0;
+      state.income.passive[c.id] = !!passive[c.id];
+      c.label = typeof c.label === "string" ? c.label : "";
+    });
+  }
+  if (s.portfolio && typeof s.portfolio === "object") {
+    const holdings = Array.isArray(s.portfolio.holdings) ? s.portfolio.holdings.filter((h) => h && typeof h.id === "string") : [];
+    state.portfolio = {
+      holdings,
+      seq: Number.isFinite(s.portfolio.seq) ? s.portfolio.seq : holdings.length,
+      target: s.portfolio.target && typeof s.portfolio.target === "object" ? s.portfolio.target : { USD: [SAVINGS_DEFAULT_INVEST.USD], TL: [SAVINGS_DEFAULT_INVEST.TL] },
+    };
+  }
+  if (Array.isArray(s.watchlist)) state.watchlist = s.watchlist.filter((w) => w && typeof w.type === "string" && typeof w.key === "string");
   if (typeof s.portTotalUSD === "boolean") state.portTotalUSD = s.portTotalUSD;
   // normalize any legacy/removed asset types from older saves
   if (state.portfolio && Array.isArray(state.portfolio.holdings)) {

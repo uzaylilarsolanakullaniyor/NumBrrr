@@ -4,7 +4,8 @@
 // ?symbol=AAPL&range=1y   -> also { chg24, chg1mo, chg1y } performance (%)
 module.exports = async (req, res) => {
   const symbol = req.query && req.query.symbol ? String(req.query.symbol).trim() : "";
-  const range = req.query && req.query.range ? String(req.query.range) : "1d";
+  const requestedRange = req.query && req.query.range ? String(req.query.range) : "1d";
+  const range = requestedRange === "1y" ? "1y" : "1d";
   if (!symbol) {
     res.status(400).json({ error: "symbol required" });
     return;
@@ -12,12 +13,20 @@ module.exports = async (req, res) => {
   try {
     const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}?interval=1d&range=${encodeURIComponent(range)}`;
     const r = await fetch(url, { headers: { "User-Agent": "Mozilla/5.0 (compatible; NumBrrr/1.0)" } });
+    if (!r.ok) {
+      res.status(502).json({ error: "upstream failed", status: r.status });
+      return;
+    }
     const j = await r.json();
     const result = j && j.chart && j.chart.result && j.chart.result[0];
     const meta = result && result.meta;
     const closes = (result && result.indicators && result.indicators.quote && result.indicators.quote[0] && result.indicators.quote[0].close) || [];
     const valid = closes.filter((c) => typeof c === "number");
     const price = meta && typeof meta.regularMarketPrice === "number" ? meta.regularMarketPrice : (valid.length ? valid[valid.length - 1] : null);
+    if (typeof price !== "number" || !Number.isFinite(price)) {
+      res.status(404).json({ error: "quote unavailable" });
+      return;
+    }
     // previous *daily* close (yesterday) for the 24h move — chartPreviousClose is ~1y ago on a 1y range
     const prev = valid.length >= 2 ? valid[valid.length - 2] : (meta && (meta.chartPreviousClose || meta.previousClose));
     const pct = (a, b) => (a != null && b ? (a / b - 1) * 100 : null);
