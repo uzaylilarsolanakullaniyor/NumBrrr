@@ -665,6 +665,15 @@ body {
 .car-cost--total { background: rgba(46, 230, 166, 0.1); border-color: rgba(46, 230, 166, 0.35); }
 .car-result-actions { display: flex; gap: 8px; margin-top: 10px; }
 .car-map-link { flex: 1; display: block; padding: 10px 12px; border: 1px solid var(--glass-border-soft); border-radius: var(--radius-sm); color: var(--accent-2); text-align: center; text-decoration: none; font-size: 13px; font-weight: 700; }
+.car-map-wrap { margin-top: 14px; padding: 10px; border: 1px solid var(--glass-border-soft); border-radius: var(--radius-md); background: rgba(0, 0, 0, 0.16); overflow: hidden; }
+.car-map-wrap[hidden] { display: none; }
+.car-map-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; padding: 2px 3px 10px; }
+.car-map-head strong { font-size: 14px; }
+.car-map-head span { color: var(--text-faint); font-size: 11px; }
+.car-map { width: 100%; height: 330px; border-radius: calc(var(--radius-md) - 7px); overflow: hidden; background: #dce5ea; z-index: 0; }
+.car-map-unavailable { min-height: 220px; display: grid; place-items: center; padding: 24px; color: #344054; text-align: center; }
+.car-map .leaflet-control-attribution { font-size: 9px; }
+.car-map .leaflet-bar a { color: #24304a; }
 .car-cost {
   display: flex; flex-direction: column; gap: 3px;
   padding: 12px 14px; border-radius: var(--radius-sm);
@@ -753,6 +762,7 @@ body {
   .car-stat-l { font-size: 9px; }
   .car-exp-amt { width: 90px; }
   .car-extra-costs { grid-template-columns: 1fr; }
+  .car-map { height: 270px; }
   .car-trip { flex-direction: column; }
   .car-trip-right { width: 100%; justify-content: flex-end; }
 }
@@ -2138,4 +2148,173 @@ body {
 .ipo-row:active { transform: scale(0.99); }
 .ipo-sym { flex: none; min-width: 58px; font-size: 13px; font-weight: 800; color: var(--accent-2); }
 .ipo-name { flex: 1; min-width: 0; font-size: 13.5px; font-weight: 600; color: var(--text-dim); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ipo-date { flex: none; font-size: 11px; font-weight: 700; color: var(--text-faint); }
 .ipo-note { margin: 12px 0 0; font-size: 11.5px; font-weight: 600; color: var(--text-faint); }
+
+/* ============================================================
+   LIQUID GLASS 2.0 — calm, modern, high-clarity application UI
+   ============================================================ */
+[data-theme="glass"] {
+  --bg-base: #07101f;
+  --glass-bg: rgba(17, 30, 55, 0.58);
+  --glass-bg-strong: rgba(27, 43, 75, 0.74);
+  --glass-border: rgba(209, 228, 255, 0.24);
+  --glass-border-soft: rgba(209, 228, 255, 0.12);
+  --text: #f8fbff;
+  --text-dim: rgba(232, 241, 255, 0.76);
+  --text-faint: rgba(214, 228, 250, 0.52);
+  --accent: #776cff;
+  --accent-2: #42cbed;
+  --good: #42dda7;
+  --warn: #ffc466;
+  --shadow: 0 22px 70px rgba(0, 7, 24, 0.42);
+  --radius-lg: 28px;
+  --radius-md: 20px;
+  --radius-sm: 14px;
+}
+[data-theme="glass"] body { background: #07101f; }
+[data-theme="glass"] .bg {
+  background:
+    radial-gradient(900px 620px at 8% -4%, rgba(105, 91, 255, 0.36), transparent 64%),
+    radial-gradient(760px 620px at 96% 22%, rgba(52, 207, 232, 0.23), transparent 62%),
+    radial-gradient(840px 680px at 48% 112%, rgba(68, 114, 255, 0.17), transparent 68%),
+    linear-gradient(155deg, #0a1427 0%, #07101f 48%, #050b16 100%);
+}
+[data-theme="glass"] .blob { filter: blur(110px); opacity: 0.16; }
+[data-theme="glass"] .money-rain { display: none; }
+[data-theme="glass"] .shell { max-width: 1160px; gap: 18px; padding-top: 26px; }
+[data-theme="glass"] .view { gap: 18px; }
+[data-theme="glass"] .glass,
+[data-theme="glass"] .card {
+  position: relative;
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, 0.105), rgba(255, 255, 255, 0.025) 46%, rgba(80, 123, 255, 0.035)),
+    var(--glass-bg);
+  border: 1px solid rgba(215, 231, 255, 0.16);
+  -webkit-backdrop-filter: blur(30px) saturate(175%);
+  backdrop-filter: blur(30px) saturate(175%);
+  box-shadow: var(--shadow), inset 0 1px 0 rgba(255, 255, 255, 0.25), inset 0 0 0 1px rgba(255, 255, 255, 0.025);
+}
+[data-theme="glass"] .glass::after,
+[data-theme="glass"] .card::after {
+  content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
+  background: radial-gradient(620px 150px at 18% -8%, rgba(255,255,255,.14), transparent 62%);
+}
+[data-theme="glass"] .view-intro { text-align: left; padding: 6px 6px 2px; }
+[data-theme="glass"] .view-title {
+  font-size: clamp(30px, 5vw, 42px); letter-spacing: -1.3px;
+  background: linear-gradient(110deg, #fff 18%, #cbd8ff 60%, #74ddf7);
+  -webkit-background-clip: text; background-clip: text;
+}
+[data-theme="glass"] .subtagline { max-width: 650px; line-height: 1.55; }
+[data-theme="glass"] .settings-label {
+  color: rgba(236, 244, 255, 0.9); font-size: 12px; letter-spacing: .1em; font-weight: 800;
+}
+[data-theme="glass"] .controls,
+[data-theme="glass"] .headline,
+[data-theme="glass"] .rule,
+[data-theme="glass"] .savings-result,
+[data-theme="glass"] .settings-group,
+[data-theme="glass"] .watch-panel,
+[data-theme="glass"] .top-perf-sec,
+[data-theme="glass"] .ipo-sec { padding: 22px 24px; }
+[data-theme="glass"] input,
+[data-theme="glass"] select,
+[data-theme="glass"] button { font-family: "Inter", system-ui, sans-serif; }
+[data-theme="glass"] .money-input,
+[data-theme="glass"] .rate-input,
+[data-theme="glass"] .car-select,
+[data-theme="glass"] .car-num,
+[data-theme="glass"] .watch-search,
+[data-theme="glass"] .opt {
+  background: rgba(4, 13, 29, 0.42);
+  border-color: rgba(205, 225, 255, 0.16);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.045);
+}
+[data-theme="glass"] .money-input:focus-within,
+[data-theme="glass"] .rate-input:focus-within,
+[data-theme="glass"] .car-select:focus,
+[data-theme="glass"] .car-num:focus,
+[data-theme="glass"] .watch-search:focus {
+  border-color: rgba(105, 197, 255, 0.75);
+  box-shadow: 0 0 0 4px rgba(67, 194, 238, 0.13), inset 0 1px 0 rgba(255,255,255,.08);
+}
+[data-theme="glass"] .add-cat,
+[data-theme="glass"] .car-map-link,
+[data-theme="glass"] .rule-link {
+  border: 1px solid rgba(163, 204, 255, 0.22);
+  background: linear-gradient(135deg, rgba(119, 108, 255, 0.2), rgba(66, 203, 237, 0.13));
+  color: #eef8ff;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.13);
+}
+[data-theme="glass"] .add-cat:hover,
+[data-theme="glass"] .car-map-link:hover,
+[data-theme="glass"] .rule-link:hover {
+  transform: translateY(-1px); border-color: rgba(121, 211, 255, 0.5);
+  background: linear-gradient(135deg, rgba(119, 108, 255, 0.32), rgba(66, 203, 237, 0.22));
+}
+[data-theme="glass"] .headline {
+  overflow: hidden;
+  background: linear-gradient(135deg, rgba(112, 94, 255, 0.22), rgba(50, 201, 235, 0.12)), var(--glass-bg) !important;
+}
+[data-theme="glass"] .headline-amount,
+[data-theme="glass"] .savings-total-value {
+  background: linear-gradient(110deg, #fff, #9ee9ff);
+  -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+}
+[data-theme="glass"] .card { border-radius: 24px; transition: transform .2s ease, border-color .2s ease, box-shadow .2s ease; }
+[data-theme="glass"] .card:hover { transform: translateY(-2px); border-color: rgba(168, 210, 255, 0.28); box-shadow: 0 24px 62px rgba(0, 7, 24, .48), inset 0 1px 0 rgba(255,255,255,.25); }
+[data-theme="glass"] .card-accent { height: 3px; opacity: .75; }
+[data-theme="glass"] .cat-row,
+[data-theme="glass"] .tr-row { padding-top: 14px; padding-bottom: 14px; }
+[data-theme="glass"] .port-row,
+[data-theme="glass"] .top-perf-row,
+[data-theme="glass"] .ipo-row,
+[data-theme="glass"] .watch-row,
+[data-theme="glass"] .veh-card {
+  background: rgba(5, 15, 34, 0.35); border-color: rgba(207, 226, 255, 0.11);
+}
+[data-theme="glass"] .port-row:hover,
+[data-theme="glass"] .top-perf-row:hover,
+[data-theme="glass"] .ipo-row:hover,
+[data-theme="glass"] .watch-row:hover {
+  background: rgba(93, 119, 185, 0.13); border-color: rgba(145, 207, 255, 0.3);
+}
+[data-theme="glass"] .car-panel { padding: 22px 24px 24px; }
+[data-theme="glass"] .car-trip-type { background: rgba(4, 13, 29, 0.4); padding: 5px; }
+[data-theme="glass"] .car-trip-type button.is-active {
+  background: linear-gradient(135deg, #776cff, #3fc8ed); box-shadow: 0 8px 24px rgba(70, 112, 255, .3);
+}
+[data-theme="glass"] .car-cost,
+[data-theme="glass"] .car-stat { background: rgba(6, 18, 42, 0.4); border-color: rgba(201, 224, 255, 0.13); }
+[data-theme="glass"] .car-cost--total { background: linear-gradient(135deg, rgba(66, 221, 167, .15), rgba(66, 203, 237, .11)); border-color: rgba(77, 225, 179, .28); }
+[data-theme="glass"] .car-map-wrap { background: rgba(4, 12, 27, .42); padding: 12px; box-shadow: inset 0 1px 0 rgba(255,255,255,.05); }
+[data-theme="glass"] .tabbar {
+  bottom: calc(18px + env(safe-area-inset-bottom)); padding: 7px; gap: 4px;
+  background: linear-gradient(180deg, rgba(255,255,255,.13), rgba(255,255,255,.025)), rgba(11, 25, 49, .7);
+  border-color: rgba(216, 232, 255, .2);
+  -webkit-backdrop-filter: blur(34px) saturate(190%); backdrop-filter: blur(34px) saturate(190%);
+  box-shadow: 0 22px 65px rgba(0, 5, 18, .58), inset 0 1px 0 rgba(255,255,255,.3);
+}
+[data-theme="glass"] .tab { padding: 9px 8px 7px; min-width: 64px; }
+[data-theme="glass"] .tab.is-active::before {
+  background: linear-gradient(135deg, rgba(119, 108, 255, .64), rgba(52, 194, 234, .44));
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.45), 0 8px 22px rgba(65, 104, 237, .32);
+}
+[data-theme="glass"] .toast { background: rgba(14, 28, 54, .9); border-color: rgba(179, 218, 255, .25); box-shadow: 0 14px 45px rgba(0,5,18,.5); }
+
+@media (max-width: 620px) {
+  [data-theme="glass"] .shell { padding: 18px 12px calc(112px + env(safe-area-inset-bottom)); }
+  [data-theme="glass"] .view { gap: 14px; }
+  [data-theme="glass"] .glass { border-radius: 22px; }
+  [data-theme="glass"] .controls,
+  [data-theme="glass"] .headline,
+  [data-theme="glass"] .rule,
+  [data-theme="glass"] .settings-group,
+  [data-theme="glass"] .watch-panel,
+  [data-theme="glass"] .top-perf-sec,
+  [data-theme="glass"] .ipo-sec,
+  [data-theme="glass"] .car-panel { padding: 18px 16px; }
+  [data-theme="glass"] .view-title { font-size: 31px; }
+  [data-theme="glass"] .tab { min-width: 0; padding-left: 2px; padding-right: 2px; }
+}

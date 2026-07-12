@@ -300,6 +300,7 @@ const I18N = {
     car_cost_one: "One way fuel", car_cost_round: "Round trip fuel",
     car_oneway: "One way", car_roundtrip: "Round trip", car_toll: "Toll", car_parking: "Parking", car_other_cost: "Other",
     car_trip_total: "Trip total", car_extra_total: "Extra costs", car_open_map: "Open in Maps ↗",
+    car_route_map: "Route map", car_map_hint: "Drag and zoom the map", car_map_unavailable: "The interactive map could not load. Use Open in Maps instead.",
     car_add_favorite: "Add favorite", car_favorite_saved: "Favorite route saved ★", car_favorites: "Favorite routes",
     car_clear: "Clear route", car_details: "Details", car_vehicle: "Vehicle", car_route_type: "Trip type", car_fuel_cost: "Fuel cost",
     car_save_trip: "Save trip", car_trip_saved: "Trip saved ✓",
@@ -325,7 +326,7 @@ const I18N = {
     nav_watchlist: "Watch", watch_title: "Watchlist", watch_sub: "Search and favorite assets to track them.",
     watch_search_ph: "Search gold, stocks, crypto…", watch_empty: "Search above and tap to add assets to your watchlist.", watch_chart: "Open chart on TradingView",
     top_perf_title: "This year's top performers", asset_silver: "Silver", top_perf_loading: "Ranking the past year…",
-    ipo_title: "New IPOs (BIST)", ipo_note: "Listed in the last 2 years · BIST HALKA ARZ index (KAP)",
+    ipo_title: "Latest IPOs", ipo_note: "Latest 5 listings · automatically refreshed every 6 hours from KAP",
     watch_ccy: "Show price in USD / TL", watch_chart_full: "Open full chart on TradingView ↗",
     tr_index: "Borsa Istanbul", tr_forex: "Currencies", tr_gold: "Gold (TRY)",
     gold_gram: "Gram Gold", gold_quarter: "Quarter Gold", gold_half: "Half Gold", gold_full: "Full Gold",
@@ -447,6 +448,7 @@ const I18N = {
     car_cost_one: "Gidiş yakıt", car_cost_round: "Gidiş-dönüş yakıt",
     car_oneway: "Tek yön", car_roundtrip: "Gidiş-dönüş", car_toll: "Otoyol", car_parking: "Otopark", car_other_cost: "Diğer",
     car_trip_total: "Yolculuk toplamı", car_extra_total: "Ek giderler", car_open_map: "Haritada aç ↗",
+    car_route_map: "Rota haritası", car_map_hint: "Haritayı sürükleyip yakınlaştırabilirsin", car_map_unavailable: "Etkileşimli harita yüklenemedi. Haritada aç bağlantısını kullanabilirsin.",
     car_add_favorite: "Favorilere ekle", car_favorite_saved: "Favori rota kaydedildi ★", car_favorites: "Favori rotalar",
     car_clear: "Rotayı temizle", car_details: "Detaylar", car_vehicle: "Araç", car_route_type: "Yolculuk türü", car_fuel_cost: "Yakıt gideri",
     car_save_trip: "Yolculuğu kaydet", car_trip_saved: "Yolculuk kaydedildi ✓",
@@ -472,7 +474,7 @@ const I18N = {
     nav_watchlist: "Takip", watch_title: "Takip Listesi", watch_sub: "Varlık ara, favorile ve takip et.",
     watch_search_ph: "Altın, hisse, kripto ara…", watch_empty: "Yukarıdan ara ve takip listene varlık ekle.", watch_chart: "TradingView'de grafiği aç",
     top_perf_title: "Son 1 yılın yıldızları", asset_silver: "Gümüş", top_perf_loading: "Son 1 yıl sıralanıyor…",
-    ipo_title: "Yeni Halka Arzlar", ipo_note: "Son 2 yılda halka arz olanlar · BIST HALKA ARZ endeksi (KAP)",
+    ipo_title: "En Yeni Halka Arzlar", ipo_note: "Son 5 halka arz · KAP verileriyle 6 saatte bir otomatik güncellenir",
     watch_ccy: "Fiyatı dolar / TL göster", watch_chart_full: "TradingView'de tam grafiği aç ↗",
     tr_index: "Borsa İstanbul", tr_forex: "Döviz", tr_gold: "Altın (TL)",
     gold_gram: "Gram Altın", gold_quarter: "Çeyrek Altın", gold_half: "Yarım Altın", gold_full: "Tam Altın",
@@ -560,17 +562,17 @@ INCOME_CATEGORIES.forEach((c) => { state.income.amounts[c.id] = 0; state.income.
 [0, 1, 2].forEach(() => state.portfolio.holdings.push({ id: "h" + ++state.portfolio.seq, label: "", value: 0, assetType: "usstock" }));
 
 // ---- i18n helpers ----
-function L() { return I18N[state.lang] || I18N.en; }
+function langPack() { return I18N[state.lang] || I18N.en; }
 function t(key, vars) {
-  let s = L()[key];
+  let s = langPack()[key];
   if (s == null) s = I18N.en[key];
   if (s == null) s = key;
   if (vars) for (const k in vars) s = s.split("{" + k + "}").join(vars[k]);
   return s;
 }
-function instName(id) { return (L().inst[id] || I18N.en.inst[id] || {}).name || id; }
+function instName(id) { return (langPack().inst[id] || I18N.en.inst[id] || {}).name || id; }
 function instSub(inst) {
-  const d = L().inst[inst.id] || I18N.en.inst[inst.id] || {};
+  const d = langPack().inst[inst.id] || I18N.en.inst[inst.id] || {};
   if (inst.id === "btc" && state.currency === "TL") return d.sub_tl || d.sub || "";
   return d.sub || "";
 }
@@ -581,7 +583,7 @@ function instNote(inst) {
   if (inst.historical) return t("note_historical");
   return "";
 }
-function incLabel(id) { return (L().inc && L().inc[id]) || I18N.en.inc[id] || id; }
+function incLabel(id) { return (langPack().inc && langPack().inc[id]) || I18N.en.inc[id] || id; }
 
 // ---- Elements ----
 const el = {
@@ -623,6 +625,8 @@ const el = {
   carCalc: document.getElementById("carCalc"),
   carRouteMsg: document.getElementById("carRouteMsg"),
   carResults: document.getElementById("carResults"),
+  carMapWrap: document.getElementById("carMapWrap"),
+  carMap: document.getElementById("carMap"),
   carSaveTrip: document.getElementById("carSaveTrip"),
   carOneWay: document.getElementById("carOneWay"),
   carRoundTrip: document.getElementById("carRoundTrip"),
@@ -994,7 +998,7 @@ function monthLabel(ym) {
   const locale = state.lang === "tr" ? "tr-TR" : "en-US";
   return new Date(y, m - 1, 1).toLocaleDateString(locale, { month: "long", year: "numeric" });
 }
-function ecatName(c) { return (L().ecat && L().ecat[c]) || (I18N.en.ecat && I18N.en.ecat[c]) || c; }
+function ecatName(c) { return (langPack().ecat && langPack().ecat[c]) || (I18N.en.ecat && I18N.en.ecat[c]) || c; }
 
 // Roll over to the current calendar month: archive the previous month's total,
 // clear one-off entries, and reset each recurring bill's "paid" flag.
@@ -1206,8 +1210,8 @@ function toggleReminderPaid(id) {
 // ============================================================
 //  Vehicles (Araçlarım) — plate, dated payment reminders, expenses
 // ============================================================
-function vschedName(c) { return (L().vsched && L().vsched[c]) || (I18N.en.vsched && I18N.en.vsched[c]) || c; }
-function vcatName(c) { return (L().vcat && L().vcat[c]) || (I18N.en.vcat && I18N.en.vcat[c]) || c; }
+function vschedName(c) { return (langPack().vsched && langPack().vsched[c]) || (I18N.en.vsched && I18N.en.vsched[c]) || c; }
+function vcatName(c) { return (langPack().vcat && langPack().vcat[c]) || (I18N.en.vcat && I18N.en.vcat[c]) || c; }
 
 function buildVehicles() {
   el.vehSchedList.innerHTML = VEH_SCHED_PRESETS.map((c) => `<option value="${vschedName(c).replace(/"/g, "&quot;")}"></option>`).join("");
@@ -1513,13 +1517,14 @@ async function calcCarRoute() {
   if (!a || !b) { h.lastRoute = null; renderCarRoute(); toastCar(t("car_need_provinces")); saveState(); return; }
   if (a.lat === b.lat && a.lng === b.lng) { h.lastRoute = null; renderCarRoute(); toastCar(t("car_same_province")); saveState(); return; }
   el.carCalc.disabled = true; el.carCalc.textContent = t("car_calculating");
-  let km, mins, approx = false;
+  let km, mins, geometry, approx = false;
   try {
-    const url = `https://router.project-osrm.org/route/v1/driving/${a.lng},${a.lat};${b.lng},${b.lat}?overview=false`;
+    const url = `https://router.project-osrm.org/route/v1/driving/${a.lng},${a.lat};${b.lng},${b.lat}?overview=full&geometries=geojson`;
     const r = await fetch(url);
+    if (!r.ok) throw new Error("route service failed");
     const j = await r.json();
     const route = j && j.routes && j.routes[0];
-    if (route) { km = route.distance / 1000; mins = route.duration / 60; }
+    if (route) { km = route.distance / 1000; mins = route.duration / 60; geometry = route.geometry && route.geometry.coordinates; }
     else throw new Error("no route");
   } catch (e) {
     approx = true;
@@ -1527,7 +1532,7 @@ async function calcCarRoute() {
     mins = (km / 85) * 60;
   }
   el.carCalc.disabled = false; el.carCalc.textContent = t("car_calc");
-  h.lastRoute = { from: a.label, to: b.label, fromLat: a.lat, fromLng: a.lng, toLat: b.lat, toLng: b.lng, km, mins, approx };
+  h.lastRoute = { from: a.label, to: b.label, fromLat: a.lat, fromLng: a.lng, toLat: b.lat, toLng: b.lng, km, mins, geometry: Array.isArray(geometry) ? geometry : [[a.lng, a.lat], [b.lng, b.lat]], approx };
   renderCarRoute();
   if (approx) toastCar(t("car_route_fail"));
   saveState();
@@ -1535,7 +1540,7 @@ async function calcCarRoute() {
 
 function renderCarRoute() {
   const h = state.vehicleHub, r = h.lastRoute;
-  if (!r) { el.carResults.hidden = true; el.carSaveTrip.hidden = true; el.carRouteMsg.hidden = true; return; }
+  if (!r) { el.carResults.hidden = true; el.carMapWrap.hidden = true; el.carSaveTrip.hidden = true; el.carRouteMsg.hidden = true; return; }
   el.carResults.hidden = false; el.carSaveTrip.hidden = false;
   const veh = activeVehicle();
   const factor = tripFactor(), shownKm = r.km * factor, shownMins = r.mins * factor;
@@ -1556,6 +1561,30 @@ function renderCarRoute() {
     ${mapUrl ? `<div class="car-result-actions"><a class="car-map-link" href="${mapUrl}" target="_blank" rel="noopener noreferrer">${t("car_open_map")}</a></div>` : ""}
     ${fuel == null ? `<p class="car-hint">${t("car_no_profile")}</p>` : ""}`;
   el.carRouteMsg.hidden = true;
+  renderEmbeddedRouteMap(r);
+}
+
+let embeddedCarMap = null;
+let embeddedRouteGroup = null;
+function renderEmbeddedRouteMap(r) {
+  el.carMapWrap.hidden = false;
+  if (!window.L) {
+    el.carMap.innerHTML = `<div class="car-map-unavailable">${escapeHtml(t("car_map_unavailable"))}</div>`;
+    return;
+  }
+  if (!embeddedCarMap) {
+    embeddedCarMap = L.map(el.carMap, { zoomControl: true, scrollWheelZoom: false });
+    L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 19, attribution: "&copy; OpenStreetMap contributors" }).addTo(embeddedCarMap);
+  }
+  if (embeddedRouteGroup) embeddedRouteGroup.remove();
+  const coords = (Array.isArray(r.geometry) && r.geometry.length ? r.geometry : [[r.fromLng, r.fromLat], [r.toLng, r.toLat]])
+    .filter((p) => Array.isArray(p) && Number.isFinite(p[0]) && Number.isFinite(p[1])).map((p) => [p[1], p[0]]);
+  embeddedRouteGroup = L.featureGroup().addTo(embeddedCarMap);
+  if (coords.length) L.polyline(coords, { color: "#675cff", weight: 6, opacity: 0.9, lineCap: "round" }).addTo(embeddedRouteGroup);
+  L.circleMarker([r.fromLat, r.fromLng], { radius: 8, color: "#ffffff", weight: 3, fillColor: "#34d8a0", fillOpacity: 1 }).bindTooltip(r.from).addTo(embeddedRouteGroup);
+  L.circleMarker([r.toLat, r.toLng], { radius: 8, color: "#ffffff", weight: 3, fillColor: "#ff6b87", fillOpacity: 1 }).bindTooltip(r.to).addTo(embeddedRouteGroup);
+  embeddedCarMap.fitBounds(embeddedRouteGroup.getBounds(), { padding: [28, 28], maxZoom: 11 });
+  setTimeout(() => embeddedCarMap.invalidateSize(), 0);
 }
 
 function saveCarTrip() {
@@ -2942,11 +2971,10 @@ async function buildIpoList() {
   const sec = document.getElementById("ipoSec"), listEl = document.getElementById("ipoList");
   if (!sec) return;
   if (state.currency !== "TL") { sec.hidden = true; return; }
-  const today = localDateKey();
   let items = null;
   try {
-    const c = JSON.parse(localStorage.getItem("numbr_ipo") || "null");
-    if (c && c.day === today && Array.isArray(c.items) && c.items.length) items = c.items;
+    const c = JSON.parse(localStorage.getItem("numbr_ipo_v2") || "null");
+    if (c && Date.now() - c.time < 6 * 3600 * 1000 && Array.isArray(c.items) && c.items.length) items = c.items;
   } catch (e) {}
   if (!items) {
     try {
@@ -2955,17 +2983,19 @@ async function buildIpoList() {
         const j = await r.json();
         if (Array.isArray(j.items) && j.items.length) {
           items = j.items;
-          try { localStorage.setItem("numbr_ipo", JSON.stringify({ day: today, items })); } catch (e) {}
+          try { localStorage.setItem("numbr_ipo_v2", JSON.stringify({ time: Date.now(), items })); } catch (e) {}
         }
       }
     } catch (e) {}
   }
   if (state.currency !== "TL" || !items || !items.length) { sec.hidden = true; return; }
+  items = items.slice().sort((a, b) => (b.listedAt || "").localeCompare(a.listedAt || "")).slice(0, 5);
   sec.hidden = false;
   listEl.innerHTML = items.map((it) => `
     <button class="ipo-row" type="button" data-ipo="${escapeHtml(it.sym)}" data-name="${escapeHtml(it.name)}" title="${t("watch_chart")}">
       <span class="ipo-sym">${escapeHtml(it.sym)}</span>
       <span class="ipo-name">${escapeHtml(it.name)}</span>
+      ${it.listedAt ? `<span class="ipo-date">${new Date(it.listedAt + "T00:00:00").toLocaleDateString(state.lang === "tr" ? "tr-TR" : "en-US", { day: "numeric", month: "short", year: "numeric" })}</span>` : ""}
     </button>`).join("");
   listEl.querySelectorAll("[data-ipo]").forEach((b) => b.addEventListener("click", () => {
     openTradingView({ type: "bist", key: b.dataset.ipo, sym: b.dataset.ipo, name: b.dataset.name });
