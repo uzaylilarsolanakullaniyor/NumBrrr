@@ -192,7 +192,7 @@
       <datalist id="vehSchedList"></datalist>
       <datalist id="vehCatList"></datalist>
 
-      <!-- Route planner (Türkiye-only: provinces, radar counts and OSRM routing are TR data) -->
+      <!-- Route planner (Türkiye-only: provinces/districts and OSRM routing are TR data) -->
       <section class="glass car-panel" id="carRouteSec" aria-label="Route" hidden>
         <h3 class="settings-label" data-i18n="car_route">Route</h3>
         <div class="car-route-inputs">
@@ -211,10 +211,29 @@
             </div>
           </div>
         </div>
+        <div class="car-favorites" id="carFavWrap" hidden>
+          <span class="car-loc-lbl" data-i18n="car_favorites">Favorite routes</span>
+          <div class="car-fav-list" id="carFavList"></div>
+        </div>
         <button class="add-cat car-calc" id="carCalc" type="button" data-i18n="car_calc">Calculate route</button>
         <p class="car-route-msg" id="carRouteMsg" hidden></p>
         <div class="car-results" id="carResults" hidden></div>
-        <button class="add-cat car-save-trip" id="carSaveTrip" type="button" data-i18n="car_save_trip" hidden>Save trip</button>
+        <div class="car-trip-options" id="carTripOptions" hidden>
+          <label class="car-field"><span data-i18n="car_trip_type">Trip type</span><select class="car-select" id="carTripMode">
+            <option value="round" data-i18n="car_roundtrip_label">round trip</option>
+            <option value="one" data-i18n="car_oneway_label">one way</option>
+          </select></label>
+          <div class="car-extra-grid">
+            <label class="car-field"><span data-i18n="car_extra_toll">Toll / bridge</span><input class="car-num" id="carExtraToll" inputmode="numeric" placeholder="0" /></label>
+            <label class="car-field"><span data-i18n="car_extra_parking">Parking / ferry</span><input class="car-num" id="carExtraParking" inputmode="numeric" placeholder="0" /></label>
+            <label class="car-field"><span data-i18n="car_extra_other">Other</span><input class="car-num" id="carExtraOther" inputmode="numeric" placeholder="0" /></label>
+          </div>
+          <div class="car-route-actions">
+            <a class="add-cat car-map-link" id="carMapLink" href="#" target="_blank" rel="noopener noreferrer" data-i18n="car_open_map">Open map</a>
+            <button class="add-cat" id="carFavAdd" type="button" data-i18n="car_add_favorite">Add favorite</button>
+            <button class="add-cat car-save-trip" id="carSaveTrip" type="button" data-i18n="car_save_trip">Save trip</button>
+          </div>
+        </div>
       </section>
 
       <!-- Trip history (with running total; Türkiye-only, tied to the route planner) -->
@@ -482,6 +501,7 @@
     </div>
   </div>
 
+  <script src="data/tr-locations.js"></script>
   <script src="app.js"></script>
 
   <!-- Vercel Web Analytics (static-site injection; loads only on the deployed Vercel domain) -->
