@@ -278,7 +278,7 @@ const I18N = {
     guide_portfolio: "Add everything you own: stocks, crypto, gold, dollars, cash. You'll see your breakdown and monthly cash flow.",
     guide_income: "Enter your monthly income. Tick the passive ones like rent and interest, since only those count toward freedom.",
     guide_expenses: "Enter this month's spending, set reminders for your regular bills, and add what your car costs you.",
-    guide_car: "Plan an intercity route with distance, time, radar and checkpoint counts, save car profiles, and track fuel cost and trip expenses.",
+    guide_car: "Plan routes by province and district with distance, time, and fuel cost; save car profiles and track trip expenses.",
     guide_freedom: "Works out how much you need saved for your passive income alone to cover your expenses (the 4% rule).",
     guide_watch: "Search for the assets you care about, favorite them, and keep an eye on their prices.",
     theme_glass: "Liquid Glass", theme_glass_desc: "Modern frosted glass (default)",
@@ -294,13 +294,11 @@ const I18N = {
     car_route: "Route", car_from: "From", car_to: "To", car_pick_province: "Select province",
     car_center: "Center (province seat)", car_need_provinces: "Pick origin and destination province.", car_district: "District",
     car_calc: "Calculate route", car_calculating: "Calculating…",
-    car_same_province: "Pick two different provinces.", car_route_fail: "Couldn't reach the route service, showing an estimate.",
+    car_same_province: "Pick two different locations.", car_route_fail: "Couldn't reach the route service, showing an estimate.",
     car_no_profile: "Add a car profile to see fuel cost.",
-    car_distance: "Distance", car_duration: "Est. time", car_radar: "Radars",
-    car_corridor: "Speed corridors", car_checkpoint: "Checkpoints",
+    car_distance: "Distance", car_duration: "Est. time",
     car_cost_one: "One way fuel", car_cost_round: "Round trip fuel",
     car_save_trip: "Save trip", car_trip_saved: "Trip saved ✓",
-    car_data_note: "Radar, speed corridor and checkpoint counts are static reference figures (origin + destination province). Replace with official İçişleri figures when available.",
     car_profiles: "Car profiles", car_add_profile: "+ Add car", car_model_ph: "Brand & model",
     car_fuel_type: "Fuel", car_consumption: "Consumption", car_consumption_hint: "/100 km",
     car_price: "Fuel price", car_price_hint: "per L / kWh", car_active: "Active",
@@ -423,7 +421,7 @@ const I18N = {
     guide_portfolio: "Neyin varsa ekle: hisse, kripto, altın, dolar, nakit. Dağılımını ve aylık nakit akışını görürsün.",
     guide_income: "Aylık gelirlerini gir. Kira, faiz gibi pasif olanları işaretle, çünkü özgürlük hesabına sadece onlar giriyor.",
     guide_expenses: "Bu ayın harcamalarını gir, düzenli faturaların için hatırlatıcı kur, araç masraflarını da ekle.",
-    guide_car: "Şehirler arası rota planla: mesafe, süre, radar ve kontrol noktası sayısı; araç profilleri kaydet, yakıt maliyeti ve yolculuk harcamalarını takip et.",
+    guide_car: "İl ve ilçe bazında rota planla: mesafe, süre ve yakıt maliyetini hesapla; araç profilleri kaydet ve yolculuk harcamalarını takip et.",
     guide_freedom: "Giderlerini sadece pasif gelirinle karşılaman için ne kadar birikim gerektiğini hesaplar (%4 kuralı).",
     guide_watch: "Merak ettiğin varlıkları ara, favorine ekle ve fiyatlarını takip et.",
     theme_glass: "Sıvı Cam", theme_glass_desc: "Modern buzlu cam (varsayılan)",
@@ -439,13 +437,11 @@ const I18N = {
     car_route: "Rota", car_from: "Nereden", car_to: "Nereye", car_pick_province: "İl seç",
     car_center: "Merkez (il merkezi)", car_need_provinces: "Kalkış ve varış ilini seç.", car_district: "İlçe",
     car_calc: "Rotayı hesapla", car_calculating: "Hesaplanıyor…",
-    car_same_province: "İki farklı il seç.", car_route_fail: "Rota servisine ulaşılamadı, tahmini değer gösteriliyor.",
+    car_same_province: "İki farklı nokta seç.", car_route_fail: "Rota servisine ulaşılamadı, tahmini değer gösteriliyor.",
     car_no_profile: "Yakıt maliyeti için araç profili ekle.",
-    car_distance: "Mesafe", car_duration: "Tahmini süre", car_radar: "Radar",
-    car_corridor: "Hız koridoru", car_checkpoint: "Kontrol noktası",
+    car_distance: "Mesafe", car_duration: "Tahmini süre",
     car_cost_one: "Gidiş yakıt", car_cost_round: "Gidiş-dönüş yakıt",
     car_save_trip: "Yolculuğu kaydet", car_trip_saved: "Yolculuk kaydedildi ✓",
-    car_data_note: "Radar, hız koridoru ve kontrol noktası sayıları statik referans değerdir (kalkış + varış ili). Resmi İçişleri verisiyle güncellenebilir.",
     car_profiles: "Araç profilleri", car_add_profile: "+ Araç ekle", car_model_ph: "Marka ve model",
     car_fuel_type: "Yakıt", car_consumption: "Tüketim", car_consumption_hint: "/100 km",
     car_price: "Yakıt fiyatı", car_price_hint: "L / kWh başına", car_active: "Aktif",
@@ -1362,11 +1358,8 @@ function addVehicle() {
 // ============================================================
 //  Aracım (car hub): route planner, profiles, trips, expenses
 // ============================================================
-// Turkish provinces (plate order) with center coordinates and STATIC reference
-// counts: [plate, name, lat, lng, radar, speedCorridor, checkpoint].
-// The İçişleri site only exposes these via an interactive route tool, so these are
-// representative placeholders (origin + destination province are summed for a route).
-// Swap in official figures when a data table becomes available.
+// Turkish provinces (plate order) with center coordinates.
+// [plate, name, lat, lng]. Extra legacy columns may exist but are ignored by the route planner.
 const TR_PROVINCES = [
   [1,"Adana",37.00,35.32,9,3,7],[2,"Adıyaman",37.76,38.28,4,1,4],[3,"Afyonkarahisar",38.76,30.54,8,3,6],
   [4,"Ağrı",39.72,43.05,3,1,5],[5,"Amasya",40.65,35.83,4,1,3],[6,"Ankara",39.93,32.86,16,6,12],
@@ -1395,11 +1388,11 @@ const TR_PROVINCES = [
   [73,"Şırnak",37.52,42.46,3,1,4],[74,"Bartın",41.63,32.34,3,1,3],[75,"Ardahan",41.11,42.70,2,0,3],
   [76,"Iğdır",39.92,44.04,2,1,3],[77,"Yalova",40.65,29.28,4,2,3],[78,"Karabük",41.20,32.62,4,1,3],
   [79,"Kilis",36.72,37.12,3,1,4],[80,"Osmaniye",37.07,36.25,5,2,5],[81,"Düzce",40.84,31.16,5,2,4],
-].map((p) => ({ plate: p[0], name: p[1], lat: p[2], lng: p[3], radar: p[4], corridor: p[5], checkpoint: p[6] }));
+].map((p) => ({ plate: p[0], name: p[1], lat: p[2], lng: p[3] }));
 
 // Turkish districts (ilçe) by province plate: [name, lat, lng]. Centroids from OSM
-// admin-level-6 boundaries (ODbL, openstreetmap.org). ~966 districts; provinces
-// or districts missing here fall back to the province center (Merkez) option.
+// admin-level-6 boundaries (ODbL, openstreetmap.org). Covers all bundled districts;
+// province centers remain available through the Merkez option.
 const TR_DISTRICTS = {
   1:[["Aladağ",37.5218,35.4798],["Ceyhan",37.1188,35.8479],["Feke",37.874,35.7548],["Karaisalı",37.2471,35.1743],["Karataş",36.615,35.3033],["Kozan",37.5276,35.7723],["Pozantı",37.4934,34.9048],["Saimbeyli",38.0004,36.1267],["Sarıçam",37.1069,35.4131],["Seyhan",36.887,35.2338],["Tufanbeyli",38.3132,36.3139],["Yumurtalık",36.734,35.699],["Yüreğir",36.9017,35.3473],["Çukurova",37.0883,35.2252],["İmamoğlu",37.3095,35.5407]],
   2:[["Adıyaman merkez",37.6553,38.1472],["Besni",37.6369,37.983],["Gerger",38.0154,39.0097],["Gölbaşı",37.7826,37.6376],["Kahta",37.8252,38.7533],["Samsat",37.5622,38.4895],["Sincik",38.04,38.5902],["Tut",37.7778,37.97],["Çelikhan",38.0548,38.2756]],
@@ -1431,16 +1424,17 @@ const TR_DISTRICTS = {
   28:[["Alucra",40.3676,38.7305],["Bulancak",40.8772,38.1966],["Dereli",40.6247,38.4379],["Doğankent",40.793,38.9475],["Espiye",40.8824,38.7113],["Eynesil",41.0297,39.131],["Giresun merkez",40.8935,38.3919],["Görele",41.0032,39.037],["Güce",40.7893,38.8266],["Keşap",40.9149,38.5464],["Piraziz",40.9267,38.1284],["Tirebolu",40.9723,38.8538],["Yağlıdere",40.6523,38.6004],["Çamoluk",40.1416,38.7467],["Çanakçı",40.8719,39.0446],["Şebinkarahisar",40.2932,38.4347]],
   29:[["Gümüşhane merkez",40.5536,39.7418],["Kelkit",39.9932,39.4599],["Köse",40.2145,39.6941],["Kürtün",40.6607,39.0314],["Torul",40.5269,39.3324],["Şiran",40.1772,39.0384]],
   30:[["Derecik",37.1083,44.399],["Hakkari merkez",37.6074,43.863],["Yüksekova",37.521,44.3078],["Çukurca",37.262,43.6406],["Şemdinli",37.2487,44.5442]],
-  31:[["Altınözü",36.0664,36.349],["Anamur",36.0887,32.7872],["Antakya (merkez)",36.1945,36.2379],["Arsuz",36.4453,35.9571],["Aydıncık",36.1446,33.3481],["Belen",36.5173,36.1699],["Bozyazı",36.1157,33.0437],["Defne",36.1575,36.1082],["Dörtyol",36.8421,36.1968],["Erdemli",36.6023,34.2508],["Erzin",36.9197,36.0371],["Gülnar",36.2109,33.4665],["Hassa",36.7528,36.6252],["Kumlu",36.3698,36.5235],["Kırıkhan",36.5154,36.5106],["Mut",36.7216,33.3885],["Payas",36.7551,36.2073],["Reyhanlı",36.2786,36.5742],["Samandağ",36.1407,35.9206],["Silifke",36.2909,33.8408],["Yayladağı",35.9426,36.0056],["İskenderun",36.6189,36.1876]],
+  31:[["Altınözü",36.0664,36.349],["Antakya",36.1945,36.2379],["Arsuz",36.4453,35.9571],["Belen",36.5173,36.1699],["Defne",36.1575,36.1082],["Dörtyol",36.8421,36.1968],["Erzin",36.9197,36.0371],["Hassa",36.7528,36.6252],["Kumlu",36.3698,36.5235],["Kırıkhan",36.5154,36.5106],["Payas",36.7551,36.2073],["Reyhanlı",36.2786,36.5742],["Samandağ",36.1407,35.9206],["Yayladağı",35.9426,36.0056],["İskenderun",36.6189,36.1876]],
   32:[["Aksu",37.707,31.1778],["Atabey",38.0074,30.6322],["Eğirdir",37.8272,30.9211],["Gelendost",38.1033,31.0288],["Gönen",37.9404,30.4554],["Isparta merkez",37.7167,30.6486],["Keçiborlu",37.9078,30.2526],["Senirkent",38.1363,30.6548],["Sütçüler",37.5376,31.0998],["Uluborlu",38.1039,30.4575],["Yalvaç",38.3416,31.0317],["Yenişarbademli",37.7886,31.3412],["Şarkîkaraağaç",37.9969,31.3562]],
-  33:[["Akdeniz",36.8112,34.679],["Mezitli",36.7838,34.4758],["Tarsus",36.8655,34.9342],["Toroslar",36.88,34.5425],["Yenişehir",36.7981,34.5736],["Çamlıyayla",37.2441,34.6325]],
+  33:[["Akdeniz",36.8112,34.679],["Anamur",36.0887,32.7872],["Aydıncık",36.1446,33.3481],["Bozyazı",36.1157,33.0437],["Erdemli",36.6023,34.2508],["Gülnar",36.2109,33.4665],["Mezitli",36.7838,34.4758],["Mut",36.7216,33.3885],["Silifke",36.2909,33.8408],["Tarsus",36.8655,34.9342],["Toroslar",36.88,34.5425],["Yenişehir",36.7981,34.5736],["Çamlıyayla",37.2441,34.6325]],
   34:[["Adalar",40.8571,29.1034],["Arnavutköy",41.2702,28.6856],["Ataşehir",40.98,29.1403],["Avcılar",41.0133,28.7137],["Bahçelievler",41.0137,28.8422],["Bakırköy",40.9705,28.8379],["Bayrampaşa",41.044,28.9008],["Bağcılar",41.0408,28.8459],["Başakşehir",41.0911,28.7367],["Beykoz",41.1655,29.1646],["Beylikdüzü",40.9756,28.6404],["Beyoğlu",41.0402,28.9638],["Beşiktaş",41.0745,29.0253],["Büyükçekmece",41.0295,28.5359],["Esenler",41.0496,28.8732],["Esenyurt",41.0409,28.6682],["Eyüpsultan",41.1521,28.8895],["Fatih",41.0117,28.9536],["Gaziosmanpaşa",41.0681,28.9163],["Güngören",41.0223,28.8783],["Kadıköy",40.9768,29.045],["Kartal",40.9078,29.1987],["Kağıthane",41.0827,28.9766],["Küçükçekmece",40.9921,28.7765],["Maltepe",40.946,29.1564],["Pendik",40.9122,29.2986],["Sancaktepe",40.9964,29.2377],["Sarıyer",41.187,29.0543],["Silivri",41.131,28.1529],["Sultanbeyli",40.9725,29.2668],["Sultangazi",41.1202,28.8786],["Tuzla",40.8437,29.3172],["Zeytinburnu",40.9973,28.9037],["Çatalca",41.3653,28.2939],["Çekmeköy",41.0709,29.258],["Ümraniye",41.0321,29.1253],["Üsküdar",41.0323,29.0477],["Şile",41.1482,29.6311],["Şişli",41.0621,28.9886]],
   35:[["Aliağa",38.8162,27.0029],["Balçova",38.3937,27.0522],["Bayraklı",38.4802,27.1584],["Bayındır",38.2011,27.621],["Bergama",39.0218,27.1058],["Beydağ",38.108,28.2476],["Bornova",38.4602,27.2727],["Buca",38.3412,27.243],["Dikili",39.0136,26.8723],["Foça",38.6841,26.809],["Gaziemir",38.3334,27.1377],["Güzelbahçe",38.3402,26.8812],["Karabağlar",38.3501,27.0658],["Karaburun",38.5625,26.4778],["Karşıyaka",38.4892,27.1189],["Kemalpaşa",38.4212,27.5125],["Kiraz",38.1758,28.3532],["Konak",38.4173,27.1426],["Kınık",39.078,27.4005],["Menderes",38.0937,27.1453],["Menemen",38.629,27.0315],["Narlıdere",38.3856,26.9901],["Seferihisar",38.1722,26.8405],["Selçuk",37.9463,27.3826],["Tire",38.0687,27.7156],["Torbalı",38.2022,27.3655],["Urla",38.327,26.6896],["Çeşme",38.3147,26.3635],["Çiğli",38.4794,27.0092],["Ödemiş",38.1909,27.9914]],
   36:[["Akyaka",40.78,43.6846],["Arpaçay",40.8815,43.5015],["Digor",40.2944,43.6052],["Kars merkez",40.5463,43.4415],["Kağızman",40.1537,43.1586],["Sarıkamış",40.229,42.4633],["Selim",40.4449,42.7637],["Susuz",40.7646,43.1334]],
   37:[["Abana",41.9759,34.0443],["Araç",41.1585,33.2721],["Azdavay",41.7084,33.3486],["Ağlı",41.6992,33.5581],["Bozkurt",41.9148,33.9891],["Cide",41.9259,33.068],["Daday",41.4951,33.3629],["Devrekani",41.6839,33.8917],["Doğanyurt",41.9974,33.4594],["Hanönü",41.635,34.4442],["Kastamonu merkez",41.367,33.8026],["Küre",41.8284,33.6506],["Pınarbaşı",41.6137,33.0503],["Seydiler",41.6403,33.6943],["Taşköprü",41.4399,34.1903],["Tosya",41.0281,34.0975],["Çatalzeytin",41.9278,34.1877],["İhsangazi",41.1489,33.5497],["İnebolu",41.9655,33.7487],["Şenpazar",41.8177,33.2428]],
   38:[["Akkışla",39.0068,36.1568],["Bünyan",38.7842,35.9629],["Develi",38.2852,35.636],["Felahiye",39.1239,35.5494],["Hacılar",38.6654,35.42],["Kocasinan",38.9036,35.3056],["Melikgazi",38.7479,35.6074],["Pınarbaşı",38.794,36.3088],["Sarıoğlan",39.1085,35.9736],["Sarız",38.4532,36.4953],["Talas",38.6217,35.7307],["Tomarza",38.4654,35.84],["Yahyalı",38.0814,35.4808],["Yeşilhisar",38.3379,35.0234],["Özvatan",39.1301,35.7379],["İncesu",38.696,35.163]],
   39:[["Babaeski",41.3538,27.109],["Demirköy",41.9384,27.8393],["Kofçaz",42.0556,27.1997],["Kırklareli merkez",41.9645,27.3863],["Lüleburgaz",41.3319,27.3984],["Pehlivanköy",41.3646,26.9433],["Pınarhisar",41.6805,27.5722],["Vize",41.6615,28.0065]],
-  41:[["Akpınar",39.531,33.8887],["Akçakent",39.6416,34.0741],["Başiskele",40.6917,29.9172],["Boztepe",39.3243,34.3576],["Darıca",40.7752,29.3652],["Derince",40.8475,29.8663],["Dilovası",40.8127,29.5668],["Gebze",40.856,29.4938],["Gölcük",40.6927,29.8134],["Kaman",39.3479,33.5606],["Kandıra",41.1158,30.1304],["Karamürsel",40.6242,29.598],["Kartepe",40.6986,30.06],["Körfez",40.8262,29.7244],["Kırşehir merkez",39.0965,34.1118],["Mucur",39.0866,34.5006],["Çayırova",40.8397,29.3905],["Çiçekdağı",39.6969,34.2991],["İzmit",40.8213,29.9945]],
+  40:[["Akpınar",39.4501,33.9644],["Akçakent",39.6229,34.0955],["Boztepe",39.2697,34.2618],["Kaman",39.3576,33.7237],["Kırşehir merkez",39.1458,34.1601],["Mucur",39.0615,34.3829],["Çiçekdağı",39.6069,34.4089]],
+  41:[["Başiskele",40.6917,29.9172],["Darıca",40.7752,29.3652],["Derince",40.8475,29.8663],["Dilovası",40.8127,29.5668],["Gebze",40.856,29.4938],["Gölcük",40.6927,29.8134],["Kandıra",41.1158,30.1304],["Karamürsel",40.6242,29.598],["Kartepe",40.6986,30.06],["Körfez",40.8262,29.7244],["Çayırova",40.8397,29.3905],["İzmit",40.8213,29.9945]],
   42:[["Ahırlı",37.2685,32.0884],["Akören",37.315,32.3407],["Akşehir",38.3621,31.4655],["Altınekin",38.3258,32.9251],["Beyşehir",37.7203,31.6274],["Bozkır",37.2513,32.323],["Cihanbeyli",38.7751,32.7146],["Derbent",37.987,31.9842],["Derebucak",37.4192,31.6006],["Doğanhisar",38.1372,31.6513],["Emirgazi",37.9701,33.8283],["Ereğli",37.5859,33.9582],["Güneysınır",37.1461,32.7077],["Hadim",36.9721,32.5436],["Halkapınar",37.402,34.286],["Hüyük",37.9126,31.6441],["Ilgın",38.2673,31.922],["Kadınhanı",38.4058,32.2067],["Karapınar",37.7189,33.6014],["Karatay",37.9081,32.728],["Kulu",39.18,32.986],["Meram",37.7814,32.4418],["Sarayönü",38.4419,32.4592],["Selçuklu",37.9868,32.5308],["Seydişehir",37.4596,31.9062],["Taşkent",36.9277,32.5539],["Tuzlukçu",38.4818,31.6673],["Yalıhüyük",37.3216,32.08],["Yunak",38.9228,31.8085],["Çeltik",38.9915,31.7858],["Çumra",37.5087,32.7136]],
   43:[["Altıntaş",39.0286,30.0568],["Aslanapa",39.1936,29.7624],["Domaniç",39.7815,29.5412],["Dumlupınar",38.9094,30.0171],["Emet",39.3196,29.469],["Gediz Merkez",39.002,29.4908],["Hisarcık",39.197,29.2427],["Kütahya merkez",39.4343,30.0991],["Pazarlar",38.948,29.1089],["Simav",39.2923,28.9227],["Tavşanlı",39.5827,29.1744],["Çavdarhisar",39.2739,29.6178],["Şaphane",38.9646,29.1896]],
   44:[["Akçadağ",38.4478,37.973],["Arapgir",38.956,38.5426],["Arguvan",38.8331,38.2607],["Battalgazi",38.3505,38.398],["Darende",38.5297,37.69],["Doğanyol",38.2774,39.0393],["Doğanşehir",38.0821,37.8872],["Hekimhan",38.8327,37.9153],["Kale",38.3758,38.8021],["Kuluncak",38.8891,37.6838],["Pütürge",38.1971,38.843],["Yazıhan",38.5317,38.1039],["Yeşilyurt",38.3367,38.1889]],
@@ -1466,7 +1460,7 @@ const TR_DISTRICTS = {
   64:[["Banaz",38.7541,29.7938],["Eşme",38.4569,28.97],["Karahallı",38.3453,29.5583],["Sivaslı",38.5092,29.6629],["Ulubey",38.3469,29.244],["Uşak merkez",38.6522,29.1471]],
   65:[["Bahçesaray",38.0905,42.8134],["Başkale",38.1012,44.3272],["Edremit",38.376,43.2691],["Erciş",38.9862,43.3265],["Gevaş",38.4029,42.917],["Gürpınar",38.2502,43.5059],["Muradiye",38.961,43.6454],["Saray",38.5587,44.2821],["Tuşba",38.7531,43.3312],["Çaldıran",39.1463,44.1295],["Çatak",38.0346,43.0573],["Özalp",38.7999,44.1813],["İpekyolu",38.5424,43.4759]],
   66:[["Akdağmadeni",39.8473,35.8703],["Aydıncık",40.1702,35.2563],["Boğazlıyan",39.0712,35.3467],["Kadışehri",39.9461,35.8618],["Saraykent",39.7918,35.575],["Sarıkaya",39.5165,35.4072],["Sorgun",39.8239,35.3055],["Yenifakılı",39.186,34.9922],["Yerköy",39.733,34.3206],["Yozgat merkez",39.8259,34.7542],["Çandır",39.192,35.5504],["Çayıralan",39.2607,35.69],["Çekerek",40.0419,35.4837],["Şefaatli",39.4483,34.7956]],
-  67:[["Kilimli",41.5163,31.9049],["Kozlu",41.4086,31.7247],["Zonguldak merkez",41.4231,31.8211],["Çaycuma",41.528,32.074]],
+  67:[["Alaplı",41.1487,31.3919],["Devrek",41.2093,31.9517],["Gökçebey",41.3163,32.1793],["Kilimli",41.5163,31.9049],["Kozlu",41.4086,31.7247],["Zonguldak merkez",41.4231,31.8211],["Çaycuma",41.528,32.074],["Ereğli",41.3015,31.4767]],
   68:[["Aksaray merkez",38.4334,34.1228],["Ağaçören",38.7865,33.7844],["Eskil",38.2103,33.3874],["Gülağaç",38.4436,34.3578],["Güzelyurt",38.2805,34.3123],["Ortaköy",38.7782,34.1132],["Sarıyahşi",38.9707,33.7995],["Sultanhanı",38.2579,33.5406]],
   69:[["Aydıntepe",40.4524,40.1706],["Bayburt merkez",40.3274,40.3512],["Demirözü",40.096,39.8668]],
   70:[["Ayrancı",37.3787,33.8714],["Başyayla",36.7518,32.6778],["Ermenek",36.6103,32.9433],["Karaman merkez",37.0642,33.1523],["Kazımkarabekir",37.2658,32.9591],["Sarıveliler",36.6782,32.6058]],
@@ -1475,12 +1469,12 @@ const TR_DISTRICTS = {
   73:[["Beytüşşebap",37.5965,43.0937],["Cizre",37.2581,42.1225],["Güçlükonak",37.5278,41.8919],["Silopi",37.2479,42.6114],["Uludere",37.3516,43.0449],["İdil",37.3539,41.8176],["Şırnak merkez",37.5644,42.3987]],
   74:[["Amasra",41.7609,32.431],["Bartın merkez",41.641,32.258],["Kurucaşile",41.8284,32.6606],["Ulus",41.5311,32.6401]],
   75:[["Ardahan merkez",41.0552,42.7614],["Damal",41.3647,42.8392],["Göle",40.8376,42.4981],["Hanak",41.2229,42.9342],["Posof",41.5127,42.7755],["Çıldır",41.2336,43.1793]],
-  76:[["Aralık",39.7486,44.6615],["Karakoyunlu",40.0003,44.2582],["Tuzluca",40.046,43.6115]],
+  76:[["Aralık",39.7486,44.6615],["Iğdır merkez",39.9201,44.0436],["Karakoyunlu",40.0003,44.2582],["Tuzluca",40.046,43.6115]],
   77:[["Altınova",40.6844,29.4947],["Armutlu",40.5151,28.8732],["Termal",40.5914,29.2069],["Yalova merkez",40.5846,29.2487],["Çiftlikköy",40.6582,29.3636],["Çınarcık",40.6306,29.0429]],
-  78:[["Eflani",41.4704,32.9562],["Eskipazar",40.9859,32.6075],["Safranbolu",41.2565,32.7762]],
+  78:[["Eflani",41.4704,32.9562],["Eskipazar",40.9859,32.6075],["Karabük merkez",41.2049,32.6277],["Ovacık",41.2049,32.6277],["Safranbolu",41.2565,32.7762],["Yenice",41.2049,32.6277]],
   79:[["Elbeyli",36.6971,37.4526],["Kilis (merkez)",36.7486,37.0014],["Musabeyli",36.8954,36.9718],["Polateli",36.8527,37.0634]],
   80:[["Bahçe",37.2089,36.5777],["Düziçi",37.3,36.4126],["Hasanbeyli",37.1231,36.5246],["Kadirli",37.4055,36.077],["Osmaniye (merkez)",37.1354,36.2654],["Sumbas",37.4984,36.0308],["Toprakkale",37.0602,36.1144]],
-  81:[["Akçakoca",41.0615,31.0842],["Alaplı",41.1487,31.3919],["Cumayeri",40.9137,30.9263],["Devrek",41.2093,31.9517],["Düzce merkez",40.842,31.1834],["Ereğli",41.3015,31.4767],["Gökçebey",41.3163,32.1793],["Gölyaka",40.7583,30.9518],["Gümüşova",40.8475,30.9168],["Kaynaşlı",40.7448,31.3112],["Yığılca",40.9513,31.6022],["Çilimli",40.9034,31.0427]]
+  81:[["Akçakoca",41.0615,31.0842],["Cumayeri",40.9137,30.9263],["Düzce merkez",40.842,31.1834],["Gölyaka",40.7583,30.9518],["Gümüşova",40.8475,30.9168],["Kaynaşlı",40.7448,31.3112],["Yığılca",40.9513,31.6022],["Çilimli",40.9034,31.0427]]
 };
 
 
@@ -1489,7 +1483,7 @@ const CAR_FUELS = ["gas", "diesel", "lpg", "electric", "hybrid"];
 function provByName(name) { return TR_PROVINCES.find((p) => p.name === name); }
 function districtsFor(pName) { const p = provByName(pName); return (p && TR_DISTRICTS[p.plate]) || []; }
 // Resolve a province+district selection to a routing point. District empty = province
-// center (Merkez). Radar/checkpoint counts always come from the parent province.
+// center (Merkez).
 function resolveLoc(pName, dName) {
   const prov = provByName(pName);
   if (!prov) return null;
@@ -1540,7 +1534,7 @@ function fillDistrictSelect(sel, pName, val) {
 function buildCarHub() {
   const h = state.vehicleHub;
   if (!el.carFromP) return;
-  // Route planner + trip history are Türkiye-only (TR provinces, radar counts, OSRM
+  // Route planner + trip history are Türkiye-only (TR provinces/districts and OSRM
   // over TR roads); in USD mode the view keeps just the car cards.
   const isTR = state.currency === "TL";
   el.carRouteSec.hidden = !isTR;
@@ -1577,15 +1571,7 @@ async function calcCarRoute() {
     mins = (km / 85) * 60;
   }
   el.carCalc.disabled = false; el.carCalc.textContent = t("car_calc");
-  // Radar/checkpoint counts are province-level; sum both provinces (single count if
-  // both endpoints are in the same province).
-  const sameProv = a.prov.plate === b.prov.plate;
-  h.lastRoute = {
-    from: a.label, to: b.label, km, mins, approx,
-    radar: sameProv ? a.prov.radar : a.prov.radar + b.prov.radar,
-    corridor: sameProv ? a.prov.corridor : a.prov.corridor + b.prov.corridor,
-    checkpoint: sameProv ? a.prov.checkpoint : a.prov.checkpoint + b.prov.checkpoint,
-  };
+  h.lastRoute = { from: a.label, to: b.label, km, mins, approx };
   renderCarRoute();
   if (approx) toastCar(t("car_route_fail"));
   saveState();
@@ -1603,9 +1589,6 @@ function renderCarRoute() {
     <div class="car-stats">
       ${stat(t("car_distance"), fmtKm(r.km))}
       ${stat(t("car_duration"), fmtDuration(r.mins))}
-      ${stat(t("car_radar"), r.radar)}
-      ${stat(t("car_corridor"), r.corridor)}
-      ${stat(t("car_checkpoint"), r.checkpoint)}
     </div>
     <div class="car-costs">
       ${cost(t("car_cost_one"), costOne)}
@@ -1623,7 +1606,6 @@ function saveCarTrip() {
   h.trips.unshift({
     id: "ct" + ++h.seq, date: localDateKey(),
     from: r.from, to: r.to, km: r.km, mins: r.mins,
-    radar: r.radar, corridor: r.corridor, checkpoint: r.checkpoint,
     fuelOne: costOne, fuelRound: costOne == null ? null : costOne * 2,
     profile: veh ? (veh.plate || "") : "",
   });
@@ -1644,7 +1626,7 @@ function buildCarHistory() {
     row.innerHTML = `
       <div class="car-trip-main">
         <div class="car-trip-route"><b>${escapeHtml(tr.from)} → ${escapeHtml(tr.to)}</b><span class="car-trip-date">${escapeHtml(tr.date)}</span></div>
-        <div class="car-trip-meta">${fmtKm(tr.km)} · ${fmtDuration(tr.mins)} · ${t("car_radar")} ${tr.radar} · ${t("car_checkpoint")} ${tr.checkpoint}</div>
+        <div class="car-trip-meta">${fmtKm(tr.km)} · ${fmtDuration(tr.mins)}</div>
       </div>
       <div class="car-trip-right">
         <span class="car-trip-cost">${round}</span><small>${t("car_roundtrip_label")}</small>
