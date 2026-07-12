@@ -632,6 +632,21 @@ body {
 .car-select:disabled { opacity: 0.5; cursor: not-allowed; }
 .car-arrow { color: var(--text-faint); font-size: 20px; padding-bottom: 10px; }
 .car-calc { margin-top: 14px; }
+.car-trip-type { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 14px; padding: 4px; border: 1px solid var(--glass-border-soft); border-radius: var(--radius-sm); background: rgba(255, 255, 255, 0.035); }
+.car-trip-type button { padding: 9px 10px; border: 0; border-radius: calc(var(--radius-sm) - 4px); background: transparent; color: var(--text-dim); font: inherit; font-weight: 700; cursor: pointer; }
+.car-trip-type button.is-active { background: linear-gradient(135deg, var(--accent), var(--accent-2)); color: #fff; }
+.car-route-actions { display: grid; grid-template-columns: 1fr 44px 44px; gap: 8px; align-items: end; }
+.car-route-actions .car-calc { margin-top: 12px; }
+.car-icon-btn { height: 44px; border: 1px solid var(--glass-border-soft); border-radius: var(--radius-sm); background: rgba(255, 255, 255, 0.05); color: var(--text); font: inherit; font-size: 22px; cursor: pointer; }
+.car-icon-btn.is-active { color: #ffd54a; border-color: rgba(255, 213, 74, 0.55); }
+.car-favorites { display: flex; gap: 7px; overflow-x: auto; padding: 10px 0 2px; }
+.car-fav { flex: none; display: inline-flex; align-items: center; gap: 7px; padding: 7px 10px; border: 1px solid var(--glass-border-soft); border-radius: 999px; background: rgba(255,255,255,.04); color: var(--text-dim); font: inherit; font-size: 12px; cursor: pointer; }
+.car-fav-del { color: var(--text-faint); font-size: 15px; }
+.car-extra-costs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 12px; }
+.car-extra-costs label { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
+.car-extra-costs label > span { color: var(--text-faint); font-size: 11px; font-weight: 700; }
+.car-extra-costs .money-input { min-width: 0; }
+.car-extra-costs input { width: 100%; min-width: 0; }
 .car-route-msg { margin: 10px 0 0; font-size: 13px; color: var(--warn); }
 .car-results { margin-top: 16px; }
 .car-stats {
@@ -646,6 +661,10 @@ body {
 .car-stat-v { font-family: "Sora", sans-serif; font-size: 19px; font-weight: 800; letter-spacing: -0.5px; }
 .car-stat-l { font-size: 10.5px; color: var(--text-faint); font-weight: 600; line-height: 1.2; }
 .car-costs { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; }
+.car-costs--total { grid-template-columns: 1fr; }
+.car-cost--total { background: rgba(46, 230, 166, 0.1); border-color: rgba(46, 230, 166, 0.35); }
+.car-result-actions { display: flex; gap: 8px; margin-top: 10px; }
+.car-map-link { flex: 1; display: block; padding: 10px 12px; border: 1px solid var(--glass-border-soft); border-radius: var(--radius-sm); color: var(--accent-2); text-align: center; text-decoration: none; font-size: 13px; font-weight: 700; }
 .car-cost {
   display: flex; flex-direction: column; gap: 3px;
   padding: 12px 14px; border-radius: var(--radius-sm);
@@ -695,6 +714,11 @@ body {
   display: flex; align-items: center; gap: 12px;
   padding: 12px 0; border-bottom: 1px solid var(--glass-border-soft);
 }
+.car-trip { align-items: flex-start; }
+.car-trip-details { margin-top: 7px; color: var(--text-faint); font-size: 11px; line-height: 1.55; }
+.car-trip-details summary { cursor: pointer; color: var(--accent-2); font-weight: 700; }
+.car-trip-detail-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 3px 12px; margin-top: 6px; }
+.car-trip-map { color: var(--accent-2); text-decoration: none; }
 .car-trip:last-child { border-bottom: none; }
 .car-trip-main { flex: 1; min-width: 0; }
 .car-trip-route { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
@@ -728,6 +752,9 @@ body {
   .car-stat-v { font-size: 15px; }
   .car-stat-l { font-size: 9px; }
   .car-exp-amt { width: 90px; }
+  .car-extra-costs { grid-template-columns: 1fr; }
+  .car-trip { flex-direction: column; }
+  .car-trip-right { width: 100%; justify-content: flex-end; }
 }
 
 .savings-result { padding: 26px; display: flex; flex-direction: column; gap: 20px; }

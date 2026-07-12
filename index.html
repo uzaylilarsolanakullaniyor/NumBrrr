@@ -211,8 +211,22 @@
             </div>
           </div>
         </div>
-        <button class="add-cat car-calc" id="carCalc" type="button" data-i18n="car_calc">Calculate route</button>
+        <div class="car-trip-type" role="group" aria-label="Trip type">
+          <button id="carOneWay" type="button" data-trip-type="oneway" data-i18n="car_oneway">One way</button>
+          <button id="carRoundTrip" type="button" data-trip-type="roundtrip" data-i18n="car_roundtrip">Round trip</button>
+        </div>
+        <div class="car-favorites" id="carFavorites" hidden></div>
+        <div class="car-route-actions">
+          <button class="add-cat car-calc" id="carCalc" type="button" data-i18n="car_calc">Calculate route</button>
+          <button class="car-icon-btn" id="carFavorite" type="button" data-i18n-title="car_add_favorite" title="Add favorite">☆</button>
+          <button class="car-icon-btn" id="carClear" type="button" data-i18n-title="car_clear" title="Clear">×</button>
+        </div>
         <p class="car-route-msg" id="carRouteMsg" hidden></p>
+        <div class="car-extra-costs">
+          <label><span data-i18n="car_toll">Toll</span><div class="money-input money-input--sm"><span class="money-symbol">₺</span><input id="carToll" inputmode="numeric" placeholder="0"></div></label>
+          <label><span data-i18n="car_parking">Parking</span><div class="money-input money-input--sm"><span class="money-symbol">₺</span><input id="carParking" inputmode="numeric" placeholder="0"></div></label>
+          <label><span data-i18n="car_other_cost">Other</span><div class="money-input money-input--sm"><span class="money-symbol">₺</span><input id="carOther" inputmode="numeric" placeholder="0"></div></label>
+        </div>
         <div class="car-results" id="carResults" hidden></div>
         <button class="add-cat car-save-trip" id="carSaveTrip" type="button" data-i18n="car_save_trip" hidden>Save trip</button>
       </section>
@@ -482,6 +496,7 @@
     </div>
   </div>
 
+  <script src="turkey-locations.js"></script>
   <script src="app.js"></script>
 
   <!-- Vercel Web Analytics (static-site injection; loads only on the deployed Vercel domain) -->

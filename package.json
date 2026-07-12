@@ -4,7 +4,9 @@
   "description": "NumBrrr — calculate the total savings you need to become financially free",
   "main": "app.js",
   "scripts": {
-    "test": "node --check app.js && node --check api/quote.js && node --check api/ipo.js && node --check api/topperf.js"
+    "lint": "node --check app.js && node --check turkey-locations.js && node --check api/quote.js && node --check api/ipo.js && node --check api/topperf.js",
+    "test": "node --test tests/*.test.js",
+    "check": "npm run lint && npm test"
   },
   "keywords": [
     "finance",
