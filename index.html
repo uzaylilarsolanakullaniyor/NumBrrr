@@ -293,7 +293,7 @@
         <div class="settings-subgroup">
           <h4 class="settings-subtitle" data-i18n="price_alerts">Price alerts</h4>
           <div class="alert-form">
-            <label><span data-i18n="alert_asset">Asset</span><select id="priceAlertAsset"></select></label>
+            <label class="alert-search-field"><span data-i18n="alert_asset">Asset</span><span class="alert-search"><input id="priceAlertSearch" type="text" autocomplete="off" role="combobox" aria-autocomplete="list" aria-controls="priceAlertDd" aria-expanded="false" /><span class="coin-dropdown alert-search-dd" id="priceAlertDd" role="listbox" hidden></span></span></label>
             <label><span data-i18n="alert_condition">Condition</span><select id="priceAlertCondition"><option value="above" data-i18n="alert_above">Rises above</option><option value="below" data-i18n="alert_below">Falls below</option></select></label>
             <label><span data-i18n="alert_target">Target price</span><input id="priceAlertTarget" type="text" inputmode="decimal" placeholder="0" /></label>
             <button class="settings-action settings-action--primary" id="addPriceAlert" type="button" data-i18n="alert_add">Add alert</button>

@@ -1377,6 +1377,10 @@ body {
 .settings-inline-input input { width: 68px; min-height: 42px; text-align: center; }
 .alert-form { display: grid; grid-template-columns: minmax(150px, 1.2fr) minmax(130px, .9fr) minmax(120px, .8fr) auto; gap: 9px; align-items: end; }
 .alert-form label { display: flex; flex-direction: column; gap: 6px; min-width: 0; color: var(--text-faint); font-size: 11px; font-weight: 700; }
+.alert-search-field, .alert-search { min-width: 0; }
+.alert-search { position: relative; display: block; }
+.alert-search-dd { top: calc(100% + 7px); z-index: 80; min-width: min(360px, calc(100vw - 56px)); }
+.alert-search-dd .coin-opt { min-height: 44px; }
 .alert-form select,
 .alert-form input,
 .settings-inline-input input {

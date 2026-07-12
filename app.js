@@ -275,7 +275,7 @@ const I18N = {
     notify_title: "Notifications", notify_desc: "Get price alerts and reminders for upcoming vehicle maintenance. Alerts are checked while the app is open.", notify_enable: "Enable notifications",
     notify_active: "Notifications are active.", notify_inapp: "System notifications are unavailable; alerts will appear inside the app.", notify_blocked: "Notification permission is blocked in browser settings.", notify_off: "Notifications are off.",
     vehicle_notify: "Vehicle maintenance reminder", days_before: "days before",
-    price_alerts: "Price alerts", alert_asset: "Asset", alert_condition: "Condition", alert_above: "Rises above", alert_below: "Falls below", alert_target: "Target price", alert_add: "Add alert",
+    price_alerts: "Price alerts", alert_asset: "Asset", alert_search_ph: "Search gold, stocks, crypto…", alert_condition: "Condition", alert_above: "Rises above", alert_below: "Falls below", alert_target: "Target price", alert_add: "Add alert",
     alert_empty: "No price alerts yet.", alert_watch_empty: "Add an asset to your Watch list first.", alert_invalid: "Choose an asset and enter a valid target price.", alert_remove: "Remove alert",
     price_alert_title: "Price alert", price_alert_body: "{name} is now {price} ({condition} {target}).",
     vehicle_alert_title: "Vehicle reminder", vehicle_alert_body: "{vehicle}: {label} {when}.", vehicle_due_today: "is due today", vehicle_due_days: "is due in {days} days", vehicle_overdue_days: "is {days} days overdue",
@@ -432,7 +432,7 @@ const I18N = {
     notify_title: "Bildirimler", notify_desc: "Fiyat alarmlarını ve yaklaşan araç bakım hatırlatmalarını al. Alarmlar uygulama açıkken kontrol edilir.", notify_enable: "Bildirimleri aç",
     notify_active: "Bildirimler aktif.", notify_inapp: "Sistem bildirimi kullanılamıyor; uyarılar uygulama içinde gösterilecek.", notify_blocked: "Bildirim izni tarayıcı ayarlarından engellenmiş.", notify_off: "Bildirimler kapalı.",
     vehicle_notify: "Araç bakım hatırlatması", days_before: "gün önceden",
-    price_alerts: "Fiyat alarmları", alert_asset: "Varlık", alert_condition: "Koşul", alert_above: "Üzerine çıkarsa", alert_below: "Altına düşerse", alert_target: "Hedef fiyat", alert_add: "Alarm ekle",
+    price_alerts: "Fiyat alarmları", alert_asset: "Varlık", alert_search_ph: "Altın, hisse, kripto ara…", alert_condition: "Koşul", alert_above: "Üzerine çıkarsa", alert_below: "Altına düşerse", alert_target: "Hedef fiyat", alert_add: "Alarm ekle",
     alert_empty: "Henüz fiyat alarmı yok.", alert_watch_empty: "Önce Takip listesine bir varlık ekle.", alert_invalid: "Bir varlık seç ve geçerli hedef fiyat gir.", alert_remove: "Alarmı kaldır",
     price_alert_title: "Fiyat alarmı", price_alert_body: "{name} şu anda {price} ({target} {condition}).",
     vehicle_alert_title: "Araç hatırlatması", vehicle_alert_body: "{vehicle}: {label} {when}.", vehicle_due_today: "bugün yapılmalı", vehicle_due_days: "{days} gün içinde yapılmalı", vehicle_overdue_days: "{days} gün gecikti",
@@ -693,7 +693,8 @@ const el = {
   notifyToggle: document.getElementById("notifyToggle"),
   notifyStatus: document.getElementById("notifyStatus"),
   vehicleNotifyDays: document.getElementById("vehicleNotifyDays"),
-  priceAlertAsset: document.getElementById("priceAlertAsset"),
+  priceAlertSearch: document.getElementById("priceAlertSearch"),
+  priceAlertDd: document.getElementById("priceAlertDd"),
   priceAlertCondition: document.getElementById("priceAlertCondition"),
   priceAlertTarget: document.getElementById("priceAlertTarget"),
   addPriceAlert: document.getElementById("addPriceAlert"),
@@ -2468,7 +2469,6 @@ function addWatch(item) {
 }
 function removeWatch(type, key) {
   state.watchlist = state.watchlist.filter((w) => !(w.type === type && w.key === key));
-  state.notifications.priceAlerts = state.notifications.priceAlerts.filter((a) => !(a.type === type && a.key === key));
   buildWatchlist(); saveState();
   renderNotificationSettings();
 }
@@ -2551,29 +2551,29 @@ function renderNotificationStatus() {
   else el.notifyStatus.textContent = t("notify_inapp");
 }
 
+let selectedPriceAlertAsset = null;
+function syncPriceAlertSelectionUi() {
+  const ready = !!selectedPriceAlertAsset;
+  el.priceAlertTarget.disabled = !ready;
+  el.priceAlertCondition.disabled = !ready;
+  el.addPriceAlert.disabled = !ready;
+  el.priceAlertHint.textContent = ready ? `${selectedPriceAlertAsset.name} · ${(selectedPriceAlertAsset.sym || "").toUpperCase()}` : "";
+}
+
 function renderNotificationSettings() {
-  if (!el.priceAlertAsset) return;
+  if (!el.priceAlertSearch) return;
   renderNotificationStatus();
   el.vehicleNotifyDays.value = String(state.notifications.vehicleDays);
-  const selected = el.priceAlertAsset.value;
-  el.priceAlertAsset.innerHTML = state.watchlist.map((w) => `<option value="${escapeHtml(w.type + "|" + w.key)}">${escapeHtml(w.name)} · ${escapeHtml((w.sym || "").toUpperCase())}</option>`).join("");
-  if ([...el.priceAlertAsset.options].some((o) => o.value === selected)) el.priceAlertAsset.value = selected;
-  const noAssets = !state.watchlist.length;
-  el.priceAlertAsset.disabled = noAssets;
-  el.priceAlertTarget.disabled = noAssets;
-  el.priceAlertCondition.disabled = noAssets;
-  el.addPriceAlert.disabled = noAssets;
-  el.priceAlertHint.textContent = noAssets ? t("alert_watch_empty") : "";
+  el.priceAlertSearch.placeholder = t("alert_search_ph");
+  syncPriceAlertSelectionUi();
 
   const alerts = state.notifications.priceAlerts;
   if (!alerts.length) {
     el.priceAlertList.innerHTML = `<p class="settings-note">${escapeHtml(t("alert_empty"))}</p>`;
   } else {
     el.priceAlertList.innerHTML = alerts.map((a) => {
-      const w = state.watchlist.find((x) => x.type === a.type && x.key === a.key);
-      const name = w ? w.name : a.name;
       const condition = a.condition === "below" ? t("alert_below") : t("alert_above");
-      return `<div class="alert-row"><div><strong>${escapeHtml(name || a.key)}</strong><span>${escapeHtml(condition)} · ${escapeHtml(formatAlertPrice(a.target, a.ccy))}</span></div><button type="button" data-alert-del="${escapeHtml(a.id)}" aria-label="${escapeHtml(t("alert_remove"))}">×</button></div>`;
+      return `<div class="alert-row"><div><strong>${escapeHtml(a.name || a.key)}</strong><span>${escapeHtml(condition)} · ${escapeHtml(formatAlertPrice(a.target, a.ccy))}</span></div><button type="button" data-alert-del="${escapeHtml(a.id)}" aria-label="${escapeHtml(t("alert_remove"))}">×</button></div>`;
     }).join("");
     el.priceAlertList.querySelectorAll("[data-alert-del]").forEach((button) => button.addEventListener("click", () => {
       state.notifications.priceAlerts = state.notifications.priceAlerts.filter((a) => a.id !== button.dataset.alertDel);
@@ -2619,28 +2619,25 @@ function deliverUserAlert(id, title, body, daily = false) {
 }
 
 function addPriceAlertFromSettings() {
-  const raw = el.priceAlertAsset.value;
-  const split = raw.indexOf("|");
   const target = parseDecimal(el.priceAlertTarget.value);
-  if (split < 1 || !(target > 0)) { showAppToast(t("alert_invalid")); return; }
-  const type = raw.slice(0, split), key = raw.slice(split + 1);
-  const w = state.watchlist.find((x) => x.type === type && x.key === key);
-  if (!w) { showAppToast(t("alert_invalid")); return; }
+  const w = selectedPriceAlertAsset;
+  if (!w || !(target > 0)) { showAppToast(t("alert_invalid")); return; }
   state.notifications.priceAlerts.push({
-    id: "pa" + ++state.notifications.seq, type, key, name: w.name,
+    id: "pa" + ++state.notifications.seq, type: w.type, key: w.key, name: w.name, sym: w.sym || "",
     condition: el.priceAlertCondition.value === "below" ? "below" : "above",
     target, ccy: watchDisplayCcy(w), triggered: false,
   });
+  selectedPriceAlertAsset = null;
+  el.priceAlertSearch.value = "";
   el.priceAlertTarget.value = "";
-  saveState(); renderNotificationSettings(); checkPriceAlerts();
+  saveState(); renderNotificationSettings(); refreshWatchData();
 }
 
 function checkPriceAlerts() {
   if (!state.notifications.enabled) return;
   let changed = false;
   state.notifications.priceAlerts.forEach((a) => {
-    const w = state.watchlist.find((x) => x.type === a.type && x.key === a.key);
-    if (!w) return;
+    const w = state.watchlist.find((x) => x.type === a.type && x.key === a.key) || { type: a.type, key: a.key, name: a.name, sym: a.sym || "" };
     const value = watchValueInCurrency(w, a.ccy);
     if (!Number.isFinite(value)) return;
     const hit = a.condition === "below" ? value <= a.target : value >= a.target;
@@ -3013,11 +3010,22 @@ function startWatchReorder(e) {
   document.addEventListener("pointerup", finish);
   document.addEventListener("pointercancel", finish);
 }
+function monitoredPriceItems() {
+  const items = new Map();
+  state.watchlist.forEach((w) => items.set(w.type + "|" + w.key, w));
+  state.notifications.priceAlerts.forEach((a) => {
+    const id = a.type + "|" + a.key;
+    if (!items.has(id)) items.set(id, { type: a.type, key: a.key, name: a.name, sym: a.sym || "" });
+  });
+  return [...items.values()];
+}
+
 async function refreshWatchData() {
-  if (!state.watchlist.length) return;
+  const monitored = monitoredPriceItems();
+  if (!monitored.length) return;
   const vs = state.currency === "TL" ? "try" : "usd";
-  const ids = state.watchlist.filter((w) => w.type === "crypto").map((w) => w.key);
-  if (state.watchlist.some((w) => w.type === "gold" || w.type === "goldoz")) ids.push("pax-gold");
+  const ids = [...new Set(monitored.filter((w) => w.type === "crypto").map((w) => w.key))];
+  if (monitored.some((w) => w.type === "gold" || w.type === "goldoz")) ids.push("pax-gold");
   if (ids.length) {
     try {
       const r = await fetch(`https://api.coingecko.com/api/v3/coins/markets?vs_currency=${vs}&ids=${ids.join(",")}&price_change_percentage=24h,30d,1y&sparkline=true`);
@@ -3032,7 +3040,7 @@ async function refreshWatchData() {
       }
     } catch (e) {}
   }
-  for (const w of state.watchlist) {
+  for (const w of monitored) {
     if (w.type === "usstock" || w.type === "bist") {
       const d = await fetchStockData(w.type === "bist" ? w.key + ".IS" : w.key);
       if (d) watchData[w.key] = d;
@@ -3314,6 +3322,41 @@ function wireWatchSearch() {
   search.addEventListener("input", () => render(search.value));
   search.addEventListener("focus", () => render(search.value));
   search.addEventListener("blur", () => setTimeout(() => { dd.hidden = true; }, 150));
+}
+
+function wirePriceAlertSearch() {
+  const search = el.priceAlertSearch, dd = el.priceAlertDd;
+  if (!search || !dd) return;
+  let currentMatches = [];
+  const close = () => { dd.hidden = true; search.setAttribute("aria-expanded", "false"); };
+  const choose = (item) => {
+    selectedPriceAlertAsset = { type: item.type, key: item.key, name: item.name, sym: item.sym || "" };
+    search.value = `${item.name}${item.sym ? " · " + String(item.sym).toUpperCase() : ""}`;
+    close(); syncPriceAlertSelectionUi(); el.priceAlertTarget.focus();
+  };
+  const render = () => {
+    if (selectedPriceAlertAsset && search.value !== `${selectedPriceAlertAsset.name}${selectedPriceAlertAsset.sym ? " · " + String(selectedPriceAlertAsset.sym).toUpperCase() : ""}`) {
+      selectedPriceAlertAsset = null; syncPriceAlertSelectionUi();
+    }
+    const q = search.value.trim().toLocaleLowerCase(state.lang === "tr" ? "tr-TR" : "en-US");
+    if (!q || selectedPriceAlertAsset) { currentMatches = []; close(); return; }
+    currentMatches = watchSearchPool().filter((item) => item.name.toLocaleLowerCase(state.lang === "tr" ? "tr-TR" : "en-US").includes(q) || String(item.sym || "").toLowerCase().includes(q)).slice(0, 12);
+    if (!currentMatches.length) { close(); return; }
+    dd.innerHTML = currentMatches.map((item, i) => `<button type="button" class="coin-opt" role="option" data-alert-result="${i}">${escapeHtml(item.name)} <span>${escapeHtml(item.sym || "")} · ${escapeHtml(item.tag)}</span></button>`).join("");
+    dd.hidden = false; search.setAttribute("aria-expanded", "true");
+    dd.querySelectorAll("[data-alert-result]").forEach((button) => {
+      button.addEventListener("mousedown", (e) => { e.preventDefault(); choose(currentMatches[+button.dataset.alertResult]); });
+      button.addEventListener("click", () => choose(currentMatches[+button.dataset.alertResult]));
+    });
+  };
+  search.addEventListener("input", render);
+  search.addEventListener("focus", render);
+  search.addEventListener("blur", () => setTimeout(close, 150));
+  search.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") { close(); return; }
+    if (e.key === "ArrowDown" && !dd.hidden) { e.preventDefault(); const first = dd.querySelector("[data-alert-result]"); if (first) first.focus(); }
+    else if (e.key === "Enter" && currentMatches.length && !selectedPriceAlertAsset) { e.preventDefault(); choose(currentMatches[0]); }
+  });
 }
 
 // ============================================================
@@ -3703,7 +3746,7 @@ function loadState() {
   if (s.notifications && typeof s.notifications === "object") {
     const n = s.notifications;
     const alerts = Array.isArray(n.priceAlerts) ? n.priceAlerts.filter((a) => a && typeof a.id === "string" && typeof a.type === "string" && typeof a.key === "string" && Number.isFinite(a.target) && a.target > 0).slice(0, 100).map((a) => ({
-      id: a.id, type: a.type, key: a.key, name: typeof a.name === "string" ? a.name : "",
+      id: a.id, type: a.type, key: a.key, name: typeof a.name === "string" ? a.name : "", sym: typeof a.sym === "string" ? a.sym : "",
       condition: a.condition === "below" ? "below" : "above", target: a.target,
       ccy: a.ccy === "TRY" ? "TRY" : "USD", triggered: !!a.triggered,
     })) : [];
@@ -3754,11 +3797,12 @@ applyLanguage(state.lang); // builds layout + savings, applies all translations
 if (isFirstRun) showOnboarding();
 else { try { if (!localStorage.getItem("numbr_guide_seen")) showGuide(); } catch (e) {} }
 wireWatchSearch();
+wirePriceAlertSearch();
 refreshCryptoPrices(); // fetch live crypto prices (works on the deployed site)
 refreshWatchData(); // fetch performance for any saved watchlist items
 runNotificationChecks();
-setInterval(runNotificationChecks, 60 * 60 * 1000);
-document.addEventListener("visibilitychange", () => { if (!document.hidden) runNotificationChecks(); });
+setInterval(() => { checkVehicleNotifications(); refreshWatchData(); }, 60 * 60 * 1000);
+document.addEventListener("visibilitychange", () => { if (!document.hidden) { checkVehicleNotifications(); refreshWatchData(); } });
 // Prefetch theme wallpapers once the page is idle so theme switches are instant.
 if (typeof requestIdleCallback === "function") requestIdleCallback(preloadThemeWallpapers, { timeout: 3000 });
 else setTimeout(preloadThemeWallpapers, 1500);
