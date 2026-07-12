@@ -272,6 +272,15 @@ const I18N = {
     punch_empty: "Toggle on the habits you want to quit and type what you spend to see your number.",
     savings_note: "Projection compounds yearly contributions: FV = annual × [((1 + r)ⁿ − 1) / r], where r is the selected annual return. Returns are assumptions, not guarantees.",
     settings_title: "Settings", language: "Language", theme: "Theme", country: "Country", sound: "Sound", sound_fx: "Sound effects",
+    notify_title: "Notifications", notify_desc: "Get price alerts and reminders for upcoming vehicle maintenance. Alerts are checked while the app is open.", notify_enable: "Enable notifications",
+    notify_active: "Notifications are active.", notify_inapp: "System notifications are unavailable; alerts will appear inside the app.", notify_blocked: "Notification permission is blocked in browser settings.", notify_off: "Notifications are off.",
+    vehicle_notify: "Vehicle maintenance reminder", days_before: "days before",
+    price_alerts: "Price alerts", alert_asset: "Asset", alert_condition: "Condition", alert_above: "Rises above", alert_below: "Falls below", alert_target: "Target price", alert_add: "Add alert",
+    alert_empty: "No price alerts yet.", alert_watch_empty: "Add an asset to your Watch list first.", alert_invalid: "Choose an asset and enter a valid target price.", alert_remove: "Remove alert",
+    price_alert_title: "Price alert", price_alert_body: "{name} is now {price} ({condition} {target}).",
+    vehicle_alert_title: "Vehicle reminder", vehicle_alert_body: "{vehicle}: {label} {when}.", vehicle_due_today: "is due today", vehicle_due_days: "is due in {days} days", vehicle_overdue_days: "is {days} days overdue",
+    backup_title: "Data backup", backup_desc: "Save all your data as a file or restore it on another phone.", backup_export: "Export backup", backup_import: "Import backup",
+    backup_ready: "Backup downloaded: {date}", backup_imported: "Backup restored. Reloading…", backup_invalid: "This file is not a valid NumBrrr backup.", backup_too_large: "The backup file is too large.", backup_confirm: "Importing will replace the current data. Continue?", backup_last: "Last backup: {date}",
     onb_title: "Welcome to NumBrrr", onb_sub: "Pick your country and language to get started. You can change these anytime in Settings.",
     onb_country: "Country", onb_language: "Language", onb_start: "Continue",
     guide_title: "Quick guide", guide_intro: "Here's what each tab does:", guide_ok: "Got it",
@@ -420,6 +429,15 @@ const I18N = {
     punch_empty: "Bırakmak istediğin alışkanlıkları aç ve harcamanı yaz; rakamını gör.",
     savings_note: "Projeksiyon yıllık katkıları bileşik hesaplar: GD = yıllık × [((1 + r)ⁿ − 1) / r], r seçilen yıllık getiridir. Getiriler varsayımdır, garanti değildir.",
     settings_title: "Ayarlar", language: "Dil", theme: "Tema", country: "Ülke", sound: "Ses", sound_fx: "Ses efektleri",
+    notify_title: "Bildirimler", notify_desc: "Fiyat alarmlarını ve yaklaşan araç bakım hatırlatmalarını al. Alarmlar uygulama açıkken kontrol edilir.", notify_enable: "Bildirimleri aç",
+    notify_active: "Bildirimler aktif.", notify_inapp: "Sistem bildirimi kullanılamıyor; uyarılar uygulama içinde gösterilecek.", notify_blocked: "Bildirim izni tarayıcı ayarlarından engellenmiş.", notify_off: "Bildirimler kapalı.",
+    vehicle_notify: "Araç bakım hatırlatması", days_before: "gün önceden",
+    price_alerts: "Fiyat alarmları", alert_asset: "Varlık", alert_condition: "Koşul", alert_above: "Üzerine çıkarsa", alert_below: "Altına düşerse", alert_target: "Hedef fiyat", alert_add: "Alarm ekle",
+    alert_empty: "Henüz fiyat alarmı yok.", alert_watch_empty: "Önce Takip listesine bir varlık ekle.", alert_invalid: "Bir varlık seç ve geçerli hedef fiyat gir.", alert_remove: "Alarmı kaldır",
+    price_alert_title: "Fiyat alarmı", price_alert_body: "{name} şu anda {price} ({target} {condition}).",
+    vehicle_alert_title: "Araç hatırlatması", vehicle_alert_body: "{vehicle}: {label} {when}.", vehicle_due_today: "bugün yapılmalı", vehicle_due_days: "{days} gün içinde yapılmalı", vehicle_overdue_days: "{days} gün gecikti",
+    backup_title: "Veri yedekleme", backup_desc: "Tüm verilerini dosya olarak sakla veya başka telefonda geri yükle.", backup_export: "Yedeği dışa aktar", backup_import: "Yedeği içe aktar",
+    backup_ready: "Yedek indirildi: {date}", backup_imported: "Yedek geri yüklendi. Yeniden açılıyor…", backup_invalid: "Bu dosya geçerli bir NumBrrr yedeği değil.", backup_too_large: "Yedek dosyası çok büyük.", backup_confirm: "İçe aktarma mevcut verilerin yerine geçecek. Devam edilsin mi?", backup_last: "Son yedek: {date}",
     onb_title: "NumBrrr'a hoş geldin", onb_sub: "Başlamak için ülkeni ve dilini seç. Bunları istediğin zaman Ayarlar'dan değiştirebilirsin.",
     onb_country: "Ülke", onb_language: "Dil", onb_start: "Devam",
     guide_title: "Hızlı rehber", guide_intro: "Her sekme ne işe yarıyor:", guide_ok: "Anladım",
@@ -555,6 +573,7 @@ const state = {
   },
   portTotalUSD: false, // when currency is TL, show the total portfolio value in USD instead
   watchlist: [], // [{ type, key, name }] — assets to monitor (price + 24h/1mo/1yr performance)
+  notifications: { enabled: false, vehicleDays: 7, priceAlerts: [], seq: 0, sent: {} },
   income: { amounts: {}, passive: {}, custom: [], seq: 0 },
 };
 INCOME_CATEGORIES.forEach((c) => { state.income.amounts[c.id] = 0; state.income.passive[c.id] = c.passive; });
@@ -671,6 +690,18 @@ const el = {
   watchEmpty: document.getElementById("watchEmpty"),
   watchBubblesSec: document.getElementById("watchBubblesSec"),
   watchBubbles: document.getElementById("watchBubbles"),
+  notifyToggle: document.getElementById("notifyToggle"),
+  notifyStatus: document.getElementById("notifyStatus"),
+  vehicleNotifyDays: document.getElementById("vehicleNotifyDays"),
+  priceAlertAsset: document.getElementById("priceAlertAsset"),
+  priceAlertCondition: document.getElementById("priceAlertCondition"),
+  priceAlertTarget: document.getElementById("priceAlertTarget"),
+  addPriceAlert: document.getElementById("addPriceAlert"),
+  priceAlertHint: document.getElementById("priceAlertHint"),
+  priceAlertList: document.getElementById("priceAlertList"),
+  exportData: document.getElementById("exportData"),
+  importData: document.getElementById("importData"),
+  backupStatus: document.getElementById("backupStatus"),
 };
 
 // ---- Helpers ----
@@ -711,6 +742,15 @@ function formatMoneyCcy(value, curKey, { compact = false } = {}) {
 function formatThousands(n) { return new Intl.NumberFormat("en-US").format(Math.round(n)); }
 function localDateKey(d = new Date()) {
   return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+}
+let appToastTimer = 0;
+function showAppToast(message) {
+  const toast = document.getElementById("toast");
+  if (!toast || !message) return;
+  toast.textContent = message;
+  toast.classList.add("show");
+  clearTimeout(appToastTimer);
+  appToastTimer = setTimeout(() => toast.classList.remove("show"), 3200);
 }
 // Show a comma as the decimal separator for Turkish (round-trips with parseDecimal).
 function locDec(n) { const s = String(n); return state.lang === "tr" ? s.replace(".", ",") : s; }
@@ -1324,7 +1364,7 @@ function makeVehSchedRow(v, s) {
 
   row.querySelector("[data-vs-paid]").addEventListener("click", () => { s.paidMonth = s.paidMonth ? "" : state.expenses.month; refreshExpenses(); });
   row.querySelector("[data-vs-label]").addEventListener("input", (e) => { s.label = e.target.value; saveState(); });
-  row.querySelector("[data-vs-date]").addEventListener("input", (e) => { s.date = e.target.value; updateVehSchedStatus(row, s); saveState(); });
+  row.querySelector("[data-vs-date]").addEventListener("input", (e) => { s.date = e.target.value; updateVehSchedStatus(row, s); saveState(); checkVehicleNotifications(); });
   const amt = row.querySelector("[data-vs-amt]");
   amt.addEventListener("input", () => { s.amount = parseNumber(amt.value); refreshExpenses(); });
   amt.addEventListener("blur", () => { if (s.amount > 0) amt.value = formatThousands(s.amount); });
@@ -2424,11 +2464,13 @@ function watchSearchPool() {
 function addWatch(item) {
   if (state.watchlist.some((w) => w.type === item.type && w.key === item.key)) return;
   state.watchlist.push({ type: item.type, key: item.key, name: item.name, sym: item.sym });
-  buildWatchlist(); saveState(); refreshWatchData();
+  buildWatchlist(); saveState(); renderNotificationSettings(); refreshWatchData();
 }
 function removeWatch(type, key) {
   state.watchlist = state.watchlist.filter((w) => !(w.type === type && w.key === key));
+  state.notifications.priceAlerts = state.notifications.priceAlerts.filter((a) => !(a.type === type && a.key === key));
   buildWatchlist(); saveState();
+  renderNotificationSettings();
 }
 function chgHtml(label, v) {
   if (v == null || isNaN(v)) return `<span class="perf-chip"><span class="perf-lbl">${label}</span> <b>—</b></span>`;
@@ -2473,6 +2515,168 @@ function watchPriceLabel(w) {
     else { value /= usdTry; ccy = "USD"; }
   }
   return (ccy === "TRY" ? "₺" : "$") + fmtPrice(value) + suffix;
+}
+
+function watchValueInCurrency(w, ccy) {
+  const d = watchData[w.key];
+  if (!d || !Number.isFinite(d.price)) return null;
+  let value = d.price;
+  if (w.type === "gold") value *= goldFactor();
+  else if (w.type === "goldoz") value *= GRAMS_PER_OZ;
+  const native = watchNativeCcy(w);
+  if (native !== ccy) {
+    if (!(usdTry > 0)) return null;
+    value = native === "USD" ? value * usdTry : value / usdTry;
+  }
+  return value;
+}
+
+function formatAlertPrice(value, ccy) {
+  if (!Number.isFinite(value)) return "—";
+  return new Intl.NumberFormat(ccy === "TRY" ? "tr-TR" : "en-US", {
+    style: "currency", currency: ccy, maximumFractionDigits: value < 10 ? 4 : 2,
+  }).format(value);
+}
+
+function notificationPermission() {
+  return "Notification" in window ? Notification.permission : "unsupported";
+}
+
+function renderNotificationStatus() {
+  if (!el.notifyStatus || !el.notifyToggle) return;
+  const permission = notificationPermission();
+  el.notifyToggle.checked = !!state.notifications.enabled;
+  if (!state.notifications.enabled) el.notifyStatus.textContent = permission === "denied" ? t("notify_blocked") : t("notify_off");
+  else if (permission === "granted") el.notifyStatus.textContent = t("notify_active");
+  else el.notifyStatus.textContent = t("notify_inapp");
+}
+
+function renderNotificationSettings() {
+  if (!el.priceAlertAsset) return;
+  renderNotificationStatus();
+  el.vehicleNotifyDays.value = String(state.notifications.vehicleDays);
+  const selected = el.priceAlertAsset.value;
+  el.priceAlertAsset.innerHTML = state.watchlist.map((w) => `<option value="${escapeHtml(w.type + "|" + w.key)}">${escapeHtml(w.name)} · ${escapeHtml((w.sym || "").toUpperCase())}</option>`).join("");
+  if ([...el.priceAlertAsset.options].some((o) => o.value === selected)) el.priceAlertAsset.value = selected;
+  const noAssets = !state.watchlist.length;
+  el.priceAlertAsset.disabled = noAssets;
+  el.priceAlertTarget.disabled = noAssets;
+  el.priceAlertCondition.disabled = noAssets;
+  el.addPriceAlert.disabled = noAssets;
+  el.priceAlertHint.textContent = noAssets ? t("alert_watch_empty") : "";
+
+  const alerts = state.notifications.priceAlerts;
+  if (!alerts.length) {
+    el.priceAlertList.innerHTML = `<p class="settings-note">${escapeHtml(t("alert_empty"))}</p>`;
+  } else {
+    el.priceAlertList.innerHTML = alerts.map((a) => {
+      const w = state.watchlist.find((x) => x.type === a.type && x.key === a.key);
+      const name = w ? w.name : a.name;
+      const condition = a.condition === "below" ? t("alert_below") : t("alert_above");
+      return `<div class="alert-row"><div><strong>${escapeHtml(name || a.key)}</strong><span>${escapeHtml(condition)} · ${escapeHtml(formatAlertPrice(a.target, a.ccy))}</span></div><button type="button" data-alert-del="${escapeHtml(a.id)}" aria-label="${escapeHtml(t("alert_remove"))}">×</button></div>`;
+    }).join("");
+    el.priceAlertList.querySelectorAll("[data-alert-del]").forEach((button) => button.addEventListener("click", () => {
+      state.notifications.priceAlerts = state.notifications.priceAlerts.filter((a) => a.id !== button.dataset.alertDel);
+      saveState(); renderNotificationSettings();
+    }));
+  }
+
+  if (el.backupStatus) {
+    let last = "";
+    try { last = localStorage.getItem("numbr_last_backup") || ""; } catch (e) {}
+    el.backupStatus.textContent = last ? t("backup_last", { date: new Date(last).toLocaleString(state.lang === "tr" ? "tr-TR" : "en-US") }) : "";
+  }
+}
+
+async function setNotificationsEnabled(enabled) {
+  if (!enabled) {
+    state.notifications.enabled = false;
+  } else if (!("Notification" in window)) {
+    state.notifications.enabled = true;
+  } else if (Notification.permission === "denied") {
+    state.notifications.enabled = false;
+  } else {
+    let permission = Notification.permission;
+    if (permission === "default") {
+      try { permission = await Notification.requestPermission(); } catch (e) { permission = "default"; }
+    }
+    state.notifications.enabled = permission !== "denied";
+  }
+  saveState(); renderNotificationStatus();
+  if (state.notifications.enabled) runNotificationChecks();
+}
+
+function deliverUserAlert(id, title, body, daily = false) {
+  if (!state.notifications.enabled) return false;
+  const today = localDateKey();
+  if (daily && state.notifications.sent[id] === today) return false;
+  showAppToast(`${title}: ${body}`);
+  if (notificationPermission() === "granted") {
+    try { new Notification(title, { body, tag: "numbrrr-" + id }); } catch (e) {}
+  }
+  if (daily) state.notifications.sent[id] = today;
+  return true;
+}
+
+function addPriceAlertFromSettings() {
+  const raw = el.priceAlertAsset.value;
+  const split = raw.indexOf("|");
+  const target = parseDecimal(el.priceAlertTarget.value);
+  if (split < 1 || !(target > 0)) { showAppToast(t("alert_invalid")); return; }
+  const type = raw.slice(0, split), key = raw.slice(split + 1);
+  const w = state.watchlist.find((x) => x.type === type && x.key === key);
+  if (!w) { showAppToast(t("alert_invalid")); return; }
+  state.notifications.priceAlerts.push({
+    id: "pa" + ++state.notifications.seq, type, key, name: w.name,
+    condition: el.priceAlertCondition.value === "below" ? "below" : "above",
+    target, ccy: watchDisplayCcy(w), triggered: false,
+  });
+  el.priceAlertTarget.value = "";
+  saveState(); renderNotificationSettings(); checkPriceAlerts();
+}
+
+function checkPriceAlerts() {
+  if (!state.notifications.enabled) return;
+  let changed = false;
+  state.notifications.priceAlerts.forEach((a) => {
+    const w = state.watchlist.find((x) => x.type === a.type && x.key === a.key);
+    if (!w) return;
+    const value = watchValueInCurrency(w, a.ccy);
+    if (!Number.isFinite(value)) return;
+    const hit = a.condition === "below" ? value <= a.target : value >= a.target;
+    if (hit && !a.triggered) {
+      const condition = a.condition === "below" ? t("alert_below").toLowerCase() : t("alert_above").toLowerCase();
+      deliverUserAlert("price-" + a.id, t("price_alert_title"), t("price_alert_body", {
+        name: w.name, price: formatAlertPrice(value, a.ccy), condition, target: formatAlertPrice(a.target, a.ccy),
+      }));
+      a.triggered = true; changed = true;
+    } else if (!hit && a.triggered) { a.triggered = false; changed = true; }
+  });
+  if (changed) saveState();
+}
+
+function checkVehicleNotifications() {
+  if (!state.notifications.enabled) return;
+  const now = new Date(); now.setHours(0, 0, 0, 0);
+  let changed = false;
+  state.vehicles.forEach((v) => (v.sched || []).forEach((s) => {
+    if (!s.date || s.paidMonth) return;
+    const due = new Date(s.date + "T00:00:00");
+    if (isNaN(due)) return;
+    const days = Math.round((due - now) / 86400000);
+    if (days > state.notifications.vehicleDays) return;
+    const when = days < 0 ? t("vehicle_overdue_days", { days: Math.abs(days) }) : days === 0 ? t("vehicle_due_today") : t("vehicle_due_days", { days });
+    const id = "vehicle-" + v.id + "-" + s.id;
+    if (deliverUserAlert(id, t("vehicle_alert_title"), t("vehicle_alert_body", {
+      vehicle: v.plate || t("veh_model_ph"), label: s.label || t("veh_reminders"), when,
+    }), true)) changed = true;
+  }));
+  if (changed) saveState();
+}
+
+function runNotificationChecks() {
+  checkVehicleNotifications();
+  checkPriceAlerts();
 }
 // Map a watchlist item to a TradingView symbol and open its chart in a new tab.
 function tradingViewSymbol(w) {
@@ -2835,6 +3039,8 @@ async function refreshWatchData() {
     }
   }
   buildWatchlist();
+  renderNotificationSettings();
+  checkPriceAlerts();
 }
 
 // ---- Best 1-year performers (fixed pool: top-10 crypto, top-10 US stocks, gold,
@@ -3125,6 +3331,7 @@ function applyLanguage(lang) {
   buildPortfolio(); refreshPortfolio();
   buildIncome(); refreshIncome();
   buildWatchlist();
+  renderNotificationSettings();
   updateSettingsActive();
   try { localStorage.setItem("numbr_lang", lang); } catch (e) {}
 }
@@ -3158,6 +3365,7 @@ function setCurrency(cur) {
   buildLayout(); refresh(); refreshExpenses(); buildCarHub(); buildPortfolio(); refreshPortfolio(); refreshIncome();
   refreshCryptoPrices(); // refetch crypto prices in the new currency
   buildWatchlist(); refreshWatchData();
+  renderNotificationSettings();
   updateSettingsActive();
   try { localStorage.setItem("numbr_currency", cur); } catch (e) {}
 }
@@ -3279,6 +3487,17 @@ const soundToggle = document.getElementById("soundToggle");
 soundToggle.addEventListener("change", () => { state.sound = soundToggle.checked; saveState(); if (state.sound) sfx("toggle"); });
 el.inflation.addEventListener("input", () => { state.inflation[state.currency] = parseDecimal(el.inflation.value); refresh(); });
 
+el.notifyToggle.addEventListener("change", () => setNotificationsEnabled(el.notifyToggle.checked));
+el.vehicleNotifyDays.addEventListener("change", () => {
+  state.notifications.vehicleDays = Math.max(0, Math.min(30, Math.round(parseNumber(el.vehicleNotifyDays.value))));
+  el.vehicleNotifyDays.value = String(state.notifications.vehicleDays);
+  saveState(); checkVehicleNotifications();
+});
+el.addPriceAlert.addEventListener("click", addPriceAlertFromSettings);
+el.priceAlertTarget.addEventListener("keydown", (e) => { if (e.key === "Enter") addPriceAlertFromSettings(); });
+el.exportData.addEventListener("click", exportBackup);
+el.importData.addEventListener("change", importBackup);
+
 document.querySelectorAll("[data-lang]").forEach((b) => b.addEventListener("click", () => applyLanguage(b.dataset.lang)));
 document.querySelectorAll("[data-theme-pick]").forEach((b) => b.addEventListener("click", () => applyTheme(b.dataset.themePick)));
 
@@ -3287,10 +3506,7 @@ document.querySelectorAll("[data-theme-pick]").forEach((b) => b.addEventListener
   const tabs = Array.from(document.querySelectorAll(".tab"));
   const toast = document.getElementById("toast");
   let toastTimer;
-  function showToast(msg) {
-    toast.textContent = msg; toast.classList.add("show");
-    clearTimeout(toastTimer); toastTimer = setTimeout(() => toast.classList.remove("show"), 2200);
-  }
+  function showToast(msg) { showAppToast(msg); }
   function setActive(tab) {
     tabs.forEach((tt) => { const on = tt === tab; tt.classList.toggle("is-active", on); if (on) tt.setAttribute("aria-current", "page"); else tt.removeAttribute("aria-current"); });
   }
@@ -3308,7 +3524,7 @@ document.querySelectorAll("[data-theme-pick]").forEach((b) => b.addEventListener
     if (name === "income") refreshIncome();
     if (name === "watch") { refreshWatchData(); buildTopPerformers(); buildTrPanel(); buildIpoList(); kickBubbles(); }
     else stopBubbles(); // pause the bubble animation loop off the Watch view
-    if (name === "settings") preloadThemeWallpapers(); // user is about to pick a theme
+    if (name === "settings") { preloadThemeWallpapers(); renderNotificationSettings(); }
     window.scrollTo({ top: 0, behavior: "auto" });
   }
   tabs.forEach((tab) => {
@@ -3325,19 +3541,66 @@ document.querySelectorAll("[data-theme-pick]").forEach((b) => b.addEventListener
 })();
 
 // ---- Persistence (localStorage; survives page refresh) ----
+function persistedState() {
+  return {
+    v: 2,
+    lang: state.lang, theme: state.theme, currency: state.currency,
+    monthlyExpenses: state.monthlyExpenses, realMode: state.realMode, sound: state.sound,
+    inflation: state.inflation, rates: state.rates, realEstate: state.realEstate,
+    expenses: state.expenses, vehicles: state.vehicles, vehSeq: state.vehSeq,
+    vehicleHub: state.vehicleHub,
+    income: state.income, portfolio: state.portfolio, watchlist: state.watchlist,
+    notifications: state.notifications, portTotalUSD: state.portTotalUSD,
+  };
+}
+
 function saveState() {
+  try { localStorage.setItem("numbr_state", JSON.stringify(persistedState())); } catch (e) {}
+}
+
+function exportBackup() {
+  saveState();
+  const now = new Date();
+  const backup = { format: "numbrrr-backup", version: 1, exportedAt: now.toISOString(), data: persistedState() };
+  const blob = new Blob([JSON.stringify(backup, null, 2)], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = `numbrrr-yedek-${localDateKey(now)}.json`;
+  document.body.appendChild(link); link.click(); link.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+  try { localStorage.setItem("numbr_last_backup", now.toISOString()); } catch (e) {}
+  if (el.backupStatus) el.backupStatus.textContent = t("backup_ready", { date: now.toLocaleString(state.lang === "tr" ? "tr-TR" : "en-US") });
+}
+
+function validBackupState(value) {
+  return value && typeof value === "object" && !Array.isArray(value) &&
+    (value.currency === "USD" || value.currency === "TL") &&
+    (value.lang === "en" || value.lang === "tr") &&
+    value.expenses && typeof value.expenses === "object" &&
+    Array.isArray(value.vehicles) && value.portfolio && typeof value.portfolio === "object";
+}
+
+async function importBackup(event) {
+  const file = event.target.files && event.target.files[0];
+  event.target.value = "";
+  if (!file) return;
+  if (file.size > 2 * 1024 * 1024) { showAppToast(t("backup_too_large")); return; }
   try {
-    localStorage.setItem("numbr_state", JSON.stringify({
-      v: 1,
-      lang: state.lang, theme: state.theme, currency: state.currency,
-      monthlyExpenses: state.monthlyExpenses, realMode: state.realMode, sound: state.sound,
-      inflation: state.inflation, rates: state.rates, realEstate: state.realEstate,
-      expenses: state.expenses, vehicles: state.vehicles, vehSeq: state.vehSeq,
-      vehicleHub: state.vehicleHub,
-      income: state.income, portfolio: state.portfolio, watchlist: state.watchlist,
-      portTotalUSD: state.portTotalUSD,
-    }));
-  } catch (e) {}
+    const parsed = JSON.parse(await file.text());
+    const restored = parsed && parsed.format === "numbrrr-backup" ? parsed.data : parsed;
+    if (!validBackupState(restored)) throw new Error("invalid backup");
+    if (!window.confirm(t("backup_confirm"))) return;
+    localStorage.setItem("numbr_state", JSON.stringify(restored));
+    localStorage.setItem("numbr_lang", restored.lang);
+    localStorage.setItem("numbr_theme", restored.theme || "black");
+    localStorage.setItem("numbr_currency", restored.currency);
+    if (el.backupStatus) el.backupStatus.textContent = t("backup_imported");
+    setTimeout(() => window.location.reload(), 350);
+  } catch (e) {
+    showAppToast(t("backup_invalid"));
+    if (el.backupStatus) el.backupStatus.textContent = t("backup_invalid");
+  }
 }
 function loadState() {
   let s;
@@ -3437,6 +3700,23 @@ function loadState() {
     };
   }
   if (Array.isArray(s.watchlist)) state.watchlist = s.watchlist.filter((w) => w && typeof w.type === "string" && typeof w.key === "string");
+  if (s.notifications && typeof s.notifications === "object") {
+    const n = s.notifications;
+    const alerts = Array.isArray(n.priceAlerts) ? n.priceAlerts.filter((a) => a && typeof a.id === "string" && typeof a.type === "string" && typeof a.key === "string" && Number.isFinite(a.target) && a.target > 0).slice(0, 100).map((a) => ({
+      id: a.id, type: a.type, key: a.key, name: typeof a.name === "string" ? a.name : "",
+      condition: a.condition === "below" ? "below" : "above", target: a.target,
+      ccy: a.ccy === "TRY" ? "TRY" : "USD", triggered: !!a.triggered,
+    })) : [];
+    const sent = {};
+    if (n.sent && typeof n.sent === "object") Object.keys(n.sent).slice(0, 300).forEach((key) => { if (typeof n.sent[key] === "string") sent[key] = n.sent[key]; });
+    state.notifications = {
+      enabled: !!n.enabled,
+      vehicleDays: Number.isFinite(n.vehicleDays) ? Math.max(0, Math.min(30, Math.round(n.vehicleDays))) : 7,
+      priceAlerts: alerts,
+      seq: Number.isFinite(n.seq) ? n.seq : alerts.length,
+      sent,
+    };
+  }
   if (typeof s.portTotalUSD === "boolean") state.portTotalUSD = s.portTotalUSD;
   // normalize any legacy/removed asset types from older saves
   if (state.portfolio && Array.isArray(state.portfolio.holdings)) {
@@ -3476,6 +3756,9 @@ else { try { if (!localStorage.getItem("numbr_guide_seen")) showGuide(); } catch
 wireWatchSearch();
 refreshCryptoPrices(); // fetch live crypto prices (works on the deployed site)
 refreshWatchData(); // fetch performance for any saved watchlist items
+runNotificationChecks();
+setInterval(runNotificationChecks, 60 * 60 * 1000);
+document.addEventListener("visibilitychange", () => { if (!document.hidden) runNotificationChecks(); });
 // Prefetch theme wallpapers once the page is idle so theme switches are instant.
 if (typeof requestIdleCallback === "function") requestIdleCallback(preloadThemeWallpapers, { timeout: 3000 });
 else setTimeout(preloadThemeWallpapers, 1500);

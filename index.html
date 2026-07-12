@@ -270,6 +270,50 @@
         </label>
       </section>
 
+      <section class="glass settings-group settings-tools" aria-labelledby="notifyTitle">
+        <h3 class="settings-label" id="notifyTitle" data-i18n="notify_title">Notifications</h3>
+        <p class="settings-note" data-i18n="notify_desc">Get price alerts and reminders for upcoming vehicle maintenance.</p>
+        <label class="switch settings-switch">
+          <input type="checkbox" id="notifyToggle" />
+          <span class="switch-track"><span class="switch-thumb"></span></span>
+          <span class="switch-label" data-i18n="notify_enable">Enable notifications</span>
+        </label>
+        <p class="settings-status" id="notifyStatus" role="status" aria-live="polite"></p>
+
+        <div class="settings-subgroup">
+          <label class="settings-field" for="vehicleNotifyDays">
+            <span data-i18n="vehicle_notify">Vehicle maintenance reminder</span>
+            <span class="settings-inline-input">
+              <input id="vehicleNotifyDays" type="number" min="0" max="30" inputmode="numeric" value="7" />
+              <span data-i18n="days_before">days before</span>
+            </span>
+          </label>
+        </div>
+
+        <div class="settings-subgroup">
+          <h4 class="settings-subtitle" data-i18n="price_alerts">Price alerts</h4>
+          <div class="alert-form">
+            <label><span data-i18n="alert_asset">Asset</span><select id="priceAlertAsset"></select></label>
+            <label><span data-i18n="alert_condition">Condition</span><select id="priceAlertCondition"><option value="above" data-i18n="alert_above">Rises above</option><option value="below" data-i18n="alert_below">Falls below</option></select></label>
+            <label><span data-i18n="alert_target">Target price</span><input id="priceAlertTarget" type="text" inputmode="decimal" placeholder="0" /></label>
+            <button class="settings-action settings-action--primary" id="addPriceAlert" type="button" data-i18n="alert_add">Add alert</button>
+          </div>
+          <p class="settings-note" id="priceAlertHint"></p>
+          <div class="alert-list" id="priceAlertList" aria-live="polite"></div>
+        </div>
+      </section>
+
+      <section class="glass settings-group settings-tools" aria-labelledby="backupTitle">
+        <h3 class="settings-label" id="backupTitle" data-i18n="backup_title">Data backup</h3>
+        <p class="settings-note" data-i18n="backup_desc">Save all your data as a file or restore it on another phone.</p>
+        <div class="backup-actions">
+          <button class="settings-action settings-action--primary" id="exportData" type="button" data-i18n="backup_export">Export backup</button>
+          <label class="settings-action settings-file" for="importData"><span data-i18n="backup_import">Import backup</span></label>
+          <input class="visually-hidden" id="importData" type="file" accept="application/json,.json" />
+        </div>
+        <p class="settings-status" id="backupStatus" role="status" aria-live="polite"></p>
+      </section>
+
       <section class="glass settings-group">
         <h3 class="settings-label" data-i18n="theme">Theme</h3>
         <div class="settings-options settings-options--theme">
