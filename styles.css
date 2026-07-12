@@ -989,9 +989,9 @@ body {
 [data-theme="xp"] .watch-search, [data-theme="doge"] .watch-search { background: #fff; border-color: #9a9a8a; color: #1a1a1a; }
 [data-theme="medieval"] .watch-search { background: rgba(60, 40, 18, 0.1); border-color: #9a7b4a; color: #2b1c0c; }
 .watch-list { display: flex; flex-direction: column; }
-.watch-row { display: flex; align-items: stretch; gap: 8px; padding: 12px 0; border-bottom: 1px solid var(--glass-border-soft); }
+.watch-row { display: grid; grid-template-columns: 28px minmax(0, 1fr); align-items: center; gap: 12px; padding: 14px 4px; border-bottom: 1px solid var(--glass-border-soft); }
 .watch-row:last-child { border-bottom: 0; }
-.watch-body { flex: 1; min-width: 0; }
+.watch-body { min-width: 0; display: grid; grid-template-columns: minmax(300px, 1.35fr) minmax(270px, 1fr); align-items: center; gap: clamp(18px, 3vw, 42px); }
 .watch-grip {
   flex: none; align-self: center; display: grid; place-items: center;
   width: 26px; padding: 4px 2px; background: transparent; border: 0;
@@ -1006,15 +1006,15 @@ body {
   box-shadow: 0 8px 22px rgba(0, 0, 0, 0.35);
 }
 .watch-row.wl-dragging .watch-grip { color: var(--accent); }
-.watch-top { display: flex; align-items: center; gap: 9px; }
+.watch-top { display: grid; grid-template-columns: minmax(150px, 1fr) 72px minmax(112px, auto); align-items: center; gap: 16px; min-width: 0; }
 .watch-name { flex: 1; font-size: 15px; font-weight: 600; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .watch-name small { color: var(--text-faint); font-weight: 400; font-size: 11.5px; margin-left: 5px; }
 /* Fixed-width spark + price columns so every row's trend line and price line up. */
-.watch-price { flex: none; width: 104px; text-align: right; font-family: "Sora", sans-serif; font-weight: 800; font-size: 15px; white-space: nowrap; }
-.watch-spark { flex: none; width: 52px; height: 22px; opacity: 0.9; }
+.watch-price { min-width: 112px; text-align: right; font-family: "Sora", sans-serif; font-weight: 800; font-size: 15px; white-space: nowrap; }
+.watch-spark { width: 72px; height: 26px; opacity: 0.9; }
 .watch-spark.up { color: var(--good); }
 .watch-spark.down { color: #ff6b6b; }
-.watch-perf { display: flex; align-items: center; gap: 7px; margin-top: 9px; flex-wrap: wrap; }
+.watch-perf { display: flex; align-items: center; justify-content: flex-start; gap: 8px; margin-top: 0; min-width: 0; flex-wrap: wrap; }
 .perf-chip {
   font-size: 11.5px; padding: 3px 9px; border-radius: 999px;
   background: rgba(255, 255, 255, 0.06); color: var(--text-dim); border: 1px solid var(--glass-border-soft);
@@ -1022,7 +1022,7 @@ body {
 .perf-chip .perf-lbl { color: var(--text-faint); margin-right: 2px; }
 .perf-chip.up { color: var(--good); border-color: color-mix(in srgb, var(--good) 40%, transparent); background: color-mix(in srgb, var(--good) 12%, transparent); }
 .perf-chip.down { color: #ff6b6b; border-color: rgba(255, 107, 107, 0.4); background: rgba(255, 107, 107, 0.1); }
-.watch-actions { margin-left: auto; display: inline-flex; align-items: center; gap: 7px; }
+.watch-actions { margin-left: auto; display: inline-flex; align-items: center; gap: 8px; padding-left: 10px; }
 .watch-ccy {
   min-width: 30px; height: 26px; padding: 0 7px; border-radius: 8px; flex: none;
   display: inline-flex; align-items: center; justify-content: center;
@@ -1052,6 +1052,23 @@ body {
   cursor: pointer; font-size: 15px; line-height: 1;
 }
 .watch-del:hover { color: #ff8a8a; border-color: rgba(255, 120, 120, 0.5); }
+
+@media (max-width: 860px) {
+  .watch-body { grid-template-columns: 1fr; gap: 10px; }
+  .watch-top { grid-template-columns: minmax(0, 1fr) 68px minmax(104px, auto); gap: 12px; }
+  .watch-perf { min-height: 30px; }
+}
+
+@media (max-width: 520px) {
+  .watch-panel { padding-left: 14px; padding-right: 14px; }
+  .watch-row { grid-template-columns: 22px minmax(0, 1fr); gap: 8px; padding: 13px 0; }
+  .watch-grip { width: 22px; }
+  .watch-top { grid-template-columns: minmax(0, 1fr) 52px; gap: 9px; }
+  .watch-spark { width: 52px; height: 23px; }
+  .watch-price { grid-column: 1 / -1; grid-row: 2; min-width: 0; text-align: left; font-size: 14px; }
+  .watch-perf { gap: 6px; }
+  .watch-actions { margin-left: 0; padding-left: 0; }
+}
 
 /* Best 1-year performers leaderboard */
 .top-perf-sec { margin-top: 16px; padding: 18px 20px 20px; }
