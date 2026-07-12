@@ -54,21 +54,13 @@ body {
     linear-gradient(168deg, #0c0d15 0%, #0a0c12 52%, #07080d 100%);
 }
 
-/* Blobs are static: animating blurred shapes *behind* backdrop-filter cards
-   forces constant re-sampling and produces dark "selection-like" repaint
-   boxes around text in some browsers. A still gradient avoids that entirely. */
+/* Blurred background shapes stay static. Moving a large blurred layer behind
+   backdrop-filter cards forces the browser to repaint every card while scrolling. */
 .blob {
   position: absolute;
   border-radius: 50%;
   filter: blur(80px);
   opacity: 0.2;
-  /* slow ambient drift; transform-only so it stays on the GPU */
-  animation: blobDrift 26s ease-in-out infinite alternate;
-}
-@keyframes blobDrift {
-  0% { transform: translate3d(0, 0, 0) scale(1); }
-  50% { transform: translate3d(42px, -28px, 0) scale(1.08); }
-  100% { transform: translate3d(-30px, 24px, 0) scale(0.95); }
 }
 /* Cohesive two-hue palette (violet + cyan family) — no rainbow soup */
 .blob-1 { width: 460px; height: 460px; background: #7d6bff; top: -120px; left: -80px; opacity: 0.22; }
@@ -129,8 +121,6 @@ body {
     inset 0 1px 0.5px rgba(255, 255, 255, 0.22),
     inset 0 -1px 1px rgba(255, 255, 255, 0.04),
     inset 0 0 0 0.5px rgba(255, 255, 255, 0.04);
-  /* own compositing layer → frosted cards repaint atomically, no text artifacts */
-  will-change: transform;
 }
 /* Default (Liquid Glass) theme only — premium edge lighting on the frosted cards. */
 [data-theme="glass"] .glass {
@@ -408,7 +398,6 @@ body {
   border-radius: var(--radius-md);
   -webkit-backdrop-filter: blur(18px) saturate(140%);
   backdrop-filter: blur(18px) saturate(140%);
-  will-change: transform;
   padding: 20px;
   display: flex;
   flex-direction: column;
@@ -1011,7 +1000,7 @@ body {
 .watch-name small { color: var(--text-faint); font-weight: 400; font-size: 11.5px; margin-left: 5px; }
 /* Fixed-width spark + price columns so every row's trend line and price line up. */
 .watch-price { min-width: 112px; text-align: right; font-family: "Sora", sans-serif; font-weight: 800; font-size: 15px; white-space: nowrap; }
-.watch-spark { width: 72px; height: 26px; opacity: 0.9; }
+.watch-spark { display: block; width: 72px; height: 26px; overflow: hidden; opacity: 0.9; }
 .watch-spark.up { color: var(--good); }
 .watch-spark.down { color: #ff6b6b; }
 .watch-perf { display: flex; align-items: center; justify-content: flex-start; gap: 8px; margin-top: 0; min-width: 0; flex-wrap: wrap; }
@@ -2208,9 +2197,18 @@ body {
     linear-gradient(145deg, rgba(255, 255, 255, 0.105), rgba(255, 255, 255, 0.025) 46%, rgba(80, 123, 255, 0.035)),
     var(--glass-bg);
   border: 1px solid rgba(215, 231, 255, 0.16);
-  -webkit-backdrop-filter: blur(30px) saturate(175%);
-  backdrop-filter: blur(30px) saturate(175%);
   box-shadow: var(--shadow), inset 0 1px 0 rgba(255, 255, 255, 0.25), inset 0 0 0 1px rgba(255, 255, 255, 0.025);
+}
+[data-theme="glass"] .glass {
+  -webkit-backdrop-filter: blur(20px) saturate(150%);
+  backdrop-filter: blur(20px) saturate(150%);
+}
+/* Cards already live inside a frosted section; a second blur adds substantial
+   GPU cost and can produce stale rectangular patches during fast scrolling. */
+[data-theme="glass"] .card {
+  background: linear-gradient(145deg, rgba(255,255,255,.09), rgba(9,24,48,.82));
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
 }
 [data-theme="glass"] .glass::after,
 [data-theme="glass"] .card::after {
@@ -2310,13 +2308,15 @@ body {
   bottom: calc(18px + env(safe-area-inset-bottom)); padding: 7px; gap: 4px;
   background: linear-gradient(180deg, rgba(255,255,255,.13), rgba(255,255,255,.025)), rgba(11, 25, 49, .7);
   border-color: rgba(216, 232, 255, .2);
-  -webkit-backdrop-filter: blur(34px) saturate(190%); backdrop-filter: blur(34px) saturate(190%);
+  -webkit-backdrop-filter: blur(20px) saturate(155%); backdrop-filter: blur(20px) saturate(155%);
   box-shadow: 0 22px 65px rgba(0, 5, 18, .58), inset 0 1px 0 rgba(255,255,255,.3);
 }
 [data-theme="glass"] .tab { padding: 9px 8px 7px; min-width: 64px; }
 [data-theme="glass"] .tab.is-active::before {
   background: linear-gradient(135deg, rgba(119, 108, 255, .64), rgba(52, 194, 234, .44));
   box-shadow: inset 0 1px 0 rgba(255,255,255,.45), 0 8px 22px rgba(65, 104, 237, .32);
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
 }
 [data-theme="glass"] .toast { background: rgba(14, 28, 54, .9); border-color: rgba(179, 218, 255, .25); box-shadow: 0 14px 45px rgba(0,5,18,.5); }
 

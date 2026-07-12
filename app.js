@@ -2441,10 +2441,11 @@ function sparklineSvg(series) {
   let arr = pts;
   if (arr.length > 32) { arr = []; const step = pts.length / 32; for (let i = 0; i < 32; i++) arr.push(pts[Math.floor(i * step)]); arr.push(pts[pts.length - 1]); }
   const min = Math.min(...arr), max = Math.max(...arr), range = max - min || 1;
-  const W = 60, H = 22, pad = 2, n = arr.length;
-  const coords = arr.map((v, i) => `${(pad + (i / (n - 1)) * (W - 2 * pad)).toFixed(1)},${(pad + (1 - (v - min) / range) * (H - 2 * pad)).toFixed(1)}`).join(" ");
+  const W = 72, H = 26, pad = 2, n = arr.length;
+  const coords = arr.map((v, i) => `${(pad + (i / (n - 1)) * (W - 2 * pad)).toFixed(1)} ${(pad + (1 - (v - min) / range) * (H - 2 * pad)).toFixed(1)}`);
+  const path = coords.map((point, i) => `${i ? "L" : "M"}${point}`).join(" ");
   const up = arr[arr.length - 1] >= arr[0];
-  return `<svg class="watch-spark ${up ? "up" : "down"}" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" preserveAspectRatio="none" aria-hidden="true"><polyline points="${coords}" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+  return `<svg class="watch-spark ${up ? "up" : "down"}" viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet" focusable="false" aria-hidden="true"><path d="${path}" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" vector-effect="non-scaling-stroke"/></svg>`;
 }
 // The currency a row's price is shown in (native by type), optionally flipped by
 // the per-row toggle (TR users only).
@@ -2519,7 +2520,7 @@ function closeChartModal() {
 // ---- Crypto bubbles: floating, draggable physics field ----
 // One circle per watched asset, sized by 24h-move magnitude, colored by direction.
 // Bubbles drift, collide, bounce off the walls, and can be dragged/flung.
-const bubbleSim = { raf: 0, bubbles: [], drag: null };
+const bubbleSim = { raf: 0, bubbles: [], drag: null, lastFrame: 0 };
 function clampN(v, lo, hi) { return v < lo ? lo : v > hi ? hi : v; }
 
 // Radius is proportional to how big the 24h move is relative to the biggest
@@ -2602,7 +2603,8 @@ function renderBubbles() {
 // One-time synchronous un-overlap pass (used for the initial layout).
 function relaxBubbles(W, H) {
   const bs = bubbleSim.bubbles;
-  for (let it = 0; it < 140; it++) {
+  const iterations = Math.min(80, Math.max(28, bs.length * 8));
+  for (let it = 0; it < iterations; it++) {
     for (let i = 0; i < bs.length; i++) for (let j = i + 1; j < bs.length; j++) {
       const a = bs[i], c = bs[j];
       let dx = c.x - a.x, dy = c.y - a.y, dist = Math.hypot(dx, dy) || 0.01, sep = a.r + c.r + 2 - dist;
@@ -2613,18 +2615,21 @@ function relaxBubbles(W, H) {
     for (const b of bs) { b.x = clampN(b.x, b.r, W - b.r); b.y = clampN(b.y, b.r, H - b.r); }
   }
 }
-// Physics step: gentle perpetual drift (each bubble keeps a small ambient speed
-// so it never looks frozen), light friction, wall bounce, and collisions that
-// transfer momentum. A fling decays back down to the ambient drift. Never sleeps.
-function stepBubbles() {
+// Physics runs at 30fps instead of repainting at the display refresh rate. It is
+// paused while the page scrolls or is hidden so it cannot compete with scrolling.
+function stepBubbles(now) {
   bubbleSim.raf = requestAnimationFrame(stepBubbles);
   const host = el.watchBubbles;
-  if (!host || host.offsetParent === null || !host.clientWidth || !host.clientHeight) return; // hidden → idle
+  if (!host || host.offsetParent === null || !host.clientWidth || !host.clientHeight) { stopBubbles(); return; }
+  if (bubbleSim.lastFrame && now - bubbleSim.lastFrame < 32) return;
+  const dt = bubbleSim.lastFrame ? Math.min((now - bubbleSim.lastFrame) / 16.667, 2) : 1;
+  bubbleSim.lastFrame = now;
   const W = host.clientWidth, H = host.clientHeight, bs = bubbleSim.bubbles;
   for (const b of bs) {
     if (bubbleSim.drag === b) continue;
-    b.x += b.vx; b.y += b.vy;
-    b.vx *= 0.992; b.vy *= 0.992; // very light friction
+    b.x += b.vx * dt; b.y += b.vy * dt;
+    const friction = Math.pow(0.992, dt);
+    b.vx *= friction; b.vy *= friction;
     const sp = Math.hypot(b.vx, b.vy);
     if (sp < 0.22) { const a = Math.random() * 6.283; b.vx += Math.cos(a) * 0.1; b.vy += Math.sin(a) * 0.1; } // keep a gentle drift alive
     else if (sp > 6) { b.vx *= 6 / sp; b.vy *= 6 / sp; } // cap fling speed
@@ -2650,11 +2655,47 @@ function stepBubbles() {
     b.node.style.transform = `translate(${(b.x - b.r).toFixed(1)}px, ${(b.y - b.r).toFixed(1)}px)`;
   }
 }
-function startBubbles() { if (!bubbleSim.raf) bubbleSim.raf = requestAnimationFrame(stepBubbles); }
-function stopBubbles() { if (bubbleSim.raf) { cancelAnimationFrame(bubbleSim.raf); bubbleSim.raf = 0; } }
+function bubbleMotionAllowed() {
+  return !document.hidden && !(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches);
+}
+function startBubbles() {
+  if (!bubbleSim.raf && bubbleMotionAllowed()) {
+    bubbleSim.lastFrame = 0;
+    bubbleSim.raf = requestAnimationFrame(stepBubbles);
+  }
+}
+function stopBubbles() {
+  if (bubbleSim.raf) cancelAnimationFrame(bubbleSim.raf);
+  bubbleSim.raf = 0;
+  bubbleSim.lastFrame = 0;
+}
+
+let bubbleScrollTimer = 0;
+window.addEventListener("scroll", () => {
+  const host = el.watchBubbles;
+  if (!host || host.offsetParent === null) return;
+  stopBubbles();
+  clearTimeout(bubbleScrollTimer);
+  bubbleScrollTimer = setTimeout(startBubbles, 160);
+}, { passive: true });
+document.addEventListener("visibilitychange", () => {
+  if (document.hidden) stopBubbles();
+  else if (el.watchBubbles && el.watchBubbles.offsetParent !== null) startBubbles();
+});
+
+if (typeof ResizeObserver === "function" && el.watchBubbles) {
+  new ResizeObserver(() => {
+    if (el.watchBubbles.offsetParent !== null) kickBubbles();
+  }).observe(el.watchBubbles);
+} else {
+  let bubbleResizeTimer = 0;
+  window.addEventListener("resize", () => {
+    clearTimeout(bubbleResizeTimer);
+    bubbleResizeTimer = setTimeout(kickBubbles, 120);
+  }, { passive: true });
+}
 function startBubbleDrag(b, e) {
   e.preventDefault();
-  const rect = el.watchBubbles.getBoundingClientRect();
   bubbleSim.drag = b;
   b.vx = 0; b.vy = 0;
   b.node.classList.add("is-drag");
@@ -2662,21 +2703,26 @@ function startBubbleDrag(b, e) {
   startBubbles(); // run physics so other bubbles get shoved while dragging
   let lx = e.clientX, ly = e.clientY, fvx = 0, fvy = 0;
   const move = (ev) => {
+    const rect = el.watchBubbles.getBoundingClientRect();
     fvx = ev.clientX - lx; fvy = ev.clientY - ly; lx = ev.clientX; ly = ev.clientY;
     b.x = clampN(ev.clientX - rect.left, b.r, rect.width - b.r);
     b.y = clampN(ev.clientY - rect.top, b.r, rect.height - b.r);
     b.node.style.transform = `translate(${(b.x - b.r).toFixed(1)}px, ${(b.y - b.r).toFixed(1)}px)`;
   };
-  const up = () => {
+  const finish = (ev) => {
     document.removeEventListener("pointermove", move);
-    document.removeEventListener("pointerup", up);
+    document.removeEventListener("pointerup", finish);
+    document.removeEventListener("pointercancel", finish);
     b.node.classList.remove("is-drag");
-    b.vx = clampN(fvx, -30, 30) * 0.7; b.vy = clampN(fvy, -30, 30) * 0.7; // fling it
+    if (ev.type !== "pointercancel") {
+      b.vx = clampN(fvx, -30, 30) * 0.7; b.vy = clampN(fvy, -30, 30) * 0.7;
+    }
     bubbleSim.drag = null;
     startBubbles();
   };
   document.addEventListener("pointermove", move);
-  document.addEventListener("pointerup", up);
+  document.addEventListener("pointerup", finish);
+  document.addEventListener("pointercancel", finish);
 }
 
 function buildWatchlist() {
@@ -2750,16 +2796,18 @@ function startWatchReorder(e) {
     }
     if (before) list.insertBefore(row, before); else list.appendChild(row);
   };
-  const up = () => {
+  const finish = () => {
     document.removeEventListener("pointermove", move);
-    document.removeEventListener("pointerup", up);
+    document.removeEventListener("pointerup", finish);
+    document.removeEventListener("pointercancel", finish);
     row.classList.remove("wl-dragging");
     const order = [...list.querySelectorAll(".watch-row")].map((r) => r.dataset.wkey);
     state.watchlist.sort((a, b) => order.indexOf(a.type + "|" + a.key) - order.indexOf(b.type + "|" + b.key));
     saveState();
   };
   document.addEventListener("pointermove", move);
-  document.addEventListener("pointerup", up);
+  document.addEventListener("pointerup", finish);
+  document.addEventListener("pointercancel", finish);
 }
 async function refreshWatchData() {
   if (!state.watchlist.length) return;
