@@ -255,9 +255,10 @@ const I18N = {
     disc_4: "<strong>Real estate yields vary.</strong> Rental yields differ widely by city and property type; defaults are national averages (Global Property Guide) and are historical, not a guarantee. Use the property-value & rent fields for your own number.",
     disc_5: "<strong>Rates are defaults.</strong> Every return rate is pre-filled with a reasonable default and is fully editable, tune them to your own assumptions.",
     cut_title: "Your expenses", cut_sub: "Your monthly spending. See what investing it instead could become.",
+    expenses_page_title: "Expenses", expenses_page_sub: "Plan the month, track spending and stay ahead of payments.",
     exp_reminders: "Upcoming payments", exp_total: "This month's expenses",
-    exp_recurring: "Recurring expenses", exp_add_recurring: "+ Add recurring",
-    exp_thismonth: "This month's spending", exp_add: "+ Add expense", exp_history: "Past months",
+    exp_recurring: "Recurring expenses", exp_recurring_sub: "Add bills and fixed payments that repeat every month.", exp_add_recurring: "+ Add recurring",
+    exp_thismonth: "This month's spending", exp_thismonth_sub: "Log everyday spending and see where the month is going.", exp_add: "+ Add expense", exp_history: "Past months",
     exp_cat_ph: "Category", exp_day_ph: "Day", exp_paid: "Paid",
     exp_due_fmt: "Day {day}", exp_empty: "No expenses logged yet.",
     exp_overdue: "Overdue", exp_soon: "Due soon",
@@ -358,10 +359,11 @@ const I18N = {
     cat_cash: "Cash", cat_investment: "Investment",
     asset_stocks: "Stocks", asset_usstock: "US Stocks", asset_bist: "Turkish (BIST)", asset_crypto: "Crypto", asset_deposit: "Deposit", asset_bonds: "Bonds", asset_realestate: "Real estate", asset_gold: "Gold", asset_gold_oz: "Gold (oz)", asset_usd: "US Dollar", asset_cash: "Cash",
     stock_search_ph: "Search stock (e.g. Apple)", shares_ph: "Shares",
-    nav_watchlist: "Watch", watch_title: "Watchlist", watch_sub: "Search and favorite assets to track them.",
+    nav_watchlist: "Watch", watch_title: "Watchlist", watch_sub: "Search markets and keep important assets close.", watch_count: "{count} assets",
     watch_search_ph: "Search gold, stocks, crypto…", watch_empty: "Search above and tap to add assets to your watchlist.", watch_chart: "Open chart on TradingView",
-    top_perf_title: "This year's top performers", asset_silver: "Silver", top_perf_loading: "Ranking the past year…",
-    ipo_title: "Latest IPOs", ipo_note: "Latest 5 listings · automatically refreshed every 6 hours from KAP",
+    market_snapshot_title: "Market snapshot", market_snapshot_sub: "Current BIST, currency and gold prices.",
+    top_perf_title: "This year's top performers", top_perf_sub: "Assets with the strongest one-year performance.", asset_silver: "Silver", top_perf_loading: "Ranking the past year…",
+    ipo_title: "Latest IPOs", ipo_sub: "The five newest BIST offerings.", ipo_note: "Latest 5 listings · automatically refreshed every 6 hours from KAP",
     watch_ccy: "Show price in USD / TL", watch_chart_full: "Open full chart on TradingView ↗",
     tr_index: "Borsa Istanbul", tr_forex: "Currencies", tr_gold: "Gold (TRY)",
     gold_gram: "Gram Gold", gold_quarter: "Quarter Gold", gold_half: "Half Gold", gold_full: "Full Gold",
@@ -375,7 +377,8 @@ const I18N = {
     portfolio_note: "Freedom target = yearly expenses ÷ chosen return. Passive income = value × return. Estimates, not advice.",
     nav_income: "Income",
     income_title: "Your income", income_sub: "Add your income. Mark the passive ones, only they count toward freedom.",
-    add_income: "+ Add income", income_ph: "Income source", total_income: "Total monthly income",
+    income_sources_title: "Income sources", income_sources_sub: "Separate active and passive income in one clear view.", income_source_count: "{count} sources",
+    add_income: "+ Add income", income_ph: "Income source", total_income: "Total monthly income", income_remove: "Remove income source",
     passive_label: "Passive", active_label: "Active", covered_by_passive: "covered by passive income",
     surplus_line: "You have about {x}/month left to invest.", deficit_line: "You spend about {x}/month more than you earn.",
     income_free: "🎉 Financially free: your passive income already covers your expenses!",
@@ -437,9 +440,10 @@ const I18N = {
     disc_4: "<strong>Kira getirileri değişir.</strong> Kira getirileri şehre ve mülk tipine göre çok farklılaşır; varsayılanlar ulusal ortalamalardır (Global Property Guide) ve tarihseldir, garanti değildir. Kendi rakamın için mülk değeri ve kira alanlarını kullan.",
     disc_5: "<strong>Oranlar varsayılandır.</strong> Her getiri oranı makul bir varsayılanla doldurulmuştur ve tamamen düzenlenebilir, kendi varsayımlarına göre ayarla.",
     cut_title: "Giderlerin", cut_sub: "Aylık harcamaların. Yatırsan ne olabileceğini gör.",
+    expenses_page_title: "Giderler", expenses_page_sub: "Ayı planla, harcamaları izle ve ödemelerin önünde kal.",
     exp_reminders: "Yaklaşan ödemeler", exp_total: "Bu ayki giderler",
-    exp_recurring: "Düzenli giderler", exp_add_recurring: "+ Düzenli gider ekle",
-    exp_thismonth: "Bu ayki harcamaların", exp_add: "+ Harcama ekle", exp_history: "Geçmiş aylar",
+    exp_recurring: "Düzenli giderler", exp_recurring_sub: "Her ay tekrarlanan fatura ve sabit ödemelerini ekle.", exp_add_recurring: "+ Düzenli gider ekle",
+    exp_thismonth: "Bu ayki harcamaların", exp_thismonth_sub: "Günlük harcamaları kaydet, ayın nereye gittiğini gör.", exp_add: "+ Harcama ekle", exp_history: "Geçmiş aylar",
     exp_cat_ph: "Kategori", exp_day_ph: "Gün", exp_paid: "Ödendi",
     exp_due_fmt: "Ayın {day}'i", exp_empty: "Henüz harcama eklenmedi.",
     exp_overdue: "Gecikmiş", exp_soon: "Yaklaşıyor",
@@ -540,10 +544,11 @@ const I18N = {
     cat_cash: "Nakit", cat_investment: "Yatırım",
     asset_stocks: "Hisse", asset_usstock: "ABD Hisse", asset_bist: "Türk Hisse (BIST)", asset_crypto: "Kripto", asset_deposit: "Mevduat", asset_bonds: "Tahvil", asset_realestate: "Gayrimenkul", asset_gold: "Altın", asset_gold_oz: "Ons Altın", asset_usd: "Dolar (USD)", asset_cash: "Nakit",
     stock_search_ph: "Hisse ara (örn. THY)", shares_ph: "Adet",
-    nav_watchlist: "Takip", watch_title: "Takip Listesi", watch_sub: "Varlık ara, favorile ve takip et.",
+    nav_watchlist: "Takip", watch_title: "Takip listesi", watch_sub: "Piyasada ara, önemli varlıkları hep yakında tut.", watch_count: "{count} varlık",
     watch_search_ph: "Altın, hisse, kripto ara…", watch_empty: "Yukarıdan ara ve takip listene varlık ekle.", watch_chart: "TradingView'de grafiği aç",
-    top_perf_title: "Son 1 yılın yıldızları", asset_silver: "Gümüş", top_perf_loading: "Son 1 yıl sıralanıyor…",
-    ipo_title: "En Yeni Halka Arzlar", ipo_note: "Son 5 halka arz · KAP verileriyle 6 saatte bir otomatik güncellenir",
+    market_snapshot_title: "Piyasa özeti", market_snapshot_sub: "Güncel BIST, döviz ve altın fiyatları.",
+    top_perf_title: "Son 1 yılın yıldızları", top_perf_sub: "Bir yıllık performansı en güçlü varlıklar.", asset_silver: "Gümüş", top_perf_loading: "Son 1 yıl sıralanıyor…",
+    ipo_title: "En Yeni Halka Arzlar", ipo_sub: "BIST'e en son katılan beş şirket.", ipo_note: "Son 5 halka arz · KAP verileriyle 6 saatte bir otomatik güncellenir",
     watch_ccy: "Fiyatı dolar / TL göster", watch_chart_full: "TradingView'de tam grafiği aç ↗",
     tr_index: "Borsa İstanbul", tr_forex: "Döviz", tr_gold: "Altın (TL)",
     gold_gram: "Gram Altın", gold_quarter: "Çeyrek Altın", gold_half: "Yarım Altın", gold_full: "Tam Altın",
@@ -557,7 +562,8 @@ const I18N = {
     portfolio_note: "Özgürlük hedefi = yıllık gider ÷ seçilen getiri. Pasif gelir = değer × getiri. Tahmindir, tavsiye değildir.",
     nav_income: "Gelirler",
     income_title: "Gelirlerin", income_sub: "Gelirini ekle. Pasif olanları işaretle; özgürlüğe yalnızca onlar sayılır.",
-    add_income: "+ Gelir ekle", income_ph: "Gelir kaynağı", total_income: "Toplam aylık gelir",
+    income_sources_title: "Gelir kaynakları", income_sources_sub: "Aktif ve pasif gelirlerini tek bakışta ayır.", income_source_count: "{count} kaynak",
+    add_income: "+ Gelir ekle", income_ph: "Gelir kaynağı", total_income: "Toplam aylık gelir", income_remove: "Gelir kaynağını kaldır",
     passive_label: "Pasif", active_label: "Aktif", covered_by_passive: "pasif gelirle karşılanıyor",
     surplus_line: "Yatırıma ayırabileceğin yaklaşık {x}/ay artıyor.", deficit_line: "Kazandığından ayda yaklaşık {x} fazla harcıyorsun.",
     income_free: "🎉 Finansal özgürsün: pasif gelirin giderlerini zaten karşılıyor!",
@@ -758,6 +764,7 @@ const el = {
   // income view
   incList: document.getElementById("incList"),
   addIncome: document.getElementById("addIncome"),
+  incSourceCount: document.getElementById("incSourceCount"),
   incTotal: document.getElementById("incTotal"),
   incBreakdown: document.getElementById("incBreakdown"),
   incPct: document.getElementById("incPct"),
@@ -769,6 +776,7 @@ const el = {
   watchDd: document.getElementById("watchDd"),
   watchList: document.getElementById("watchList"),
   watchEmpty: document.getElementById("watchEmpty"),
+  watchCount: document.getElementById("watchCount"),
   watchBubblesSec: document.getElementById("watchBubblesSec"),
   watchBubbles: document.getElementById("watchBubbles"),
   homeCardList: document.getElementById("homeCardList"),
@@ -1500,7 +1508,7 @@ function buildVehicles() {
   el.vehList.innerHTML = "";
   if (!vehicles.length) {
     el.vehList.innerHTML = `<div class="veh-empty-state">
-      <span class="veh-empty-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 17h14M6.5 17l-1-5.2a2 2 0 0 1 .4-1.6l1.8-2.3A2 2 0 0 1 9.3 7h5.4a2 2 0 0 1 1.6.8l1.8 2.3a2 2 0 0 1 .4 1.6l-1 5.2M7 13h.01M17 13h.01M8 17v2M16 17v2"></path></svg></span>
+      <span class="veh-empty-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 15v-2a2 2 0 0 1 2-2h1.5l1.7-3a2 2 0 0 1 1.7-1h4.2a2 2 0 0 1 1.7 1l1.7 3H19a2 2 0 0 1 2 2v2h-2M5 15H3m4 0h10M8 17a2 2 0 1 0 0-4 2 2 0 0 0 0 4Zm8 0a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z"></path></svg></span>
       <div><strong>${t("veh_empty_title")}</strong><p>${t("veh_empty_sub")}</p></div>
     </div>`;
     return;
@@ -1537,7 +1545,7 @@ function makeVehicleCard(v) {
   card.innerHTML = `
     <div class="veh-head">
       <div class="veh-head-main">
-        <span class="veh-avatar" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 17h14M6.5 17l-1-5.2a2 2 0 0 1 .4-1.6l1.8-2.3A2 2 0 0 1 9.3 7h5.4a2 2 0 0 1 1.6.8l1.8 2.3a2 2 0 0 1 .4 1.6l-1 5.2M7 13h.01M17 13h.01M8 17v2M16 17v2"></path></svg></span>
+        <span class="veh-avatar" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 15v-2a2 2 0 0 1 2-2h1.5l1.7-3a2 2 0 0 1 1.7-1h4.2a2 2 0 0 1 1.7 1l1.7 3H19a2 2 0 0 1 2 2v2h-2M5 15H3m4 0h10M8 17a2 2 0 1 0 0-4 2 2 0 0 0 0 4Zm8 0a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z"></path></svg></span>
         <div class="veh-identity"><span>${t("car_vehicle")}</span><input class="veh-plate" data-veh-plate value="${escapeHtml(v.plate || "")}" placeholder="${escapeHtml(t("car_model_ph"))}" /></div>
       </div>
       <div class="veh-head-actions">
@@ -2813,6 +2821,7 @@ function buildIncome() {
   el.incList.innerHTML = "";
   INCOME_CATEGORIES.forEach((c) => el.incList.appendChild(makeIncomeRow(c.id, false)));
   state.income.custom.forEach((c) => el.incList.appendChild(makeIncomeRow(c.id, true)));
+  if (el.incSourceCount) el.incSourceCount.textContent = t("income_source_count", { count: INCOME_CATEGORIES.length + state.income.custom.length });
 }
 
 function makeIncomeRow(id, isCustom) {
@@ -2834,13 +2843,17 @@ function makeIncomeRow(id, isCustom) {
     ? `<button type="button" class="inc-type inc-type--btn" data-inc-toggle="${id}">${passive ? t("passive_label") : t("active_label")}</button>`
     : `<span class="inc-type">${passive ? t("passive_label") : t("active_label")}</span>`;
 
+  const sourceMarks = { salary: "↗", rental: "⌂", interest: "%", dividends: "◆", side: "+" };
+  const sourceMark = sourceMarks[id] || "•";
+
   row.innerHTML = `
+    <span class="inc-source-icon" aria-hidden="true">${sourceMark}</span>
     <div class="cat-label">${labelHtml}${badge}<small class="inc-from-port" data-inc-port="${id}"></small></div>
     <div class="money-input money-input--sm cat-amount">
       <span class="money-symbol savings-symbol">${meta.symbol}</span>
       <input type="text" inputmode="numeric" data-inc-amt="${id}" value="${amt ? formatThousands(amt) : ""}" placeholder="0" />
     </div>
-    ${isCustom ? `<button class="cat-remove" type="button" data-inc-del="${id}" aria-label="remove">×</button>` : ""}`;
+    ${isCustom ? `<button class="cat-remove" type="button" data-inc-del="${id}" aria-label="${escapeHtml(t("income_remove"))}">×</button>` : ""}`;
 
   if (isCustom) {
     const toggleBtn = row.querySelector("[data-inc-toggle]");
@@ -4099,6 +4112,7 @@ function startBubbleDrag(b, e) {
 
 function buildWatchlist() {
   if (el.watchSearch) el.watchSearch.placeholder = t("watch_search_ph");
+  if (el.watchCount) el.watchCount.textContent = t("watch_count", { count: state.watchlist.length });
   syncBubbles();
   if (!state.watchlist.length) { el.watchList.innerHTML = ""; el.watchEmpty.hidden = false; return; }
   el.watchEmpty.hidden = true;

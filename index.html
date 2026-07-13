@@ -21,7 +21,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <noscript><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Sora:wght@600;700;800&family=Cinzel:wght@600;700;800&family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet" /></noscript>
-  <link rel="stylesheet" href="styles.css?v=16" />
+  <link rel="stylesheet" href="styles.css?v=18" />
 </head>
 <body>
   <div class="offline-banner" id="offlineBanner" role="status" aria-live="polite" hidden data-i18n="offline_banner">Çevrimdışısın · son kaydedilen veriler gösteriliyor</div>
@@ -307,8 +307,12 @@
 
     <!-- ============ EXPENSES VIEW (Gider) ============ -->
     <div class="view" id="view-savings" hidden>
-      <div class="view-intro">
-        <p class="subtagline" id="expMonthLabel">—</p>
+      <div class="glass expense-hero">
+        <div class="modern-section-title">
+          <span class="modern-section-icon modern-section-icon--expense" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7 3h10a2 2 0 0 1 2 2v16l-3-2-4 2-4-2-3 2V5a2 2 0 0 1 2-2Zm2 5h6M9 12h6"></path></svg></span>
+          <div><h2 data-i18n="expenses_page_title">Expenses</h2><p data-i18n="expenses_page_sub">Plan the month, track spending and stay ahead of payments.</p></div>
+        </div>
+        <span class="feature-month-chip" id="expMonthLabel">—</span>
       </div>
 
       <!-- Summary: this month's spend + upcoming payments, side by side -->
@@ -356,15 +360,19 @@
       </section>
 
       <!-- Recurring expenses -->
-      <section class="glass savings-panel" aria-label="Recurring expenses">
-        <h3 class="settings-label exp-sec-label" data-i18n="exp_recurring">Recurring expenses</h3>
+      <section class="glass savings-panel expense-list-panel" aria-labelledby="expRecurringTitle">
+        <div class="modern-section-head">
+          <div class="modern-section-title"><span class="modern-section-icon modern-section-icon--recurring" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M20 12a8 8 0 1 1-2.3-5.7L20 8.6M20 4v4.6h-4.6M12 8v4l2.5 1.5"></path></svg></span><div><h3 class="settings-label" id="expRecurringTitle" data-i18n="exp_recurring">Recurring expenses</h3><p data-i18n="exp_recurring_sub">Add bills and fixed payments that repeat every month.</p></div></div>
+        </div>
         <div class="savings-list" id="expRecList"></div>
         <button class="add-cat" id="addRecurring" type="button" data-i18n="exp_add_recurring">+ Add recurring</button>
       </section>
 
       <!-- This month's logged expenses -->
-      <section class="glass savings-panel" aria-label="This month">
-        <h3 class="settings-label exp-sec-label" data-i18n="exp_thismonth">This month</h3>
+      <section class="glass savings-panel expense-list-panel" aria-labelledby="expThisMonthTitle">
+        <div class="modern-section-head">
+          <div class="modern-section-title"><span class="modern-section-icon modern-section-icon--spending" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 7h16v12H4zM4 10h16M8 15h3"></path></svg></span><div><h3 class="settings-label" id="expThisMonthTitle" data-i18n="exp_thismonth">This month</h3><p data-i18n="exp_thismonth_sub">Log everyday spending and see where the month is going.</p></div></div>
+        </div>
         <div class="savings-list" id="expOneList"></div>
         <button class="add-cat" id="addExpense" type="button" data-i18n="exp_add">+ Add expense</button>
       </section>
@@ -389,7 +397,7 @@
         <div class="car-section-head">
           <div class="car-section-title">
             <span class="car-section-icon" aria-hidden="true">
-              <svg viewBox="0 0 24 24"><path d="M5 17h14M6.5 17l-1-5.2a2 2 0 0 1 .4-1.6l1.8-2.3A2 2 0 0 1 9.3 7h5.4a2 2 0 0 1 1.6.8l1.8 2.3a2 2 0 0 1 .4 1.6l-1 5.2M7 13h.01M17 13h.01M8 17v2M16 17v2"></path></svg>
+              <svg viewBox="0 0 24 24"><path d="M3 15v-2a2 2 0 0 1 2-2h1.5l1.7-3a2 2 0 0 1 1.7-1h4.2a2 2 0 0 1 1.7 1l1.7 3H19a2 2 0 0 1 2 2v2h-2M5 15H3m4 0h10M8 17a2 2 0 1 0 0-4 2 2 0 0 0 0 4Zm8 0a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z"></path></svg>
             </span>
             <div>
               <h3 class="settings-label exp-sec-label" id="vehicleSectionTitle" data-i18n="veh_title">My vehicles</h3>
@@ -653,16 +661,23 @@
 
     <!-- ============ INCOME VIEW ============ -->
     <div class="view" id="view-income" hidden>
-      <section class="glass savings-panel" aria-label="Income sources">
+      <section class="glass savings-panel income-sources-panel" aria-labelledby="incomeSourcesTitle">
+        <div class="modern-section-head">
+          <div class="modern-section-title"><span class="modern-section-icon modern-section-icon--income" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 18V8m0 10h16M8 15l3-4 3 2 5-7m-4 0h4v4"></path></svg></span><div><h3 class="settings-label" id="incomeSourcesTitle" data-i18n="income_sources_title">Income sources</h3><p data-i18n="income_sources_sub">Separate active and passive income in one clear view.</p></div></div>
+          <span class="modern-section-count" id="incSourceCount">0</span>
+        </div>
         <div class="savings-list" id="incList"></div>
         <button class="add-cat" id="addIncome" type="button" data-i18n="add_income">+ Add income</button>
       </section>
 
-      <section class="glass savings-result" aria-label="Income summary">
-        <div class="savings-total">
-          <span class="savings-total-label" data-i18n="total_income">Total monthly income</span>
-          <span class="savings-total-value" id="incTotal">—</span>
-          <span class="savings-total-sub" id="incBreakdown"></span>
+      <section class="glass savings-result income-summary-card" aria-label="Income summary">
+        <div class="income-summary-top">
+          <span class="income-summary-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 3v18M17 7.5c0-1.9-2.2-3-5-3S7 5.6 7 7.5s1.8 2.8 5 3.5 5 1.6 5 3.5-2.2 3-5 3-5-1.1-5-3"></path></svg></span>
+          <div class="savings-total">
+            <span class="savings-total-label" data-i18n="total_income">Total monthly income</span>
+            <span class="savings-total-value" id="incTotal">—</span>
+            <span class="savings-total-sub" id="incBreakdown"></span>
+          </div>
         </div>
 
         <div class="port-progress">
@@ -679,8 +694,12 @@
 
     <!-- ============ WATCHLIST VIEW ============ -->
     <div class="view" id="view-watch" hidden>
-      <section class="glass watch-panel" aria-label="Watchlist">
-        <div class="coin-search watch-search-wrap">
+      <section class="glass watch-panel" aria-labelledby="watchSectionTitle">
+        <div class="modern-section-head watch-section-head">
+          <div class="modern-section-title"><span class="modern-section-icon modern-section-icon--watch" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1.1 6.2-5.6-3-5.6 3 1.1-6.2L3 9.6l6.2-.9L12 3Z"></path></svg></span><div><h3 class="settings-label" id="watchSectionTitle" data-i18n="watch_title">Watchlist</h3><p data-i18n="watch_sub">Search markets and keep important assets close.</p></div></div>
+          <span class="modern-section-count" id="watchCount">0</span>
+        </div>
+        <div class="coin-search watch-search-wrap"><span class="watch-search-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-4-4"></path></svg></span>
           <input id="watchSearch" class="watch-search" type="text" autocomplete="off" placeholder="Search gold, stocks, crypto…" />
           <div class="coin-dropdown" id="watchDd" hidden></div>
         </div>
@@ -694,19 +713,20 @@
       </section>
 
       <!-- Turkey-only: live FX rates + gram/quarter gold in lira (shown only on TL) -->
-      <section class="glass tr-panel" id="trPanel" aria-label="Market snapshot" hidden>
+      <section class="glass tr-panel watch-data-panel" id="trPanel" aria-labelledby="marketSnapshotTitle" hidden>
+        <div class="modern-section-head"><div class="modern-section-title"><span class="modern-section-icon modern-section-icon--market" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 19V9m5 10V5m6 14v-7m5 7V3"></path></svg></span><div><h3 class="settings-label" id="marketSnapshotTitle" data-i18n="market_snapshot_title">Market snapshot</h3><p data-i18n="market_snapshot_sub">Current BIST, currency and gold prices.</p></div></div></div>
         <div class="tr-list" id="trList"></div>
       </section>
 
       <!-- Best 1-year performers across a fixed pool (crypto, US stocks, metals, +BIST in TR) -->
-      <section class="glass top-perf-sec" aria-label="Top performers">
-        <h3 class="settings-label" data-i18n="top_perf_title">This year's top performers</h3>
+      <section class="glass top-perf-sec watch-data-panel" aria-labelledby="topPerfTitle">
+        <div class="modern-section-head"><div class="modern-section-title"><span class="modern-section-icon modern-section-icon--leaders" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M8 21h8M12 17v4M7 4h10v4a5 5 0 0 1-10 0V4Zm0 2H4v2a4 4 0 0 0 4 4m9-6h3v2a4 4 0 0 1-4 4"></path></svg></span><div><h3 class="settings-label" id="topPerfTitle" data-i18n="top_perf_title">This year's top performers</h3><p data-i18n="top_perf_sub">Assets with the strongest one-year performance.</p></div></div></div>
         <div class="top-perf-list" id="topPerfList"></div>
       </section>
 
       <!-- Türkiye-only: BIST new IPOs (XHARZ index members via KAP, refreshed daily) -->
-      <section class="glass ipo-sec" id="ipoSec" aria-label="New IPOs" hidden>
-        <h3 class="settings-label" data-i18n="ipo_title">New IPOs (BIST)</h3>
+      <section class="glass ipo-sec watch-data-panel" id="ipoSec" aria-labelledby="ipoTitle" hidden>
+        <div class="modern-section-head"><div class="modern-section-title"><span class="modern-section-icon modern-section-icon--ipo" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 19h16M6 16l4-4 3 2 5-7m-4 0h4v4"></path></svg></span><div><h3 class="settings-label" id="ipoTitle" data-i18n="ipo_title">New IPOs (BIST)</h3><p data-i18n="ipo_sub">The five newest BIST offerings.</p></div></div></div>
         <div class="ipo-list" id="ipoList"></div>
         <p class="ipo-note" data-i18n="ipo_note">Listed in the last 2 years · BIST HALKA ARZ index (KAP)</p>
       </section>
@@ -807,7 +827,7 @@
     </div>
   </div>
 
-  <script src="app.js?v=16"></script>
+  <script src="app.js?v=18"></script>
 
   <!-- Vercel Web Analytics (static-site injection; loads only on the deployed Vercel domain) -->
   <script>
