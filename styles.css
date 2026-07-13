@@ -2852,15 +2852,19 @@ body {
 
 /* ============ Crypto bubbles (floating, draggable physics field) ============ */
 .watch-bubbles-sec { padding: 8px; overflow: hidden; }
-.watch-bubbles { position: relative; width: 100%; height: clamp(180px, 30vh, 240px); overflow: hidden; }
+.watch-bubbles {
+  position: relative; width: 100%; height: clamp(180px, 30vh, 240px); overflow: hidden;
+  contain: layout paint; touch-action: pan-y;
+}
 .bubble {
   position: absolute; top: 0; left: 0;
   border-radius: 50%;
   display: flex; flex-direction: column; align-items: center; justify-content: center;
   gap: 2px; text-align: center; padding: 4px;
   border: 1px solid var(--glass-border-soft);
-  cursor: grab; user-select: none; touch-action: none;
-  will-change: transform;
+  cursor: grab; user-select: none; -webkit-user-select: none; touch-action: pan-y;
+  contain: layout paint style; backface-visibility: hidden;
+  transform: translate3d(0, 0, 0); will-change: transform;
   animation: bubble-pop 0.4s ease both;
 }
 .bubble:active, .bubble.is-drag { cursor: grabbing; }

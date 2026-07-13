@@ -1,10 +1,10 @@
-const SHELL_CACHE = "numbrrr-shell-v32";
+const SHELL_CACHE = "numbrrr-shell-v33";
 const DATA_CACHE = "numbrrr-data-v2";
 const APP_SHELL = [
   "/",
   "/index.html",
-  "/styles.css?v=32",
-  "/app.js?v=32",
+  "/styles.css?v=33",
+  "/app.js?v=33",
   "/manifest.webmanifest",
   "/icons/icon.svg",
   "/icons/icon-192.png",

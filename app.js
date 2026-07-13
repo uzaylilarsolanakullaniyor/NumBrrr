@@ -3919,7 +3919,11 @@ const bubbleSim = {
   raf: 0,
   bubbles: [],
   drag: null,
+  pending: null,
   lastFrame: 0,
+  fastUntil: 0,
+  width: 0,
+  height: 0,
   // Updated by the observer and synchronously before a loop starts.
   inViewport: false,
 };
@@ -3928,7 +3932,7 @@ function clampN(v, lo, hi) { return v < lo ? lo : v > hi ? hi : v; }
 // Radius is proportional to how big the 24h move is relative to the biggest
 // mover currently in the list, so the largest gainer/loser is the largest
 // bubble and the smallest move is the smallest, with a clear spread.
-const BUBBLE_MIN_R = 26, BUBBLE_MAX_R = 52;
+const BUBBLE_MIN_R = 26, BUBBLE_MAX_R = 52, BUBBLE_GAP = 1;
 function bubbleRadius(ch, maxMag) {
   const mag = ch == null ? 0 : Math.abs(ch);
   const frac = maxMag > 0 ? Math.min(mag / maxMag, 1) : 0.35;
@@ -3959,7 +3963,14 @@ function syncBubbles() {
     const ch = (typeof d.chg24 === "number" && !isNaN(d.chg24)) ? d.chg24 : null;
     let b = existing.get(w.key);
     if (!b) {
-      b = { key: w.key, node: document.createElement("div"), x: 0, y: 0, vx: 0, vy: 0, place: true };
+      b = {
+        key: w.key,
+        node: document.createElement("div"),
+        x: 0, y: 0, vx: 0, vy: 0,
+        dragX: 0, dragY: 0, dragVx: 0, dragVy: 0,
+        phase: Math.random() * Math.PI * 2,
+        place: true,
+      };
       b.node.addEventListener("pointerdown", (e) => startBubbleDrag(b, e));
       el.watchBubbles.appendChild(b.node);
     }
@@ -3972,89 +3983,125 @@ function syncBubbles() {
   bubbleSim.bubbles = keep;
   kickBubbles();
 }
-// Place any new bubbles, un-overlap them, give them a gentle initial drift, then
-// run the damped physics loop (motion fades to rest). Bubbles also move when
-// dragged/flung and collide with each other; friction brings everything to a stop.
+// Place new bubbles on a compact spiral, then let the damped physics field keep
+// them touching around the centre. This matches the dense Crypto Bubbles feel
+// without needing a heavyweight canvas/physics dependency.
 function kickBubbles() {
   const host = el.watchBubbles;
   if (!host || host.offsetParent === null) return;
   const W = host.clientWidth, H = host.clientHeight;
   if (!W || !H) return;
+  const resized = W !== bubbleSim.width || H !== bubbleSim.height;
+  bubbleSim.width = W;
+  bubbleSim.height = H;
   let placedNew = false;
-  for (const b of bubbleSim.bubbles) {
+  const cx = W / 2, cy = H / 2;
+  bubbleSim.bubbles.forEach((b, index) => {
     if (b.place) {
-      b.x = b.r + Math.random() * Math.max(1, W - 2 * b.r);
-      b.y = b.r + Math.random() * Math.max(1, H - 2 * b.r);
+      const angle = index * 2.399963;
+      const ring = Math.sqrt(index) * Math.min(W, H) * 0.13;
+      b.x = clampN(cx + Math.cos(angle) * ring, b.r, W - b.r);
+      b.y = clampN(cy + Math.sin(angle) * ring, b.r, H - b.r);
       b.place = false; placedNew = true;
     }
-  }
+  });
   for (const b of bubbleSim.bubbles) { b.x = clampN(b.x, b.r, W - b.r); b.y = clampN(b.y, b.r, H - b.r); }
-  if (placedNew) {
-    relaxBubbles(W, H);                 // pack without overlap on first appearance
-    for (const b of bubbleSim.bubbles) { // start a gentle drift
-      const a = Math.random() * 6.283, s = 0.4 + Math.random() * 0.5;
-      b.vx = Math.cos(a) * s; b.vy = Math.sin(a) * s;
+  if (placedNew || resized) {
+    relaxBubbles(W, H);
+    for (const b of bubbleSim.bubbles) {
+      const a = b.phase, speed = 0.12 + Math.random() * 0.12;
+      b.vx = Math.cos(a) * speed;
+      b.vy = Math.sin(a) * speed;
     }
+    bubbleSim.fastUntil = performance.now() + 650;
   }
   renderBubbles();
   startBubbles();
 }
 function renderBubbles() {
-  for (const b of bubbleSim.bubbles) b.node.style.transform = `translate(${(b.x - b.r).toFixed(1)}px, ${(b.y - b.r).toFixed(1)}px)`;
+  for (const b of bubbleSim.bubbles) b.node.style.transform = `translate3d(${(b.x - b.r).toFixed(1)}px, ${(b.y - b.r).toFixed(1)}px, 0)`;
 }
-// One-time synchronous un-overlap pass (used for the initial layout).
+// One-time compacting pass used for initial layout and responsive resizes.
 function relaxBubbles(W, H) {
   const bs = bubbleSim.bubbles;
-  const iterations = Math.min(80, Math.max(28, bs.length * 8));
+  const cx = W / 2, cy = H / 2;
+  const iterations = Math.min(90, Math.max(34, bs.length * 7));
   for (let it = 0; it < iterations; it++) {
+    for (const b of bs) {
+      b.x += (cx - b.x) * 0.018;
+      b.y += (cy - b.y) * 0.018;
+    }
     for (let i = 0; i < bs.length; i++) for (let j = i + 1; j < bs.length; j++) {
       const a = bs[i], c = bs[j];
-      let dx = c.x - a.x, dy = c.y - a.y, dist = Math.hypot(dx, dy) || 0.01, sep = a.r + c.r + 2 - dist;
+      let dx = c.x - a.x, dy = c.y - a.y, dist = Math.hypot(dx, dy) || 0.01, sep = a.r + c.r + BUBBLE_GAP - dist;
       if (sep <= 0) continue;
       const nx = dx / dist, ny = dy / dist;
-      a.x -= nx * sep / 2; a.y -= ny * sep / 2; c.x += nx * sep / 2; c.y += ny * sep / 2;
+      const invA = 1 / Math.max(1, a.r * a.r), invC = 1 / Math.max(1, c.r * c.r), sum = invA + invC;
+      a.x -= nx * sep * (invA / sum); a.y -= ny * sep * (invA / sum);
+      c.x += nx * sep * (invC / sum); c.y += ny * sep * (invC / sum);
     }
     for (const b of bs) { b.x = clampN(b.x, b.r, W - b.r); b.y = clampN(b.y, b.r, H - b.r); }
   }
 }
-// Physics runs at 30fps instead of repainting at the display refresh rate. It is
-// paused while the page scrolls or is hidden so it cannot compete with scrolling.
+// Resting bubbles use a light 30fps loop; dragging and a short post-fling window
+// switch to 60fps. Dimensions are cached so scrolling never forces layout reads.
 function stepBubbles(now) {
   bubbleSim.raf = requestAnimationFrame(stepBubbles);
-  const host = el.watchBubbles;
-  if (!host || host.offsetParent === null || !host.clientWidth || !host.clientHeight) { stopBubbles(); return; }
-  if (bubbleSim.lastFrame && now - bubbleSim.lastFrame < 32) return;
+  const W = bubbleSim.width, H = bubbleSim.height;
+  if (!W || !H) { stopBubbles(); return; }
+  const frameInterval = bubbleSim.drag || now < bubbleSim.fastUntil ? 16 : 32;
+  if (bubbleSim.lastFrame && now - bubbleSim.lastFrame < frameInterval) return;
   const dt = bubbleSim.lastFrame ? Math.min((now - bubbleSim.lastFrame) / 16.667, 2) : 1;
   bubbleSim.lastFrame = now;
-  const W = host.clientWidth, H = host.clientHeight, bs = bubbleSim.bubbles;
+  const bs = bubbleSim.bubbles, cx = W / 2, cy = H / 2;
   for (const b of bs) {
-    if (bubbleSim.drag === b) continue;
+    if (bubbleSim.drag === b) {
+      b.x = clampN(b.dragX, b.r, W - b.r);
+      b.y = clampN(b.dragY, b.r, H - b.r);
+      b.vx = b.dragVx;
+      b.vy = b.dragVy;
+      continue;
+    }
+    // Shared centre gravity keeps the circles in one dense, touching cluster.
+    b.vx += (cx - b.x) * 0.00072 * dt;
+    b.vy += (cy - b.y) * 0.00072 * dt;
+    // Tiny deterministic motion prevents the field looking frozen at rest.
+    const phase = now * 0.00055 + b.phase;
+    b.vx += Math.cos(phase) * 0.0024 * dt;
+    b.vy += Math.sin(phase) * 0.0024 * dt;
     b.x += b.vx * dt; b.y += b.vy * dt;
-    const friction = Math.pow(0.992, dt);
+    const friction = Math.pow(0.965, dt);
     b.vx *= friction; b.vy *= friction;
     const sp = Math.hypot(b.vx, b.vy);
-    if (sp < 0.22) { const a = Math.random() * 6.283; b.vx += Math.cos(a) * 0.1; b.vy += Math.sin(a) * 0.1; } // keep a gentle drift alive
-    else if (sp > 6) { b.vx *= 6 / sp; b.vy *= 6 / sp; } // cap fling speed
-    if (b.x < b.r) { b.x = b.r; b.vx = Math.abs(b.vx) * 0.85 || 0.25; } else if (b.x > W - b.r) { b.x = W - b.r; b.vx = -(Math.abs(b.vx) * 0.85 || 0.25); }
-    if (b.y < b.r) { b.y = b.r; b.vy = Math.abs(b.vy) * 0.85 || 0.25; } else if (b.y > H - b.r) { b.y = H - b.r; b.vy = -(Math.abs(b.vy) * 0.85 || 0.25); }
+    if (sp > 16) { b.vx *= 16 / sp; b.vy *= 16 / sp; }
+    if (b.x < b.r) { b.x = b.r; b.vx = Math.abs(b.vx) * 0.42; } else if (b.x > W - b.r) { b.x = W - b.r; b.vx = -Math.abs(b.vx) * 0.42; }
+    if (b.y < b.r) { b.y = b.r; b.vy = Math.abs(b.vy) * 0.42; } else if (b.y > H - b.r) { b.y = H - b.r; b.vy = -Math.abs(b.vy) * 0.42; }
   }
   for (let i = 0; i < bs.length; i++) for (let j = i + 1; j < bs.length; j++) {
     const a = bs[i], c = bs[j];
-    let dx = c.x - a.x, dy = c.y - a.y, dist = Math.hypot(dx, dy) || 0.01, min = a.r + c.r;
+    let dx = c.x - a.x, dy = c.y - a.y, dist = Math.hypot(dx, dy) || 0.01, min = a.r + c.r + BUBBLE_GAP;
     if (dist < min) {
       const nx = dx / dist, ny = dy / dist, ov = min - dist;
-      const aF = bubbleSim.drag === a, cF = bubbleSim.drag === c;
-      if (aF) { c.x += nx * ov; c.y += ny * ov; }
-      else if (cF) { a.x -= nx * ov; a.y -= ny * ov; }
-      else { a.x -= nx * ov / 2; a.y -= ny * ov / 2; c.x += nx * ov / 2; c.y += ny * ov / 2; }
-      const diff = (c.vx * nx + c.vy * ny) - (a.vx * nx + a.vy * ny); // momentum transfer
-      if (!aF) { a.vx += diff * nx; a.vy += diff * ny; }
-      if (!cF) { c.vx -= diff * nx; c.vy -= diff * ny; }
+      const invA = bubbleSim.drag === a ? 0 : 1 / Math.max(1, a.r * a.r);
+      const invC = bubbleSim.drag === c ? 0 : 1 / Math.max(1, c.r * c.r);
+      const invSum = invA + invC;
+      if (invSum > 0) {
+        a.x -= nx * ov * (invA / invSum); a.y -= ny * ov * (invA / invSum);
+        c.x += nx * ov * (invC / invSum); c.y += ny * ov * (invC / invSum);
+        const relativeSpeed = (c.vx - a.vx) * nx + (c.vy - a.vy) * ny;
+        if (relativeSpeed < 0) {
+          // Low restitution prevents the whole cluster exploding after a fling.
+          const impulse = -(1 + 0.24) * relativeSpeed / invSum;
+          a.vx -= impulse * invA * nx; a.vy -= impulse * invA * ny;
+          c.vx += impulse * invC * nx; c.vy += impulse * invC * ny;
+        }
+      }
     }
   }
   for (const b of bs) {
-    if (bubbleSim.drag !== b) { b.x = clampN(b.x, b.r, W - b.r); b.y = clampN(b.y, b.r, H - b.r); }
-    b.node.style.transform = `translate(${(b.x - b.r).toFixed(1)}px, ${(b.y - b.r).toFixed(1)}px)`;
+    b.x = clampN(b.x, b.r, W - b.r);
+    b.y = clampN(b.y, b.r, H - b.r);
+    b.node.style.transform = `translate3d(${(b.x - b.r).toFixed(1)}px, ${(b.y - b.r).toFixed(1)}px, 0)`;
   }
 }
 function bubblesAreOnScreen() {
@@ -4065,9 +4112,8 @@ function bubblesAreOnScreen() {
   return rect.bottom >= -80 && rect.top <= viewportHeight + 80;
 }
 function bubbleMotionAllowed() {
-  // Recheck synchronously as well as through IntersectionObserver. This makes
-  // the scroll-stop timer reliable even on older mobile WebViews whose
-  // observer callback can arrive late.
+  // Recheck synchronously as well as through IntersectionObserver so older
+  // mobile WebViews cannot restart an offscreen loop after a delayed callback.
   bubbleSim.inViewport = bubblesAreOnScreen();
   return bubbleSim.inViewport && state.motion && !document.hidden && !(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches);
 }
@@ -4083,14 +4129,6 @@ function stopBubbles() {
   bubbleSim.lastFrame = 0;
 }
 
-let bubbleScrollTimer = 0;
-window.addEventListener("scroll", () => {
-  const host = el.watchBubbles;
-  if (!host || host.offsetParent === null) return;
-  stopBubbles();
-  clearTimeout(bubbleScrollTimer);
-  bubbleScrollTimer = setTimeout(startBubbles, 160);
-}, { passive: true });
 document.addEventListener("visibilitychange", () => {
   if (document.hidden) stopBubbles();
   else if (el.watchBubbles && el.watchBubbles.offsetParent !== null) startBubbles();
@@ -4120,30 +4158,83 @@ if (typeof ResizeObserver === "function" && el.watchBubbles) {
   }, { passive: true });
 }
 function startBubbleDrag(b, e) {
-  e.preventDefault();
-  bubbleSim.drag = b;
-  b.vx = 0; b.vy = 0;
-  b.node.classList.add("is-drag");
-  if (b.node.setPointerCapture) try { b.node.setPointerCapture(e.pointerId); } catch (err) {}
-  startBubbles(); // run physics so other bubbles get shoved while dragging
-  let lx = e.clientX, ly = e.clientY, fvx = 0, fvy = 0;
+  if ((e.pointerType === "mouse" && e.button !== 0) || bubbleSim.drag || bubbleSim.pending) return;
+  const host = el.watchBubbles;
+  if (!host) return;
+  const pointerId = e.pointerId;
+  const isTouch = e.pointerType === "touch";
+  let active = false;
+  let startX = e.clientX, startY = e.clientY;
+  let lastX = e.clientX, lastY = e.clientY, lastTime = e.timeStamp || performance.now();
+  bubbleSim.pending = b;
+
+  const activate = (ev) => {
+    if (active) return;
+    active = true;
+    bubbleSim.pending = null;
+    bubbleSim.drag = b;
+    const rect = host.getBoundingClientRect();
+    b.dragX = clampN(ev.clientX - rect.left, b.r, rect.width - b.r);
+    b.dragY = clampN(ev.clientY - rect.top, b.r, rect.height - b.r);
+    b.dragVx = 0; b.dragVy = 0; b.vx = 0; b.vy = 0;
+    b.node.classList.add("is-drag");
+    if (b.node.setPointerCapture) try { b.node.setPointerCapture(pointerId); } catch (err) {}
+    bubbleSim.fastUntil = performance.now() + 1200;
+    startBubbles();
+  };
+
+  if (!isTouch) {
+    e.preventDefault();
+    activate(e);
+  }
+
   const move = (ev) => {
-    const rect = el.watchBubbles.getBoundingClientRect();
-    fvx = ev.clientX - lx; fvy = ev.clientY - ly; lx = ev.clientX; ly = ev.clientY;
-    b.x = clampN(ev.clientX - rect.left, b.r, rect.width - b.r);
-    b.y = clampN(ev.clientY - rect.top, b.r, rect.height - b.r);
-    b.node.style.transform = `translate(${(b.x - b.r).toFixed(1)}px, ${(b.y - b.r).toFixed(1)}px)`;
+    if (ev.pointerId !== pointerId) return;
+    if (!active) {
+      const dx = ev.clientX - startX, dy = ev.clientY - startY;
+      if (Math.hypot(dx, dy) < 7) return;
+      // A vertical touch remains native page scrolling; a horizontal-first
+      // gesture grabs the bubble and can then move freely in both directions.
+      if (isTouch && Math.abs(dy) > Math.abs(dx) * 1.08) { cleanup(); return; }
+      activate(ev);
+      lastX = ev.clientX; lastY = ev.clientY; lastTime = ev.timeStamp || performance.now();
+      return;
+    }
+    if (ev.cancelable) ev.preventDefault();
+    const rect = host.getBoundingClientRect();
+    const now = ev.timeStamp || performance.now();
+    const elapsed = Math.max(8, Math.min(50, now - lastTime || 16.667));
+    const scale = 16.667 / elapsed;
+    const instantVx = (ev.clientX - lastX) * scale;
+    const instantVy = (ev.clientY - lastY) * scale;
+    b.dragVx = b.dragVx * 0.62 + instantVx * 0.38;
+    b.dragVy = b.dragVy * 0.62 + instantVy * 0.38;
+    b.dragX = clampN(ev.clientX - rect.left, b.r, rect.width - b.r);
+    b.dragY = clampN(ev.clientY - rect.top, b.r, rect.height - b.r);
+    lastX = ev.clientX; lastY = ev.clientY; lastTime = now;
+    bubbleSim.fastUntil = performance.now() + 1200;
+    startBubbles();
   };
   const finish = (ev) => {
+    if (ev.pointerId !== pointerId) return;
+    const wasActive = active;
+    const cancelled = ev.type === "pointercancel";
+    cleanup();
+    if (!wasActive) return;
+    b.x = b.dragX; b.y = b.dragY;
+    b.vx = cancelled ? 0 : clampN(b.dragVx, -16, 16);
+    b.vy = cancelled ? 0 : clampN(b.dragVy, -16, 16);
+    b.dragVx = 0; b.dragVy = 0;
+    b.node.classList.remove("is-drag");
+    bubbleSim.drag = null;
+    bubbleSim.fastUntil = performance.now() + 1600;
+    startBubbles();
+  };
+  const cleanup = () => {
     document.removeEventListener("pointermove", move);
     document.removeEventListener("pointerup", finish);
     document.removeEventListener("pointercancel", finish);
-    b.node.classList.remove("is-drag");
-    if (ev.type !== "pointercancel") {
-      b.vx = clampN(fvx, -30, 30) * 0.7; b.vy = clampN(fvy, -30, 30) * 0.7;
-    }
-    bubbleSim.drag = null;
-    startBubbles();
+    if (bubbleSim.pending === b) bubbleSim.pending = null;
   };
   document.addEventListener("pointermove", move);
   document.addEventListener("pointerup", finish);
