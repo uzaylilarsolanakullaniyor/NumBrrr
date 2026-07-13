@@ -313,7 +313,7 @@ const I18N = {
     more_soon: "More features coming soon ✨",
     nav_car: "My car",
     car_title: "My car",
-    car_route: "Route", car_from: "From", car_to: "To", car_pick_province: "Select province",
+    car_route: "Route", car_from: "From", car_to: "To", car_pick_province: "Select province", car_loading: "Loading route data…",
     car_center: "Center (province seat)", car_need_provinces: "Pick origin and destination province.", car_district: "District",
     car_calc: "Calculate route", car_calculating: "Calculating…",
     car_same_province: "Pick two different locations.", car_route_fail: "Couldn't reach the route service, showing an estimate.",
@@ -482,7 +482,7 @@ const I18N = {
     more_soon: "Yeni özellikler yakında ✨",
     nav_car: "Aracım",
     car_title: "Aracım",
-    car_route: "Rota", car_from: "Nereden", car_to: "Nereye", car_pick_province: "İl seç",
+    car_route: "Rota", car_from: "Nereden", car_to: "Nereye", car_pick_province: "İl seç", car_loading: "Rota verileri yükleniyor…",
     car_center: "Merkez (il merkezi)", car_need_provinces: "Kalkış ve varış ilini seç.", car_district: "İlçe",
     car_calc: "Rotayı hesapla", car_calculating: "Hesaplanıyor…",
     car_same_province: "İki farklı nokta seç.", car_route_fail: "Rota servisine ulaşılamadı, tahmini değer gösteriliyor.",
@@ -1497,18 +1497,67 @@ function addVehicle() {
 // ============================================================
 //  Aracım (car hub): route planner, profiles, trips, expenses
 // ============================================================
-// Province and district coordinates are loaded from turkey-locations.js.
+// Route-only assets stay out of the critical startup path and load when the car
+// tab is opened for the first time.
 const CAR_FUELS = ["gas", "diesel", "lpg", "electric", "hybrid"];
+let carAssetsPromise = null;
 
-function provByName(name) { return TR_PROVINCES.find((p) => p.name === name); }
-function districtsFor(pName) { const p = provByName(pName); return (p && TR_DISTRICTS[p.plate]) || []; }
+function carAssetsReady() {
+  return Array.isArray(window.TR_PROVINCES) && window.TR_PROVINCES.length === 81 && window.TR_DISTRICTS && !!window.L;
+}
+function appendDeferredStyle(href) {
+  return new Promise((resolve, reject) => {
+    const existing = document.querySelector(`link[data-deferred-style="${href}"]`);
+    if (existing) { if (existing.dataset.loaded === "true") resolve(); else { existing.addEventListener("load", resolve, { once: true }); existing.addEventListener("error", reject, { once: true }); } return; }
+    const link = document.createElement("link");
+    link.rel = "stylesheet"; link.href = href; link.dataset.deferredStyle = href;
+    link.addEventListener("load", () => { link.dataset.loaded = "true"; resolve(); }, { once: true });
+    link.addEventListener("error", reject, { once: true });
+    document.head.appendChild(link);
+  });
+}
+function appendDeferredScript(src) {
+  return new Promise((resolve, reject) => {
+    const script = document.createElement("script");
+    script.src = src; script.async = true;
+    script.addEventListener("load", resolve, { once: true });
+    script.addEventListener("error", reject, { once: true });
+    document.head.appendChild(script);
+  });
+}
+function ensureCarAssets() {
+  if (carAssetsReady()) return Promise.resolve(true);
+  if (carAssetsPromise) return carAssetsPromise;
+  carAssetsPromise = Promise.all([
+    appendDeferredStyle("vendor/leaflet/leaflet.css"),
+    appendDeferredScript("turkey-locations.js?v=2"),
+    appendDeferredScript("vendor/leaflet/leaflet.js"),
+  ]).then(() => {
+    if (!carAssetsReady()) throw new Error("car assets unavailable");
+    const errors = typeof window.validateTurkeyLocations === "function" ? window.validateTurkeyLocations() : [];
+    if (errors.length) console.error("Türkiye location data validation failed", errors);
+    return true;
+  }).catch((error) => { carAssetsPromise = null; throw error; });
+  return carAssetsPromise;
+}
+function showCarAssetState(message) {
+  [el.carFromP, el.carFromD, el.carToP, el.carToD].forEach((select) => {
+    if (!select) return;
+    select.innerHTML = `<option value="">${escapeHtml(message)}</option>`;
+    select.disabled = true;
+  });
+  if (el.carCalc) el.carCalc.disabled = true;
+}
+
+function provByName(name) { return (window.TR_PROVINCES || []).find((p) => p.name === name); }
+function districtsFor(pName) { const p = provByName(pName); return (p && window.TR_DISTRICTS && window.TR_DISTRICTS[p.plate]) || []; }
 // Resolve a province+district selection to a routing point. District empty = province
 // center (Merkez).
 function resolveLoc(pName, dName) {
   const prov = provByName(pName);
   if (!prov) return null;
   if (dName) {
-    const d = (TR_DISTRICTS[prov.plate] || []).find((x) => x[0] === dName);
+    const d = ((window.TR_DISTRICTS && window.TR_DISTRICTS[prov.plate]) || []).find((x) => x[0] === dName);
     if (d) return { label: dName + " / " + pName, lat: d[1], lng: d[2], prov };
   }
   return { label: pName, lat: prov.lat, lng: prov.lng, prov };
@@ -1541,8 +1590,9 @@ function fuelCost(km, veh) {
 // ---- Build the province + district dropdowns + list bodies ----
 function fillProvinceSelect(sel, val) {
   sel.innerHTML = `<option value="">${t("car_pick_province")}</option>` +
-    TR_PROVINCES.map((p) => `<option value="${p.name}">${p.plate < 10 ? "0" + p.plate : p.plate} ${p.name}</option>`).join("");
+    (window.TR_PROVINCES || []).map((p) => `<option value="${p.name}">${p.plate < 10 ? "0" + p.plate : p.plate} ${p.name}</option>`).join("");
   sel.value = val || "";
+  sel.disabled = false;
 }
 function fillDistrictSelect(sel, pName, val) {
   const ds = districtsFor(pName);
@@ -1551,7 +1601,7 @@ function fillDistrictSelect(sel, pName, val) {
   sel.value = val || "";
   sel.disabled = !provByName(pName);
 }
-function buildCarHub() {
+function buildCarHub(loadAssets = false) {
   const h = state.vehicleHub;
   if (!el.carFromP) return;
   // Route planner + trip history are Türkiye-only (TR provinces/districts and OSRM
@@ -1562,6 +1612,11 @@ function buildCarHub() {
   buildVehicles();
   refreshVehicles();
   if (!isTR) return;
+  if (!carAssetsReady()) {
+    showCarAssetState(t("car_loading"));
+    if (loadAssets) ensureCarAssets().then(() => buildCarHub(false)).catch(() => showCarAssetState(t("car_map_unavailable")));
+    return;
+  }
   fillProvinceSelect(el.carFromP, h.fromP);
   fillProvinceSelect(el.carToP, h.toP);
   fillDistrictSelect(el.carFromD, h.fromP, h.fromD);
@@ -1570,6 +1625,7 @@ function buildCarHub() {
   renderCarFavorites();
   renderCarRoute();
   buildCarHistory();
+  if (el.carCalc) el.carCalc.disabled = false;
 }
 
 function tripFactor() { return state.vehicleHub.tripType === "roundtrip" ? 2 : 1; }
@@ -2063,12 +2119,48 @@ function makeHoldingRow(id) {
 }
 
 // ---- Live crypto prices (CoinGecko, client-side; works on the deployed site) ----
+const PRICE_CACHE_FRESH_MS = 24 * 3600 * 1000;
+const PRICE_CACHE_STALE_MS = 72 * 3600 * 1000;
+const FX_CACHE_FRESH_MS = 6 * 3600 * 1000;
+
+async function fetchWithTimeout(url, options = {}, timeoutMs = 6000) {
+  if (typeof AbortController !== "function") return fetch(url, options);
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  try { return await fetch(url, { ...options, signal: controller.signal }); }
+  finally { clearTimeout(timer); }
+}
+
+function hydrateHomeMarketCache() {
+  const now = Date.now(), vs = state.currency === "TL" ? "try" : "usd";
+  let usdCached = null, eurCached = null;
+  try {
+    const gold = JSON.parse(localStorage.getItem("numbr_gold2_" + vs) || "null");
+    if (gold && now - gold.t < PRICE_CACHE_STALE_MS && Number.isFinite(gold.v)) { goldPriceGram = gold.v; goldChg24 = gold.chg; }
+    const usdFx = JSON.parse(localStorage.getItem("numbr_fx_TRY=X") || "null");
+    const usdLegacy = JSON.parse(localStorage.getItem("numbr_usdtry2") || "null");
+    if (usdFx && now - usdFx.t < PRICE_CACHE_STALE_MS && usdFx.d && Number.isFinite(usdFx.d.price)) usdCached = { data: usdFx.d, time: usdFx.t };
+    else if (usdLegacy && now - usdLegacy.t < PRICE_CACHE_STALE_MS && Number.isFinite(usdLegacy.v)) usdCached = { data: { price: usdLegacy.v, chg24: usdLegacy.chg }, time: usdLegacy.t };
+    const eurFx = JSON.parse(localStorage.getItem("numbr_fx_EURTRY=X") || "null");
+    if (eurFx && now - eurFx.t < PRICE_CACHE_STALE_MS && eurFx.d && Number.isFinite(eurFx.d.price)) eurCached = { data: eurFx.d, time: eurFx.t };
+  } catch (e) {}
+  if (usdCached) { homeMarketData.usd = usdCached.data; usdTry = usdCached.data.price; usdTryChg24 = usdCached.data.chg24; }
+  if (eurCached) homeMarketData.eur = eurCached.data;
+  homeMarketData.loadedAt = usdCached && eurCached ? Math.min(usdCached.time, eurCached.time) : 0;
+}
+
 async function loadCryptoMarkets() {
   const vs = state.currency === "TL" ? "try" : "usd";
   const key = "numbr_crypto3_" + vs;
-  try { const c = JSON.parse(localStorage.getItem(key) || "null"); if (c && Date.now() - c.t < 24 * 3600 * 1000) { cryptoMarkets = c.data; return; } } catch (e) {}
   try {
-    const res = await fetch(`https://api.coingecko.com/api/v3/coins/markets?vs_currency=${vs}&order=market_cap_desc&per_page=250&page=1&sparkline=false&price_change_percentage=24h`);
+    const c = JSON.parse(localStorage.getItem(key) || "null");
+    if (c && Date.now() - c.t < PRICE_CACHE_STALE_MS && Array.isArray(c.data)) {
+      cryptoMarkets = c.data;
+      if (Date.now() - c.t < PRICE_CACHE_FRESH_MS) return;
+    }
+  } catch (e) {}
+  try {
+    const res = await fetchWithTimeout(`https://api.coingecko.com/api/v3/coins/markets?vs_currency=${vs}&order=market_cap_desc&per_page=250&page=1&sparkline=false&price_change_percentage=24h`);
     if (!res.ok) return;
     const json = await res.json();
     cryptoMarkets = json.map((c) => ({ id: c.id, symbol: (c.symbol || "").toUpperCase(), name: c.name, price: c.current_price, chg24: c.price_change_percentage_24h_in_currency }));
@@ -2079,9 +2171,15 @@ async function loadCryptoMarkets() {
 async function loadGoldPrice() {
   const vs = state.currency === "TL" ? "try" : "usd";
   const key = "numbr_gold2_" + vs;
-  try { const c = JSON.parse(localStorage.getItem(key) || "null"); if (c && Date.now() - c.t < 24 * 3600 * 1000) { goldPriceGram = c.v; goldChg24 = c.chg; return; } } catch (e) {}
   try {
-    const res = await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=pax-gold&vs_currencies=${vs}&include_24hr_change=true`);
+    const c = JSON.parse(localStorage.getItem(key) || "null");
+    if (c && Date.now() - c.t < PRICE_CACHE_STALE_MS && Number.isFinite(c.v)) {
+      goldPriceGram = c.v; goldChg24 = c.chg;
+      if (Date.now() - c.t < PRICE_CACHE_FRESH_MS) return;
+    }
+  } catch (e) {}
+  try {
+    const res = await fetchWithTimeout(`https://api.coingecko.com/api/v3/simple/price?ids=pax-gold&vs_currencies=${vs}&include_24hr_change=true`);
     if (!res.ok) return;
     const j = await res.json();
     const g = j["pax-gold"];
@@ -2098,7 +2196,7 @@ async function loadGoldPrice() {
 async function fetchYahoo(symbol) {
   // 1) Same-origin serverless function — reliable on the deployed (Vercel) site.
   try {
-    const r = await fetch(`/api/quote?symbol=${encodeURIComponent(symbol)}`);
+    const r = await fetchWithTimeout(`/api/quote?symbol=${encodeURIComponent(symbol)}`, {}, 4500);
     if (r.ok) { const j = await r.json(); if (typeof j.price === "number") return { price: j.price, chg24: typeof j.chg24 === "number" ? j.chg24 : null }; }
   } catch (e) { /* not deployed / local — fall back to public proxies */ }
   // 2) Public CORS proxies (fallback, mainly for local preview).
@@ -2106,7 +2204,7 @@ async function fetchYahoo(symbol) {
   const proxies = [`https://api.allorigins.win/raw?url=${encodeURIComponent(y)}`, `https://corsproxy.io/?url=${encodeURIComponent(y)}`];
   for (const url of proxies) {
     try {
-      const res = await fetch(url);
+      const res = await fetchWithTimeout(url, {}, 4500);
       if (!res.ok) continue;
       const j = await res.json();
       const parsed = parseYahooChart(j);
@@ -2131,12 +2229,12 @@ function parseYahooChart(j) {
 // Full quote (price + 24h/1mo/1yr %) — serverless first, public proxy fallback.
 async function fetchStockData(symbol) {
   try {
-    const r = await fetch(`/api/quote?symbol=${encodeURIComponent(symbol)}&range=1y`);
+    const r = await fetchWithTimeout(`/api/quote?symbol=${encodeURIComponent(symbol)}&range=1y`, {}, 5500);
     if (r.ok) { const j = await r.json(); if (typeof j.price === "number") return { price: j.price, ccy: j.currency, chg24: j.chg24, chg1mo: j.chg1mo, chg1y: j.chg1y, spark: j.spark || null }; }
   } catch (e) {}
   const y = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}?interval=1d&range=1y`;
   for (const url of [`https://api.allorigins.win/raw?url=${encodeURIComponent(y)}`, `https://corsproxy.io/?url=${encodeURIComponent(y)}`]) {
-    try { const res = await fetch(url); if (!res.ok) continue; const d = parseYahooChart(await res.json()); if (d) return d; } catch (e) {}
+    try { const res = await fetchWithTimeout(url, {}, 5500); if (!res.ok) continue; const d = parseYahooChart(await res.json()); if (d) return d; } catch (e) {}
   }
   return null;
 }
@@ -2150,7 +2248,13 @@ async function getStockPrice(yahooSymbol) {
 }
 async function loadUsdTry() {
   const key = "numbr_usdtry2";
-  try { const c = JSON.parse(localStorage.getItem(key) || "null"); if (c && Date.now() - c.t < 24 * 3600 * 1000) { usdTry = c.v; usdTryChg24 = c.chg; return; } } catch (e) {}
+  try {
+    const c = JSON.parse(localStorage.getItem(key) || "null");
+    if (c && Date.now() - c.t < PRICE_CACHE_STALE_MS && Number.isFinite(c.v)) {
+      usdTry = c.v; usdTryChg24 = c.chg;
+      if (Date.now() - c.t < FX_CACHE_FRESH_MS) return;
+    }
+  } catch (e) {}
   const v = await fetchYahoo("TRY=X");
   if (v && v.price) { usdTry = v.price; usdTryChg24 = v.chg24; try { localStorage.setItem(key, JSON.stringify({ t: Date.now(), v: usdTry, chg: usdTryChg24 })); } catch (e) {} }
 }
@@ -2165,10 +2269,20 @@ function stockValue(h) {
   return shares * native * fx;
 }
 
+async function forEachLimited(items, limit, worker) {
+  let cursor = 0;
+  const count = Math.min(Math.max(1, limit), items.length);
+  await Promise.all(Array.from({ length: count }, async () => {
+    while (cursor < items.length) {
+      const item = items[cursor++];
+      await worker(item);
+    }
+  }));
+}
+
 async function refreshCryptoPrices() {
-  await loadCryptoMarkets();
-  await loadGoldPrice();
-  await loadUsdTry();
+  await Promise.allSettled([loadCryptoMarkets(), loadGoldPrice(), loadUsdTry()]);
+  const stockHoldings = [];
   for (const h of state.portfolio.holdings) {
     if (h.assetType === "crypto" && h.coinId) {
       const m = cryptoMarkets.find((x) => x.id === h.coinId);
@@ -2182,12 +2296,15 @@ async function refreshCryptoPrices() {
       // In TL the $ holding moves with USD/TRY; in USD mode it's just cash (flat).
       h.chg24 = state.currency === "TL" ? usdTryChg24 : 0;
     } else if ((h.assetType === "usstock" || h.assetType === "bist") && h.symbol) {
-      const ys = h.assetType === "bist" ? h.symbol + ".IS" : h.symbol;
-      const q = await getStockPrice(ys);
-      if (q && q.price != null) { h.nativePrice = q.price; h.chg24 = q.chg24; }
-      h.value = stockValue(h);
+      stockHoldings.push(h);
     }
   }
+  await forEachLimited(stockHoldings, 3, async (h) => {
+    const ys = h.assetType === "bist" ? h.symbol + ".IS" : h.symbol;
+    const q = await getStockPrice(ys);
+    if (q && q.price != null) { h.nativePrice = q.price; h.chg24 = q.chg24; }
+    h.value = stockValue(h);
+  });
   buildPortfolio();
   refreshPortfolio();
   refreshIncome();
@@ -2720,18 +2837,19 @@ function homeMarketChange(change) {
 
 function renderHomeMarketSummary() {
   if (!el.homeMarketList) return;
+  const waiting = homeMarketData.loading || !homeMarketData.loadedAt;
   const goldTry = goldPriceGram > 0 ? goldPriceGram * (state.currency === "TL" ? 1 : usdTry || 0) : 0;
   const rows = [
     { label: t("market_usd"), value: homeMarketData.usd && homeMarketData.usd.price > 0 ? `₺${fmtPrice(homeMarketData.usd.price)}` : "", change: homeMarketData.usd && homeMarketData.usd.chg24 },
     { label: t("market_eur"), value: homeMarketData.eur && homeMarketData.eur.price > 0 ? `₺${fmtPrice(homeMarketData.eur.price)}` : "", change: homeMarketData.eur && homeMarketData.eur.chg24 },
     { label: t("market_gold"), value: goldTry > 0 ? formatMoneyCcy(goldTry, "TL") : "", change: goldChg24 },
   ];
-  el.homeMarketList.innerHTML = rows.map((row) => `<div class="home-market-row"><span>${escapeHtml(row.label)}</span><strong>${escapeHtml(row.value || (homeMarketData.loading ? "…" : t("market_unavailable")))}</strong>${homeMarketChange(row.change)}</div>`).join("");
+  el.homeMarketList.innerHTML = rows.map((row) => `<div class="home-market-row"><span>${escapeHtml(row.label)}</span><strong>${escapeHtml(row.value || (waiting ? "…" : t("market_unavailable")))}</strong>${homeMarketChange(row.change)}</div>`).join("");
 }
 
 async function refreshHomeMarketSummary(force = false) {
   if (!el.homeMarketList) return;
-  if (!force && homeMarketData.loadedAt && Date.now() - homeMarketData.loadedAt < 3600 * 1000) { renderHomeMarketSummary(); return; }
+  if (!force && homeMarketData.usd && homeMarketData.eur && homeMarketData.loadedAt && Date.now() - homeMarketData.loadedAt < FX_CACHE_FRESH_MS) { renderHomeMarketSummary(); return; }
   if (homeMarketData.loading) return;
   homeMarketData.loading = true;
   renderHomeMarketSummary();
@@ -2896,12 +3014,12 @@ function renderHomeSummaries() {
   }
 }
 
-function renderHomeDashboard() {
+function renderHomeDashboard(refreshMarket = true) {
   if (!el.dashboardGrid) return;
   renderHomeSummaries();
   applyHomeLayout();
   renderCountdowns();
-  refreshHomeMarketSummary();
+  if (refreshMarket) refreshHomeMarketSummary();
 }
 
 function dateInputValue(date) {
@@ -3804,7 +3922,7 @@ async function refreshWatchData() {
   if (monitored.some((w) => w.type === "gold" || w.type === "goldoz")) ids.push("pax-gold");
   if (ids.length) {
     try {
-      const r = await fetch(`https://api.coingecko.com/api/v3/coins/markets?vs_currency=${vs}&ids=${ids.join(",")}&price_change_percentage=24h,30d,1y&sparkline=true`);
+      const r = await fetchWithTimeout(`https://api.coingecko.com/api/v3/coins/markets?vs_currency=${vs}&ids=${ids.join(",")}&price_change_percentage=24h,30d,1y&sparkline=true`);
       if (r.ok) {
         (await r.json()).forEach((c) => {
           const d = { price: c.current_price, chg24: c.price_change_percentage_24h_in_currency, chg1mo: c.price_change_percentage_30d_in_currency, chg1y: c.price_change_percentage_1y_in_currency, spark: (c.sparkline_in_7d && c.sparkline_in_7d.price) || null };
@@ -3816,12 +3934,11 @@ async function refreshWatchData() {
       }
     } catch (e) {}
   }
-  for (const w of monitored) {
-    if (w.type === "usstock" || w.type === "bist") {
-      const d = await fetchStockData(w.type === "bist" ? w.key + ".IS" : w.key);
-      if (d) watchData[w.key] = d;
-    }
-  }
+  const stocks = monitored.filter((w) => w.type === "usstock" || w.type === "bist");
+  await forEachLimited(stocks, 3, async (w) => {
+    const d = await fetchStockData(w.type === "bist" ? w.key + ".IS" : w.key);
+    if (d) watchData[w.key] = d;
+  });
   buildWatchlist();
   renderNotificationSettings();
   checkPriceAlerts();
@@ -4046,7 +4163,7 @@ async function buildIpoList() {
 const GOLD_COIN_MULT = { gram: 1, quarter: 1.6, half: 3.2, full: 6.4 };
 async function getFxQuote(ysym) {
   const key = "numbr_fx_" + ysym;
-  try { const c = JSON.parse(localStorage.getItem(key) || "null"); if (c && Date.now() - c.t < 3600 * 1000) return c.d; } catch (e) {}
+  try { const c = JSON.parse(localStorage.getItem(key) || "null"); if (c && Date.now() - c.t < FX_CACHE_FRESH_MS) return c.d; } catch (e) {}
   const d = await fetchYahoo(ysym); // { price, chg24 } or null
   if (d && d.price != null) { try { localStorage.setItem(key, JSON.stringify({ t: Date.now(), d })); } catch (e) {} return d; }
   return null;
@@ -4154,7 +4271,7 @@ function applyLanguage(lang) {
   buildPortfolio(); refreshPortfolio();
   buildIncome(); refreshIncome();
   buildWatchlist();
-  renderHomeDashboard();
+  renderHomeDashboard(false);
   renderHomeCardSettings();
   renderPwaSettings();
   renderNotificationSettings();
@@ -4425,7 +4542,7 @@ document.querySelectorAll("[data-theme-pick]").forEach((b) => b.addEventListener
     document.getElementById("view-income").hidden = name !== "income";
     document.getElementById("view-watch").hidden = name !== "watch";
     if (name === "savings") { rollExpenseMonth(); buildExpenses(); }
-    if (name === "car") { rollExpenseMonth(); buildCarHub(); }
+    if (name === "car") { rollExpenseMonth(); buildCarHub(true); }
     if (name === "portfolio") refreshPortfolio();
     if (name === "income") refreshIncome();
     if (name === "watch") { refreshWatchData(); buildTopPerformers(); buildTrPanel(); buildIpoList(); kickBubbles(); }
@@ -4700,8 +4817,7 @@ try {
   if (savedCur && CURRENCY_META[savedCur]) state.currency = savedCur;
 } catch (e) {}
 loadState(); // full saved snapshot takes precedence over the legacy per-key values
-const locationDataErrors = typeof validateTurkeyLocations === "function" ? validateTurkeyLocations() : ["Location data module missing"];
-if (locationDataErrors.length) console.error("Türkiye location data validation failed", locationDataErrors);
+hydrateHomeMarketCache(); // show the latest small cached quote snapshot on the first paint
 rollExpenseMonth(); // archive past months + start the current month before rendering
 
 el.expenses.value = formatThousands(state.monthlyExpenses);
@@ -4717,13 +4833,37 @@ else { try { if (!localStorage.getItem("numbr_guide_seen")) showGuide(); } catch
 wireWatchSearch();
 wirePriceAlertSearch();
 wireHomeDashboard();
-registerPwa();
-refreshCryptoPrices(); // fetch live crypto prices (works on the deployed site)
-refreshWatchData(); // fetch performance for any saved watchlist items
-runNotificationChecks();
+
+let startupBackgroundStarted = false;
+function loadAppFonts() {
+  if (document.querySelector("link[data-app-fonts]")) return;
+  const link = document.createElement("link");
+  link.rel = "stylesheet";
+  link.dataset.appFonts = "true";
+  link.href = "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Sora:wght@600;700;800&family=Cinzel:wght@600;700;800&family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400&display=swap";
+  document.head.appendChild(link);
+}
+function startStartupBackgroundWork() {
+  if (startupBackgroundStarted) return;
+  startupBackgroundStarted = true;
+  if (document.readyState === "complete") loadAppFonts();
+  else window.addEventListener("load", loadAppFonts, { once: true });
+  refreshHomeMarketSummary();
+  refreshCryptoPrices();
+  runNotificationChecks();
+  setTimeout(refreshWatchData, 450);
+  setTimeout(registerPwa, 900);
+}
+function scheduleStartupBackgroundWork() {
+  const queue = () => {
+    if (typeof requestIdleCallback === "function") requestIdleCallback(startStartupBackgroundWork, { timeout: 700 });
+    else setTimeout(startStartupBackgroundWork, 120);
+  };
+  if (typeof requestAnimationFrame === "function") requestAnimationFrame(() => requestAnimationFrame(queue));
+  else setTimeout(queue, 0);
+}
+scheduleStartupBackgroundWork();
+
 setInterval(() => { checkVehicleNotifications(); refreshWatchData(); }, 60 * 60 * 1000);
 setInterval(renderCountdowns, 60 * 1000);
 document.addEventListener("visibilitychange", () => { if (!document.hidden) { checkVehicleNotifications(); refreshWatchData(); } });
-// Prefetch theme wallpapers once the page is idle so theme switches are instant.
-if (typeof requestIdleCallback === "function") requestIdleCallback(preloadThemeWallpapers, { timeout: 3000 });
-else setTimeout(preloadThemeWallpapers, 1500);

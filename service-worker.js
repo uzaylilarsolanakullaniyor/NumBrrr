@@ -1,17 +1,11 @@
-const SHELL_CACHE = "numbrrr-shell-v8";
+const SHELL_CACHE = "numbrrr-shell-v10";
 const DATA_CACHE = "numbrrr-data-v2";
 const APP_SHELL = [
   "/",
   "/index.html",
-  "/styles.css?v=8",
-  "/app.js?v=8",
-  "/turkey-locations.js?v=2",
+  "/styles.css?v=10",
+  "/app.js?v=10",
   "/manifest.webmanifest",
-  "/vendor/leaflet/leaflet.css",
-  "/vendor/leaflet/leaflet.js",
-  "/vendor/leaflet/images/marker-icon.png",
-  "/vendor/leaflet/images/marker-icon-2x.png",
-  "/vendor/leaflet/images/marker-shadow.png",
   "/icons/icon.svg",
   "/icons/icon-192.png",
   "/icons/icon-512.png",
@@ -50,9 +44,9 @@ async function networkFirst(request, fallbackUrl) {
   }
 }
 
-async function staleWhileRevalidate(request) {
+async function staleWhileRevalidate(request, fallbackUrl) {
   const cache = await caches.open(request.url.startsWith(self.location.origin) ? SHELL_CACHE : DATA_CACHE);
-  const cached = await cache.match(request);
+  const cached = (await cache.match(request)) || (fallbackUrl ? await cache.match(fallbackUrl) : undefined);
   const update = fetch(request).then((response) => {
     if (response && (response.ok || response.type === "opaque")) cache.put(request, response.clone());
     return response;
@@ -65,7 +59,7 @@ self.addEventListener("fetch", (event) => {
   if (request.method !== "GET") return;
   const url = new URL(request.url);
   if (request.mode === "navigate") {
-    event.respondWith(networkFirst(request, "/index.html"));
+    event.respondWith(staleWhileRevalidate(request, "/index.html"));
     return;
   }
   if (url.origin === self.location.origin && url.pathname.startsWith("/api/")) {
@@ -73,7 +67,7 @@ self.addEventListener("fetch", (event) => {
     return;
   }
   if (url.origin === self.location.origin) {
-    event.respondWith(networkFirst(request));
+    event.respondWith(staleWhileRevalidate(request));
     return;
   }
   if (url.hostname === "fonts.googleapis.com" || url.hostname === "fonts.gstatic.com" || url.hostname === "api.coingecko.com") {
