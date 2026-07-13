@@ -742,13 +742,6 @@ const el = {
   notifyToggle: document.getElementById("notifyToggle"),
   notifyStatus: document.getElementById("notifyStatus"),
   vehicleNotifyDays: document.getElementById("vehicleNotifyDays"),
-  priceAlertSearch: document.getElementById("priceAlertSearch"),
-  priceAlertDd: document.getElementById("priceAlertDd"),
-  priceAlertCondition: document.getElementById("priceAlertCondition"),
-  priceAlertTarget: document.getElementById("priceAlertTarget"),
-  addPriceAlert: document.getElementById("addPriceAlert"),
-  priceAlertHint: document.getElementById("priceAlertHint"),
-  priceAlertList: document.getElementById("priceAlertList"),
   exportData: document.getElementById("exportData"),
   importData: document.getElementById("importData"),
   backupStatus: document.getElementById("backupStatus"),
@@ -3046,18 +3039,17 @@ function renderNotificationStatus() {
   else el.notifyStatus.textContent = t("notify_inapp");
 }
 
-const priceAlertSelections = { settings: null, home: null };
+let selectedPriceAlertAsset = null;
 
-function priceAlertForm(scope = "settings") {
-  const home = scope === "home";
+function priceAlertForm() {
   return {
-    search: home ? el.homePriceAlertSearch : el.priceAlertSearch,
-    dropdown: home ? el.homePriceAlertDd : el.priceAlertDd,
-    condition: home ? el.homePriceAlertCondition : el.priceAlertCondition,
-    target: home ? el.homePriceAlertTarget : el.priceAlertTarget,
-    add: home ? el.homeAddPriceAlert : el.addPriceAlert,
-    hint: home ? el.homePriceAlertHint : el.priceAlertHint,
-    list: home ? el.homePriceAlertList : el.priceAlertList,
+    search: el.homePriceAlertSearch,
+    dropdown: el.homePriceAlertDd,
+    condition: el.homePriceAlertCondition,
+    target: el.homePriceAlertTarget,
+    add: el.homeAddPriceAlert,
+    hint: el.homePriceAlertHint,
+    list: el.homePriceAlertList,
   };
 }
 
@@ -3065,16 +3057,16 @@ function priceAlertSelectionText(asset) {
   return `${asset.name}${asset.sym ? " · " + String(asset.sym).toUpperCase() : ""}`;
 }
 
-function syncPriceAlertSelectionUi(scope = "settings") {
-  const form = priceAlertForm(scope);
+function syncPriceAlertSelectionUi() {
+  const form = priceAlertForm();
   if (!form.search) return;
-  const selected = priceAlertSelections[scope];
+  const selected = selectedPriceAlertAsset;
   const ready = !!selected;
   form.target.disabled = !ready;
   form.condition.disabled = !ready;
   form.add.disabled = !ready;
   if (ready) form.hint.textContent = priceAlertSelectionText(selected);
-  else form.hint.textContent = scope === "home" ? t(state.notifications.enabled ? "home_alert_ready" : "home_alert_off") : "";
+  else form.hint.textContent = t(state.notifications.enabled ? "home_alert_ready" : "home_alert_off");
 }
 
 function renderPriceAlertList(container) {
@@ -3099,13 +3091,12 @@ function renderPriceAlertList(container) {
 function renderNotificationSettings() {
   renderNotificationStatus();
   if (el.vehicleNotifyDays) el.vehicleNotifyDays.value = String(state.notifications.vehicleDays);
-  ["settings", "home"].forEach((scope) => {
-    const form = priceAlertForm(scope);
-    if (!form.search) return;
+  const form = priceAlertForm();
+  if (form.search) {
     form.search.placeholder = t("alert_search_ph");
-    syncPriceAlertSelectionUi(scope);
+    syncPriceAlertSelectionUi();
     renderPriceAlertList(form.list);
-  });
+  }
 
   if (el.backupStatus) {
     let last = "";
@@ -3152,17 +3143,17 @@ function deliverUserAlert(id, title, body, daily = false) {
   return true;
 }
 
-function addPriceAlert(scope = "settings") {
-  const form = priceAlertForm(scope);
+function addPriceAlert() {
+  const form = priceAlertForm();
   const target = parseDecimal(form.target.value);
-  const w = priceAlertSelections[scope];
+  const w = selectedPriceAlertAsset;
   if (!w || !(target > 0)) { showAppToast(t("alert_invalid")); return; }
   state.notifications.priceAlerts.push({
     id: "pa" + ++state.notifications.seq, type: w.type, key: w.key, name: w.name, sym: w.sym || "",
     condition: form.condition.value === "below" ? "below" : "above",
     target, ccy: watchDisplayCcy(w), triggered: false,
   });
-  priceAlertSelections[scope] = null;
+  selectedPriceAlertAsset = null;
   form.search.value = "";
   form.target.value = "";
   saveState();
@@ -3864,24 +3855,24 @@ function wireWatchSearch() {
   search.addEventListener("blur", () => setTimeout(() => { dd.hidden = true; }, 150));
 }
 
-function wirePriceAlertSearch(scope = "settings") {
-  const form = priceAlertForm(scope);
+function wirePriceAlertSearch() {
+  const form = priceAlertForm();
   const search = form.search, dd = form.dropdown;
   if (!search || !dd) return;
   let currentMatches = [];
   const close = () => { dd.hidden = true; search.setAttribute("aria-expanded", "false"); };
   const choose = (item) => {
-    priceAlertSelections[scope] = { type: item.type, key: item.key, name: item.name, sym: item.sym || "" };
-    search.value = priceAlertSelectionText(priceAlertSelections[scope]);
-    close(); syncPriceAlertSelectionUi(scope); form.target.focus();
+    selectedPriceAlertAsset = { type: item.type, key: item.key, name: item.name, sym: item.sym || "" };
+    search.value = priceAlertSelectionText(selectedPriceAlertAsset);
+    close(); syncPriceAlertSelectionUi(); form.target.focus();
   };
   const render = () => {
-    const selected = priceAlertSelections[scope];
+    const selected = selectedPriceAlertAsset;
     if (selected && search.value !== priceAlertSelectionText(selected)) {
-      priceAlertSelections[scope] = null; syncPriceAlertSelectionUi(scope);
+      selectedPriceAlertAsset = null; syncPriceAlertSelectionUi();
     }
     const q = search.value.trim().toLocaleLowerCase(state.lang === "tr" ? "tr-TR" : "en-US");
-    if (!q || priceAlertSelections[scope]) { currentMatches = []; close(); return; }
+    if (!q || selectedPriceAlertAsset) { currentMatches = []; close(); return; }
     currentMatches = watchSearchPool().filter((item) => item.name.toLocaleLowerCase(state.lang === "tr" ? "tr-TR" : "en-US").includes(q) || String(item.sym || "").toLowerCase().includes(q)).slice(0, 12);
     if (!currentMatches.length) { close(); return; }
     dd.innerHTML = currentMatches.map((item, i) => `<button type="button" class="coin-opt" role="option" data-alert-result="${i}">${escapeHtml(item.name)} <span>${escapeHtml(item.sym || "")} · ${escapeHtml(item.tag)}</span></button>`).join("");
@@ -3897,7 +3888,7 @@ function wirePriceAlertSearch(scope = "settings") {
   search.addEventListener("keydown", (e) => {
     if (e.key === "Escape") { close(); return; }
     if (e.key === "ArrowDown" && !dd.hidden) { e.preventDefault(); const first = dd.querySelector("[data-alert-result]"); if (first) first.focus(); }
-    else if (e.key === "Enter" && currentMatches.length && !priceAlertSelections[scope]) { e.preventDefault(); choose(currentMatches[0]); }
+    else if (e.key === "Enter" && currentMatches.length && !selectedPriceAlertAsset) { e.preventDefault(); choose(currentMatches[0]); }
   });
 }
 
@@ -4158,10 +4149,8 @@ el.vehicleNotifyDays.addEventListener("change", () => {
   el.vehicleNotifyDays.value = String(state.notifications.vehicleDays);
   saveState(); checkVehicleNotifications();
 });
-el.addPriceAlert.addEventListener("click", () => addPriceAlert("settings"));
-el.priceAlertTarget.addEventListener("keydown", (e) => { if (e.key === "Enter") addPriceAlert("settings"); });
-el.homeAddPriceAlert.addEventListener("click", () => addPriceAlert("home"));
-el.homePriceAlertTarget.addEventListener("keydown", (e) => { if (e.key === "Enter") addPriceAlert("home"); });
+el.homeAddPriceAlert.addEventListener("click", addPriceAlert);
+el.homePriceAlertTarget.addEventListener("keydown", (e) => { if (e.key === "Enter") addPriceAlert(); });
 el.resetHomeCards.addEventListener("click", resetHomeLayout);
 el.installPwa.addEventListener("click", installPwa);
 el.exportData.addEventListener("click", exportBackup);
@@ -4449,8 +4438,7 @@ applyLanguage(state.lang); // builds layout + savings, applies all translations
 if (isFirstRun) showOnboarding();
 else { try { if (!localStorage.getItem("numbr_guide_seen")) showGuide(); } catch (e) {} }
 wireWatchSearch();
-wirePriceAlertSearch("settings");
-wirePriceAlertSearch("home");
+wirePriceAlertSearch();
 wireHomeDashboard();
 registerPwa();
 refreshCryptoPrices(); // fetch live crypto prices (works on the deployed site)

@@ -22,7 +22,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Sora:wght@600;700;800&family=Cinzel:wght@600;700;800&family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="vendor/leaflet/leaflet.css" />
-  <link rel="stylesheet" href="styles.css?v=3" />
+  <link rel="stylesheet" href="styles.css?v=4" />
 </head>
 <body>
   <div class="offline-banner" id="offlineBanner" role="status" aria-live="polite" hidden data-i18n="offline_banner">Çevrimdışısın · son kaydedilen veriler gösteriliyor</div>
@@ -367,6 +367,28 @@
         </div>
       </section>
 
+      <section class="glass settings-group settings-tools" aria-labelledby="notifyTitle">
+        <h3 class="settings-label" id="notifyTitle" data-i18n="notify_title">Notifications</h3>
+        <p class="settings-note" data-i18n="notify_desc">Get price alerts and reminders for upcoming vehicle maintenance.</p>
+        <label class="switch settings-switch">
+          <input type="checkbox" id="notifyToggle" />
+          <span class="switch-track"><span class="switch-thumb"></span></span>
+          <span class="switch-label" data-i18n="notify_enable">Enable notifications</span>
+        </label>
+        <p class="settings-status" id="notifyStatus" role="status" aria-live="polite"></p>
+        <p class="settings-note" data-i18n="notify_privacy">Only alert conditions and maintenance dates are synced for background delivery.</p>
+
+        <div class="settings-subgroup">
+          <label class="settings-field" for="vehicleNotifyDays">
+            <span data-i18n="vehicle_notify">Vehicle maintenance reminder</span>
+            <span class="settings-inline-input">
+              <input id="vehicleNotifyDays" type="number" min="0" max="30" inputmode="numeric" value="7" />
+              <span data-i18n="days_before">days before</span>
+            </span>
+          </label>
+        </div>
+      </section>
+
       <section class="glass settings-group">
         <h3 class="settings-label" data-i18n="sound">Sound</h3>
         <label class="switch sound-switch">
@@ -400,40 +422,6 @@
         <p class="settings-note" data-i18n="pwa_desc">Install NumBrrr on your phone and keep using saved data without internet.</p>
         <p class="settings-status" id="pwaStatus" role="status" aria-live="polite"></p>
         <button class="settings-action settings-action--primary" id="installPwa" type="button" data-i18n="pwa_install" hidden>Install app</button>
-      </section>
-
-      <section class="glass settings-group settings-tools" aria-labelledby="notifyTitle">
-        <h3 class="settings-label" id="notifyTitle" data-i18n="notify_title">Notifications</h3>
-        <p class="settings-note" data-i18n="notify_desc">Get price alerts and reminders for upcoming vehicle maintenance.</p>
-        <label class="switch settings-switch">
-          <input type="checkbox" id="notifyToggle" />
-          <span class="switch-track"><span class="switch-thumb"></span></span>
-          <span class="switch-label" data-i18n="notify_enable">Enable notifications</span>
-        </label>
-        <p class="settings-status" id="notifyStatus" role="status" aria-live="polite"></p>
-        <p class="settings-note" data-i18n="notify_privacy">Only alert conditions and maintenance dates are synced for background delivery.</p>
-
-        <div class="settings-subgroup">
-          <label class="settings-field" for="vehicleNotifyDays">
-            <span data-i18n="vehicle_notify">Vehicle maintenance reminder</span>
-            <span class="settings-inline-input">
-              <input id="vehicleNotifyDays" type="number" min="0" max="30" inputmode="numeric" value="7" />
-              <span data-i18n="days_before">days before</span>
-            </span>
-          </label>
-        </div>
-
-        <div class="settings-subgroup">
-          <h4 class="settings-subtitle" data-i18n="price_alerts">Price alerts</h4>
-          <div class="alert-form">
-            <label class="alert-search-field"><span data-i18n="alert_asset">Asset</span><span class="alert-search"><input id="priceAlertSearch" type="text" autocomplete="off" role="combobox" aria-autocomplete="list" aria-controls="priceAlertDd" aria-expanded="false" /><span class="coin-dropdown alert-search-dd" id="priceAlertDd" role="listbox" hidden></span></span></label>
-            <label><span data-i18n="alert_condition">Condition</span><select id="priceAlertCondition"><option value="above" data-i18n="alert_above">Rises above</option><option value="below" data-i18n="alert_below">Falls below</option></select></label>
-            <label><span data-i18n="alert_target">Target price</span><input id="priceAlertTarget" type="text" inputmode="decimal" placeholder="0" /></label>
-            <button class="settings-action settings-action--primary" id="addPriceAlert" type="button" data-i18n="alert_add">Add alert</button>
-          </div>
-          <p class="settings-note" id="priceAlertHint"></p>
-          <div class="alert-list" id="priceAlertList" aria-live="polite"></div>
-        </div>
       </section>
 
       <section class="glass settings-group settings-tools" aria-labelledby="backupTitle">
@@ -680,7 +668,7 @@
 
   <script src="vendor/leaflet/leaflet.js"></script>
   <script src="turkey-locations.js?v=2"></script>
-  <script src="app.js?v=3"></script>
+  <script src="app.js?v=4"></script>
 
   <!-- Vercel Web Analytics (static-site injection; loads only on the deployed Vercel domain) -->
   <script>
