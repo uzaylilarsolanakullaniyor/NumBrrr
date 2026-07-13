@@ -21,7 +21,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <noscript><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Sora:wght@600;700;800&family=Cinzel:wght@600;700;800&family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet" /></noscript>
-  <link rel="stylesheet" href="styles.css?v=15" />
+  <link rel="stylesheet" href="styles.css?v=16" />
 </head>
 <body>
   <div class="offline-banner" id="offlineBanner" role="status" aria-live="polite" hidden data-i18n="offline_banner">Çevrimdışısın · son kaydedilen veriler gösteriliyor</div>
@@ -385,27 +385,49 @@
     <div class="view" id="view-car" hidden>
       <!-- My car(s): brand-model + fuel specs (used for route cost) + payment reminders
            + logged costs. Costs still count toward monthly expenses (Gider). -->
-      <section class="glass car-panel exp-vehicles" aria-label="My car">
-        <h3 class="settings-label exp-sec-label" data-i18n="veh_title">My car</h3>
-        <div id="vehList"></div>
-        <button class="add-cat" id="addVehicle" type="button" data-i18n="veh_add">+ Add car</button>
+      <section class="glass car-panel car-garage-panel exp-vehicles" aria-labelledby="vehicleSectionTitle">
+        <div class="car-section-head">
+          <div class="car-section-title">
+            <span class="car-section-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><path d="M5 17h14M6.5 17l-1-5.2a2 2 0 0 1 .4-1.6l1.8-2.3A2 2 0 0 1 9.3 7h5.4a2 2 0 0 1 1.6.8l1.8 2.3a2 2 0 0 1 .4 1.6l-1 5.2M7 13h.01M17 13h.01M8 17v2M16 17v2"></path></svg>
+            </span>
+            <div>
+              <h3 class="settings-label exp-sec-label" id="vehicleSectionTitle" data-i18n="veh_title">My vehicles</h3>
+              <p class="car-section-note" data-i18n="veh_sub">Keep vehicle details, reminders and expenses together.</p>
+            </div>
+          </div>
+          <span class="car-section-count" id="vehCount">0</span>
+        </div>
+        <div class="veh-list" id="vehList"></div>
+        <button class="add-cat car-add-vehicle" id="addVehicle" type="button" data-i18n="veh_add">+ Add car</button>
       </section>
       <datalist id="vehSchedList"></datalist>
       <datalist id="vehCatList"></datalist>
 
       <!-- Route planner (Türkiye-only: provinces/districts and OSRM routing are TR data) -->
-      <section class="glass car-panel" id="carRouteSec" aria-label="Route" hidden>
-        <h3 class="settings-label" data-i18n="car_route">Route</h3>
+      <section class="glass car-panel car-route-panel" id="carRouteSec" aria-labelledby="carRouteTitle" hidden>
+        <div class="car-section-head">
+          <div class="car-section-title">
+            <span class="car-section-icon car-section-icon--route" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><path d="M7 20s-4-4.2-4-8a4 4 0 1 1 8 0c0 3.8-4 8-4 8Zm0-6.5A1.5 1.5 0 1 0 7 10a1.5 1.5 0 0 0 0 3.5ZM17 4s-4 4.2-4 8a4 4 0 1 0 8 0c0-3.8-4-8-4-8Zm0 6.5A1.5 1.5 0 1 1 17 14a1.5 1.5 0 0 1 0-3.5Z"></path></svg>
+            </span>
+            <div>
+              <h3 class="settings-label" id="carRouteTitle" data-i18n="car_route">Route</h3>
+              <p class="car-section-note" data-i18n="car_route_sub">Plan the route and see the estimated trip cost.</p>
+            </div>
+          </div>
+        </div>
         <div class="car-route-inputs">
-          <div class="car-loc">
-            <span class="car-loc-lbl" data-i18n="car_from">From</span>
+          <div class="car-loc car-loc--from">
+            <div class="car-loc-head"><span class="car-point">A</span><span class="car-loc-lbl" data-i18n="car_from">From</span></div>
             <div class="car-loc-selects">
               <select class="car-select" id="carFromP" aria-label="il"></select>
               <select class="car-select car-select--d" id="carFromD" aria-label="ilçe"></select>
             </div>
           </div>
-          <div class="car-loc">
-            <span class="car-loc-lbl" data-i18n="car_to">To</span>
+          <span class="car-route-connector" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 12h14m-5-5 5 5-5 5"></path></svg></span>
+          <div class="car-loc car-loc--to">
+            <div class="car-loc-head"><span class="car-point">B</span><span class="car-loc-lbl" data-i18n="car_to">To</span></div>
             <div class="car-loc-selects">
               <select class="car-select" id="carToP" aria-label="il"></select>
               <select class="car-select car-select--d" id="carToD" aria-label="ilçe"></select>
@@ -419,10 +441,11 @@
         <div class="car-favorites" id="carFavorites" hidden></div>
         <div class="car-route-actions">
           <button class="add-cat car-calc" id="carCalc" type="button" data-i18n="car_calc">Calculate route</button>
-          <button class="car-icon-btn" id="carFavorite" type="button" data-i18n-title="car_add_favorite" title="Add favorite">☆</button>
-          <button class="car-icon-btn" id="carClear" type="button" data-i18n-title="car_clear" title="Clear">×</button>
+          <button class="car-icon-btn" id="carFavorite" type="button" data-i18n-title="car_add_favorite" title="Add favorite"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1.1 6.2-5.6-3-5.6 3 1.1-6.2L3 9.6l6.2-.9L12 3Z"></path></svg></button>
+          <button class="car-icon-btn" id="carClear" type="button" data-i18n-title="car_clear" title="Clear"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4v6h6M20 20v-6h-6M5.6 15a8 8 0 0 0 13-2M18.4 9A8 8 0 0 0 5.5 7"></path></svg></button>
         </div>
         <p class="car-route-msg" id="carRouteMsg" hidden></p>
+        <div class="car-extra-head"><span data-i18n="car_extra_costs_title">Additional trip costs</span></div>
         <div class="car-extra-costs">
           <label><span data-i18n="car_toll">Toll</span><div class="money-input money-input--sm"><span class="money-symbol">₺</span><input id="carToll" inputmode="numeric" placeholder="0"></div></label>
           <label><span data-i18n="car_parking">Parking</span><div class="money-input money-input--sm"><span class="money-symbol">₺</span><input id="carParking" inputmode="numeric" placeholder="0"></div></label>
@@ -437,8 +460,18 @@
       </section>
 
       <!-- Trip history (with running total; Türkiye-only, tied to the route planner) -->
-      <section class="glass car-panel" id="carHistSec" aria-label="Trip history" hidden>
-        <h3 class="settings-label" data-i18n="car_history">Trip history</h3>
+      <section class="glass car-panel car-history-panel" id="carHistSec" aria-labelledby="carHistoryTitle" hidden>
+        <div class="car-section-head">
+          <div class="car-section-title">
+            <span class="car-section-icon car-section-icon--history" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><path d="M4 12a8 8 0 1 0 2.3-5.7L4 8.6M4 4v4.6h4.6M12 7v5l3 2"></path></svg>
+            </span>
+            <div>
+              <h3 class="settings-label" id="carHistoryTitle" data-i18n="car_history">Trip history</h3>
+              <p class="car-section-note" data-i18n="car_history_sub">Review saved routes and total trip costs.</p>
+            </div>
+          </div>
+        </div>
         <div id="carHistList"></div>
       </section>
     </div><!-- /view-car -->
@@ -774,7 +807,7 @@
     </div>
   </div>
 
-  <script src="app.js?v=15"></script>
+  <script src="app.js?v=16"></script>
 
   <!-- Vercel Web Analytics (static-site injection; loads only on the deployed Vercel domain) -->
   <script>

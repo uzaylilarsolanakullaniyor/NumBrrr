@@ -266,7 +266,8 @@ const I18N = {
     budget_save: "Save limit", budget_empty: "No category limit yet.", budget_vehicle: "Vehicle",
     budget_progress: "{rate}% of the monthly budget used", budget_no_limit: "Add a category limit to start planning.",
     budget_over: "Budget exceeded by {amount}", budget_unbudgeted: "{amount} has no category limit.", budget_saved: "Category limit saved.", budget_invalid: "Enter a category and an amount above zero.",
-    veh_title: "My vehicles", veh_add: "+ Add vehicle", veh_model_ph: "Vehicle model",
+    veh_title: "My vehicles", veh_sub: "Keep vehicle details, reminders and expenses together.", veh_add: "+ Add vehicle", veh_model_ph: "Vehicle model",
+    veh_count: "{count} vehicles", veh_empty_title: "Your garage is empty", veh_empty_sub: "Add a vehicle to calculate route fuel costs and track maintenance.", veh_remove: "Remove vehicle",
     veh_reminders: "Payment reminders", veh_add_reminder: "+ Add reminder", veh_label_ph: "Insurance, tax…",
     veh_expenses: "Expenses", veh_add_expense: "+ Add expense", veh_monthly: "This month",
     vsched: { insurance: "Insurance", kasko: "Casco", tax: "Tax", inspection: "Inspection", service: "Service" },
@@ -318,14 +319,14 @@ const I18N = {
     more_soon: "More features coming soon ✨",
     nav_car: "My car",
     car_title: "My car",
-    car_route: "Route", car_from: "From", car_to: "To", car_pick_province: "Select province", car_loading: "Loading route data…",
+    car_route: "Route", car_route_sub: "Plan the route and see the estimated trip cost.", car_from: "From", car_to: "To", car_pick_province: "Select province", car_loading: "Loading route data…",
     car_center: "Center (province seat)", car_need_provinces: "Pick origin and destination province.", car_district: "District",
     car_calc: "Calculate route", car_calculating: "Calculating…",
     car_same_province: "Pick two different locations.", car_route_fail: "Couldn't reach the route service, showing an estimate.",
     car_no_profile: "Add a car profile to see fuel cost.",
     car_distance: "Distance", car_duration: "Est. time",
     car_cost_one: "One way fuel", car_cost_round: "Round trip fuel",
-    car_oneway: "One way", car_roundtrip: "Round trip", car_toll: "Toll", car_parking: "Parking", car_other_cost: "Other",
+    car_oneway: "One way", car_roundtrip: "Round trip", car_toll: "Toll", car_parking: "Parking", car_other_cost: "Other", car_extra_costs_title: "Additional trip costs",
     car_trip_total: "Trip total", car_extra_total: "Extra costs", car_open_map: "Open in Maps ↗",
     car_route_map: "Route map", car_map_hint: "Drag and zoom the map", car_map_unavailable: "The interactive map could not load. Use Open in Maps instead.",
     car_add_favorite: "Add favorite", car_favorite_saved: "Favorite route saved ★", car_favorites: "Favorite routes",
@@ -335,7 +336,7 @@ const I18N = {
     car_fuel_type: "Fuel", car_consumption: "Consumption", car_consumption_hint: "/100 km",
     car_price: "Fuel price", car_price_hint: "per L / kWh", car_active: "Active",
     car_fuel_gas: "Petrol", car_fuel_diesel: "Diesel", car_fuel_lpg: "LPG", car_fuel_electric: "Electric", car_fuel_hybrid: "Hybrid",
-    car_history: "Trip history", car_history_empty: "No trips saved yet.",
+    car_history: "Trip history", car_history_sub: "Review saved routes and total trip costs.", car_history_empty: "No trips saved yet.",
     car_oneway_label: "one way", car_roundtrip_label: "round trip",
     car_expenses: "Trip expenses", car_add_expense: "+ Add expense", car_exp_empty: "No expenses added yet.",
     car_general_trip: "General", car_amount_ph: "Amount", car_link_trip: "Trip",
@@ -447,7 +448,8 @@ const I18N = {
     budget_save: "Limiti kaydet", budget_empty: "Henüz kategori limiti yok.", budget_vehicle: "Araç",
     budget_progress: "Aylık bütçenin %{rate} kadarı kullanıldı", budget_no_limit: "Planlamaya başlamak için kategori limiti ekle.",
     budget_over: "Bütçe {amount} aşıldı", budget_unbudgeted: "{amount} harcamanın kategori limiti yok.", budget_saved: "Kategori limiti kaydedildi.", budget_invalid: "Kategori ve sıfırdan büyük bir tutar gir.",
-    veh_title: "Araçlarım", veh_add: "+ Araç ekle", veh_model_ph: "Araç modeli",
+    veh_title: "Araçlarım", veh_sub: "Araç bilgilerini, hatırlatmaları ve harcamaları tek yerde yönet.", veh_add: "+ Araç ekle", veh_model_ph: "Araç modeli",
+    veh_count: "{count} araç", veh_empty_title: "Garajın henüz boş", veh_empty_sub: "Rota yakıt maliyetini hesaplamak ve bakımları takip etmek için araç ekle.", veh_remove: "Aracı kaldır",
     veh_reminders: "Ödeme hatırlatmaları", veh_add_reminder: "+ Hatırlatma ekle", veh_label_ph: "Sigorta, vergi…",
     veh_expenses: "Harcamalar", veh_add_expense: "+ Harcama ekle", veh_monthly: "Bu ay",
     vsched: { insurance: "Sigorta", kasko: "Kasko", tax: "Vergi (MTV)", inspection: "Muayene", service: "Bakım" },
@@ -499,14 +501,14 @@ const I18N = {
     more_soon: "Yeni özellikler yakında ✨",
     nav_car: "Aracım",
     car_title: "Aracım",
-    car_route: "Rota", car_from: "Nereden", car_to: "Nereye", car_pick_province: "İl seç", car_loading: "Rota verileri yükleniyor…",
+    car_route: "Rota", car_route_sub: "Rotanı planla ve tahmini yolculuk maliyetini gör.", car_from: "Nereden", car_to: "Nereye", car_pick_province: "İl seç", car_loading: "Rota verileri yükleniyor…",
     car_center: "Merkez (il merkezi)", car_need_provinces: "Kalkış ve varış ilini seç.", car_district: "İlçe",
     car_calc: "Rotayı hesapla", car_calculating: "Hesaplanıyor…",
     car_same_province: "İki farklı nokta seç.", car_route_fail: "Rota servisine ulaşılamadı, tahmini değer gösteriliyor.",
     car_no_profile: "Yakıt maliyeti için araç profili ekle.",
     car_distance: "Mesafe", car_duration: "Tahmini süre",
     car_cost_one: "Gidiş yakıt", car_cost_round: "Gidiş-dönüş yakıt",
-    car_oneway: "Tek yön", car_roundtrip: "Gidiş-dönüş", car_toll: "Otoyol", car_parking: "Otopark", car_other_cost: "Diğer",
+    car_oneway: "Tek yön", car_roundtrip: "Gidiş-dönüş", car_toll: "Otoyol", car_parking: "Otopark", car_other_cost: "Diğer", car_extra_costs_title: "Ek yol giderleri",
     car_trip_total: "Yolculuk toplamı", car_extra_total: "Ek giderler", car_open_map: "Haritada aç ↗",
     car_route_map: "Rota haritası", car_map_hint: "Haritayı sürükleyip yakınlaştırabilirsin", car_map_unavailable: "Etkileşimli harita yüklenemedi. Haritada aç bağlantısını kullanabilirsin.",
     car_add_favorite: "Favorilere ekle", car_favorite_saved: "Favori rota kaydedildi ★", car_favorites: "Favori rotalar",
@@ -516,7 +518,7 @@ const I18N = {
     car_fuel_type: "Yakıt", car_consumption: "Tüketim", car_consumption_hint: "/100 km",
     car_price: "Yakıt fiyatı", car_price_hint: "L / kWh başına", car_active: "Aktif",
     car_fuel_gas: "Benzin", car_fuel_diesel: "Dizel", car_fuel_lpg: "LPG", car_fuel_electric: "Elektrik", car_fuel_hybrid: "Hibrit",
-    car_history: "Yolculuk geçmişi", car_history_empty: "Henüz yolculuk kaydedilmedi.",
+    car_history: "Yolculuk geçmişi", car_history_sub: "Kaydedilen rotaları ve toplam yolculuk maliyetlerini incele.", car_history_empty: "Henüz yolculuk kaydedilmedi.",
     car_oneway_label: "tek yön", car_roundtrip_label: "gidiş-dönüş",
     car_expenses: "Yolculuk harcamaları", car_add_expense: "+ Harcama ekle", car_exp_empty: "Henüz harcama eklenmedi.",
     car_general_trip: "Genel", car_amount_ph: "Tutar", car_link_trip: "Yolculuk",
@@ -703,6 +705,7 @@ const el = {
   budgetCategory: document.getElementById("budgetCategory"),
   budgetAmount: document.getElementById("budgetAmount"),
   vehList: document.getElementById("vehList"),
+  vehCount: document.getElementById("vehCount"),
   addVehicle: document.getElementById("addVehicle"),
   vehSchedList: document.getElementById("vehSchedList"),
   vehCatList: document.getElementById("vehCatList"),
@@ -1492,8 +1495,17 @@ function vcatName(c) { return (langPack().vcat && langPack().vcat[c]) || (I18N.e
 function buildVehicles() {
   el.vehSchedList.innerHTML = VEH_SCHED_PRESETS.map((c) => `<option value="${vschedName(c).replace(/"/g, "&quot;")}"></option>`).join("");
   el.vehCatList.innerHTML = VEH_EXP_PRESETS.map((c) => `<option value="${vcatName(c).replace(/"/g, "&quot;")}"></option>`).join("");
+  const vehicles = state.vehicles || [];
+  if (el.vehCount) el.vehCount.textContent = t("veh_count", { count: vehicles.length });
   el.vehList.innerHTML = "";
-  (state.vehicles || []).forEach((v) => el.vehList.appendChild(makeVehicleCard(v)));
+  if (!vehicles.length) {
+    el.vehList.innerHTML = `<div class="veh-empty-state">
+      <span class="veh-empty-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 17h14M6.5 17l-1-5.2a2 2 0 0 1 .4-1.6l1.8-2.3A2 2 0 0 1 9.3 7h5.4a2 2 0 0 1 1.6.8l1.8 2.3a2 2 0 0 1 .4 1.6l-1 5.2M7 13h.01M17 13h.01M8 17v2M16 17v2"></path></svg></span>
+      <div><strong>${t("veh_empty_title")}</strong><p>${t("veh_empty_sub")}</p></div>
+    </div>`;
+    return;
+  }
+  vehicles.forEach((v) => el.vehList.appendChild(makeVehicleCard(v)));
 }
 
 function refreshVehicles() {
@@ -1524,10 +1536,15 @@ function makeVehicleCard(v) {
   const fuelOpts = CAR_FUELS.map((f) => `<option value="${f}"${v.fuel === f ? " selected" : ""}>${t("car_fuel_" + f)}</option>`).join("");
   card.innerHTML = `
     <div class="veh-head">
-      ${multi ? `<button class="car-prof-pick veh-active" type="button" data-veh-active aria-label="${t("car_active")}"></button>` : ""}
-      <input class="veh-plate" data-veh-plate value="${escapeHtml(v.plate || "")}" placeholder="${escapeHtml(t("car_model_ph"))}" />
-      <span class="veh-monthly" data-veh-total></span>
-      <button class="cat-remove veh-del" type="button" data-veh-del aria-label="remove">×</button>
+      <div class="veh-head-main">
+        <span class="veh-avatar" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 17h14M6.5 17l-1-5.2a2 2 0 0 1 .4-1.6l1.8-2.3A2 2 0 0 1 9.3 7h5.4a2 2 0 0 1 1.6.8l1.8 2.3a2 2 0 0 1 .4 1.6l-1 5.2M7 13h.01M17 13h.01M8 17v2M16 17v2"></path></svg></span>
+        <div class="veh-identity"><span>${t("car_vehicle")}</span><input class="veh-plate" data-veh-plate value="${escapeHtml(v.plate || "")}" placeholder="${escapeHtml(t("car_model_ph"))}" /></div>
+      </div>
+      <div class="veh-head-actions">
+        <span class="veh-monthly" data-veh-total></span>
+        ${multi ? `<button class="car-prof-pick veh-active" type="button" data-veh-active aria-label="${t("car_active")}" title="${t("car_active")}"></button>` : ""}
+        <button class="cat-remove veh-del" type="button" data-veh-del aria-label="${t("veh_remove")}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3m-8 0 1 13h8l1-13M10 11v5m4-5v5"></path></svg></button>
+      </div>
     </div>
     <div class="veh-lastmonth" data-veh-lastmonth hidden></div>
     <div class="car-prof-grid veh-specs">
@@ -1537,15 +1554,17 @@ function makeVehicleCard(v) {
       <label class="car-field"><span>${t("car_price")} <small>${t("car_price_hint")}</small></span>
         <div class="money-input money-input--sm"><span class="money-symbol">${sym}</span><input inputmode="decimal" data-veh-price value="${v.price ? locDec(v.price) : ""}" placeholder="0" /></div></label>
     </div>
-    <div class="veh-sub">
-      <div class="veh-sub-head">${t("veh_reminders")}</div>
-      <div class="veh-sched-wrap" data-veh-sched-list></div>
-      <button class="veh-add-btn" type="button" data-veh-add-sched>${t("veh_add_reminder")}</button>
-    </div>
-    <div class="veh-sub">
-      <div class="veh-sub-head">${t("veh_expenses")}</div>
-      <div class="veh-exp-wrap" data-veh-exp-list></div>
-      <button class="veh-add-btn" type="button" data-veh-add-exp>${t("veh_add_expense")}</button>
+    <div class="veh-sub-grid">
+      <div class="veh-sub veh-sub--reminders">
+        <div class="veh-sub-head">${t("veh_reminders")}</div>
+        <div class="veh-sched-wrap" data-veh-sched-list></div>
+        <button class="veh-add-btn" type="button" data-veh-add-sched>${t("veh_add_reminder")}</button>
+      </div>
+      <div class="veh-sub veh-sub--expenses">
+        <div class="veh-sub-head">${t("veh_expenses")}</div>
+        <div class="veh-exp-wrap" data-veh-exp-list></div>
+        <button class="veh-add-btn" type="button" data-veh-add-exp>${t("veh_add_expense")}</button>
+      </div>
     </div>`;
 
   card.querySelector("[data-veh-plate]").addEventListener("input", (e) => { v.plate = e.target.value; saveState(); });
