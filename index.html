@@ -22,7 +22,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Sora:wght@600;700;800&family=Cinzel:wght@600;700;800&family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="vendor/leaflet/leaflet.css" />
-  <link rel="stylesheet" href="styles.css?v=2" />
+  <link rel="stylesheet" href="styles.css?v=3" />
 </head>
 <body>
   <div class="offline-banner" id="offlineBanner" role="status" aria-live="polite" hidden data-i18n="offline_banner">Çevrimdışısın · son kaydedilen veriler gösteriliyor</div>
@@ -201,6 +201,24 @@
             <strong class="dashboard-widget-value dashboard-widget-value--text" id="homeWatchValue">—</strong>
             <small class="dashboard-widget-note" id="homeWatchNote">—</small>
           </button>
+        </article>
+
+        <article class="glass dashboard-widget dashboard-widget--alerts" data-home-widget="alerts" aria-labelledby="homePriceAlertsTitle">
+          <div class="dashboard-feature-head">
+            <span class="dashboard-widget-icon" aria-hidden="true">🔔</span>
+            <div>
+              <h2 id="homePriceAlertsTitle" data-i18n="price_alerts">Price alerts</h2>
+              <p data-i18n="home_alert_sub">Search any asset and set the price you want to be notified at.</p>
+            </div>
+          </div>
+          <div class="alert-form alert-form--home">
+            <label class="alert-search-field"><span data-i18n="alert_asset">Asset</span><span class="alert-search"><input id="homePriceAlertSearch" type="text" autocomplete="off" role="combobox" aria-autocomplete="list" aria-controls="homePriceAlertDd" aria-expanded="false" /><span class="coin-dropdown alert-search-dd" id="homePriceAlertDd" role="listbox" hidden></span></span></label>
+            <label><span data-i18n="alert_condition">Condition</span><select id="homePriceAlertCondition"><option value="above" data-i18n="alert_above">Rises above</option><option value="below" data-i18n="alert_below">Falls below</option></select></label>
+            <label><span data-i18n="alert_target">Target price</span><input id="homePriceAlertTarget" type="text" inputmode="decimal" autocomplete="off" placeholder="0" /></label>
+            <button class="settings-action settings-action--primary" id="homeAddPriceAlert" type="button" data-i18n="alert_add">Add alert</button>
+          </div>
+          <p class="settings-note home-alert-hint" id="homePriceAlertHint" aria-live="polite"></p>
+          <div class="alert-list" id="homePriceAlertList" aria-live="polite"></div>
         </article>
 
         <article class="glass dashboard-widget dashboard-widget--countdown" data-home-widget="countdown">
@@ -662,7 +680,7 @@
 
   <script src="vendor/leaflet/leaflet.js"></script>
   <script src="turkey-locations.js?v=2"></script>
-  <script src="app.js?v=2"></script>
+  <script src="app.js?v=3"></script>
 
   <!-- Vercel Web Analytics (static-site injection; loads only on the deployed Vercel domain) -->
   <script>

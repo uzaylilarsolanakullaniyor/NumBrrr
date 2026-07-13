@@ -274,15 +274,15 @@ const I18N = {
     savings_note: "Projection compounds yearly contributions: FV = annual × [((1 + r)ⁿ − 1) / r], where r is the selected annual return. Returns are assumptions, not guarantees.",
     settings_title: "Settings", language: "Language", theme: "Theme", country: "Country", sound: "Sound", sound_fx: "Sound effects", motion: "Motion", animations: "Animations", animations_sub: "Show interface transitions and decorative motion",
     home_customize_title: "Home screen", home_customize_desc: "Reorder widgets or hide the ones you do not use.", home_customize_reset: "Reset layout", home_move_up: "Move up", home_move_down: "Move down", home_hide: "Show this widget", home_last_card: "At least one widget must remain visible.",
-    home_widget_freedom: "Freedom calculator", home_widget_portfolio: "Portfolio", home_widget_income: "Income", home_widget_expenses: "Expenses", home_widget_car: "My car", home_widget_watch: "Watchlist", home_widget_countdown: "Countdowns",
+    home_widget_freedom: "Freedom calculator", home_widget_portfolio: "Portfolio", home_widget_income: "Income", home_widget_expenses: "Expenses", home_widget_car: "My car", home_widget_watch: "Watchlist", home_widget_alerts: "Price alerts", home_widget_countdown: "Countdowns",
     home_holdings: "{count} holdings", home_passive: "{amount} passive / month", home_upcoming: "{count} upcoming payments", home_vehicles: "{count} vehicles", home_last_trip: "Last trip: {route}", home_no_route: "No saved route", home_watch_count: "{count} tracked assets", home_watch_empty: "No tracked assets", home_freedom_summary: "{amount} · {name}",
     countdown_title: "Countdowns", countdown_sub: "Pick a target date from the calendar and follow it in days or months.", countdown_name: "Name", countdown_category: "Category", countdown_date: "Target date", countdown_unit: "Show as", countdown_days: "Days", countdown_months: "Months", countdown_add: "Add countdown", countdown_name_ph: "Vacation, exam, goal…", countdown_category_ph: "Travel, work, personal…", countdown_empty: "No countdown yet.", countdown_invalid: "Enter a name and choose a future date.", countdown_day_left: "day left", countdown_days_left: "days left", countdown_month_left: "month left", countdown_months_left: "months left", countdown_done: "Time's up", countdown_target: "Target: {date}", countdown_remove: "Remove countdown", countdown_switch_unit: "Switch days / months", countdown_added: "Countdown added ✓", countdown_active: "{count} active countdowns",
     pwa_title: "App & offline use", pwa_desc: "Install NumBrrr on your phone and keep using saved data without internet.", pwa_install: "Install app", pwa_ready: "Offline use is ready.", pwa_installed: "NumBrrr is installed on this device.", pwa_ios: "Use your browser's Add to Home Screen command to install.", pwa_unsupported: "This browser does not support app installation.", offline_banner: "You are offline · showing the latest saved data",
     notify_title: "Notifications", notify_desc: "Get price alerts and upcoming vehicle maintenance reminders, including while the app is closed when background service is available.", notify_enable: "Enable notifications",
     notify_active: "Background notifications are active.", notify_syncing: "Connecting background notifications…", notify_background_unavailable: "Background service is not configured; alerts will still work while the app is open.", notify_inapp: "System notifications are unavailable; alerts will appear inside the app.", notify_blocked: "Notification permission is blocked in browser settings.", notify_off: "Notifications are off.", notify_privacy: "Only alert conditions and maintenance dates are synced for background delivery.",
     vehicle_notify: "Vehicle maintenance reminder", days_before: "days before",
-    price_alerts: "Price alerts", alert_asset: "Asset", alert_search_ph: "Search gold, stocks, crypto…", alert_condition: "Condition", alert_above: "Rises above", alert_below: "Falls below", alert_target: "Target price", alert_add: "Add alert",
-    alert_empty: "No price alerts yet.", alert_watch_empty: "Add an asset to your Watch list first.", alert_invalid: "Choose an asset and enter a valid target price.", alert_remove: "Remove alert",
+    price_alerts: "Price alerts", home_alert_sub: "Search any asset and set the price you want to be notified at.", home_alert_ready: "Notifications are on; active alerts are checked automatically.", home_alert_off: "The alert will be saved; turn on notifications in Settings to receive it.", alert_asset: "Asset", alert_search_ph: "Search gold, stocks, crypto…", alert_condition: "Condition", alert_above: "Rises above", alert_below: "Falls below", alert_target: "Target price", alert_add: "Add alert",
+    alert_empty: "No price alerts yet.", alert_watch_empty: "Add an asset to your Watch list first.", alert_invalid: "Choose an asset and enter a valid target price.", alert_added: "Price alert added ✓", alert_remove: "Remove alert",
     price_alert_title: "Price alert", price_alert_body: "{name} is now {price} ({condition} {target}).",
     vehicle_alert_title: "Vehicle reminder", vehicle_alert_body: "{vehicle}: {label} {when}.", vehicle_due_today: "is due today", vehicle_due_days: "is due in {days} days", vehicle_overdue_days: "is {days} days overdue",
     backup_title: "Data backup", backup_desc: "Save all your data as a file or restore it on another phone.", backup_export: "Export backup", backup_import: "Import backup",
@@ -437,15 +437,15 @@ const I18N = {
     savings_note: "Projeksiyon yıllık katkıları bileşik hesaplar: GD = yıllık × [((1 + r)ⁿ − 1) / r], r seçilen yıllık getiridir. Getiriler varsayımdır, garanti değildir.",
     settings_title: "Ayarlar", language: "Dil", theme: "Tema", country: "Ülke", sound: "Ses", sound_fx: "Ses efektleri", motion: "Hareket", animations: "Animasyonlar", animations_sub: "Arayüz geçişlerini ve dekoratif hareketleri göster",
     home_customize_title: "Ana sayfa", home_customize_desc: "Widget'ları sırala veya kullanmadıklarını gizle.", home_customize_reset: "Düzeni sıfırla", home_move_up: "Yukarı taşı", home_move_down: "Aşağı taşı", home_hide: "Bu widget'ı göster", home_last_card: "En az bir widget görünür kalmalı.",
-    home_widget_freedom: "Özgürlük hesaplayıcısı", home_widget_portfolio: "Portföy", home_widget_income: "Gelirler", home_widget_expenses: "Giderler", home_widget_car: "Aracım", home_widget_watch: "Takip listesi", home_widget_countdown: "Geri sayımlar",
+    home_widget_freedom: "Özgürlük hesaplayıcısı", home_widget_portfolio: "Portföy", home_widget_income: "Gelirler", home_widget_expenses: "Giderler", home_widget_car: "Aracım", home_widget_watch: "Takip listesi", home_widget_alerts: "Fiyat alarmları", home_widget_countdown: "Geri sayımlar",
     home_holdings: "{count} varlık", home_passive: "Aylık {amount} pasif", home_upcoming: "{count} yaklaşan ödeme", home_vehicles: "{count} araç", home_last_trip: "Son yolculuk: {route}", home_no_route: "Kayıtlı rota yok", home_watch_count: "{count} takip edilen varlık", home_watch_empty: "Takip edilen varlık yok", home_freedom_summary: "{name} · {amount}",
     countdown_title: "Geri sayımlar", countdown_sub: "Takvimden hedef tarihi seç; gün veya ay olarak takip et.", countdown_name: "Başlık", countdown_category: "Kategori", countdown_date: "Hedef tarih", countdown_unit: "Gösterim", countdown_days: "Gün", countdown_months: "Ay", countdown_add: "Geri sayım ekle", countdown_name_ph: "Tatil, sınav, hedef…", countdown_category_ph: "Seyahat, iş, kişisel…", countdown_empty: "Henüz geri sayım yok.", countdown_invalid: "Bir başlık gir ve takvimden ileri bir tarih seç.", countdown_day_left: "gün kaldı", countdown_days_left: "gün kaldı", countdown_month_left: "ay kaldı", countdown_months_left: "ay kaldı", countdown_done: "Süre doldu", countdown_target: "Hedef: {date}", countdown_remove: "Geri sayımı kaldır", countdown_switch_unit: "Gün / ay görünümünü değiştir", countdown_added: "Geri sayım eklendi ✓", countdown_active: "{count} aktif geri sayım",
     pwa_title: "Uygulama ve çevrimdışı kullanım", pwa_desc: "NumBrrr'ı telefonuna kur; internet yokken kayıtlı verilerinle kullanmaya devam et.", pwa_install: "Uygulamayı yükle", pwa_ready: "Çevrimdışı kullanım hazır.", pwa_installed: "NumBrrr bu cihaza yüklendi.", pwa_ios: "Yüklemek için tarayıcı menüsündeki Ana Ekrana Ekle seçeneğini kullan.", pwa_unsupported: "Bu tarayıcı uygulama yüklemeyi desteklemiyor.", offline_banner: "Çevrimdışısın · son kaydedilen veriler gösteriliyor",
     notify_title: "Bildirimler", notify_desc: "Fiyat alarmlarını ve yaklaşan araç bakım hatırlatmalarını, arka plan hizmeti hazırsa uygulama kapalıyken de al.", notify_enable: "Bildirimleri aç",
     notify_active: "Arka plan bildirimleri aktif.", notify_syncing: "Arka plan bildirimleri bağlanıyor…", notify_background_unavailable: "Arka plan hizmeti henüz yapılandırılmamış; alarmlar uygulama açıkken çalışmaya devam edecek.", notify_inapp: "Sistem bildirimi kullanılamıyor; uyarılar uygulama içinde gösterilecek.", notify_blocked: "Bildirim izni tarayıcı ayarlarından engellenmiş.", notify_off: "Bildirimler kapalı.", notify_privacy: "Arka planda göndermek için yalnızca alarm koşulları ve bakım tarihleri eşitlenir.",
     vehicle_notify: "Araç bakım hatırlatması", days_before: "gün önceden",
-    price_alerts: "Fiyat alarmları", alert_asset: "Varlık", alert_search_ph: "Altın, hisse, kripto ara…", alert_condition: "Koşul", alert_above: "Üzerine çıkarsa", alert_below: "Altına düşerse", alert_target: "Hedef fiyat", alert_add: "Alarm ekle",
-    alert_empty: "Henüz fiyat alarmı yok.", alert_watch_empty: "Önce Takip listesine bir varlık ekle.", alert_invalid: "Bir varlık seç ve geçerli hedef fiyat gir.", alert_remove: "Alarmı kaldır",
+    price_alerts: "Fiyat alarmları", home_alert_sub: "İstediğin varlığı ara ve bildirim almak istediğin fiyatı belirle.", home_alert_ready: "Bildirimler açık; aktif alarmlar otomatik kontrol edilir.", home_alert_off: "Alarm kaydedilir; uyarı almak için Ayarlar'dan bildirimleri aç.", alert_asset: "Varlık", alert_search_ph: "Altın, hisse, kripto ara…", alert_condition: "Koşul", alert_above: "Üzerine çıkarsa", alert_below: "Altına düşerse", alert_target: "Hedef fiyat", alert_add: "Alarm ekle",
+    alert_empty: "Henüz fiyat alarmı yok.", alert_watch_empty: "Önce Takip listesine bir varlık ekle.", alert_invalid: "Bir varlık seç ve geçerli hedef fiyat gir.", alert_added: "Fiyat alarmı eklendi ✓", alert_remove: "Alarmı kaldır",
     price_alert_title: "Fiyat alarmı", price_alert_body: "{name} şu anda {price} ({target} {condition}).",
     vehicle_alert_title: "Araç hatırlatması", vehicle_alert_body: "{vehicle}: {label} {when}.", vehicle_due_today: "bugün yapılmalı", vehicle_due_days: "{days} gün içinde yapılmalı", vehicle_overdue_days: "{days} gün gecikti",
     backup_title: "Veri yedekleme", backup_desc: "Tüm verilerini dosya olarak sakla veya başka telefonda geri yükle.", backup_export: "Yedeği dışa aktar", backup_import: "Yedeği içe aktar",
@@ -546,7 +546,7 @@ const I18N = {
 };
 
 // ---- State ----
-const HOME_WIDGET_IDS = ["freedom", "portfolio", "income", "expenses", "car", "watch", "countdown"];
+const HOME_WIDGET_IDS = ["freedom", "portfolio", "income", "expenses", "car", "watch", "alerts", "countdown"];
 const state = {
   lang: "en",
   theme: "black",
@@ -723,6 +723,13 @@ const el = {
   homeCarNote: document.getElementById("homeCarNote"),
   homeWatchValue: document.getElementById("homeWatchValue"),
   homeWatchNote: document.getElementById("homeWatchNote"),
+  homePriceAlertSearch: document.getElementById("homePriceAlertSearch"),
+  homePriceAlertDd: document.getElementById("homePriceAlertDd"),
+  homePriceAlertCondition: document.getElementById("homePriceAlertCondition"),
+  homePriceAlertTarget: document.getElementById("homePriceAlertTarget"),
+  homeAddPriceAlert: document.getElementById("homeAddPriceAlert"),
+  homePriceAlertHint: document.getElementById("homePriceAlertHint"),
+  homePriceAlertList: document.getElementById("homePriceAlertList"),
   countdownForm: document.getElementById("countdownForm"),
   countdownName: document.getElementById("countdownName"),
   countdownCategory: document.getElementById("countdownCategory"),
@@ -2499,6 +2506,7 @@ function normalizeHomeLayout(value) {
   const source = value && typeof value === "object" ? value : {};
   const supplied = Array.isArray(source.order) ? source.order.filter((id) => HOME_WIDGET_IDS.includes(id)) : [];
   const order = [...new Set(supplied)];
+  if (!order.includes("alerts") && order.includes("countdown")) order.splice(order.indexOf("countdown"), 0, "alerts");
   HOME_WIDGET_IDS.forEach((id) => { if (!order.includes(id)) order.push(id); });
   const hidden = Array.isArray(source.hidden) ? [...new Set(source.hidden.filter((id) => HOME_WIDGET_IDS.includes(id)))] : [];
   if (hidden.length >= HOME_WIDGET_IDS.length) hidden.pop();
@@ -3038,35 +3046,66 @@ function renderNotificationStatus() {
   else el.notifyStatus.textContent = t("notify_inapp");
 }
 
-let selectedPriceAlertAsset = null;
-function syncPriceAlertSelectionUi() {
-  const ready = !!selectedPriceAlertAsset;
-  el.priceAlertTarget.disabled = !ready;
-  el.priceAlertCondition.disabled = !ready;
-  el.addPriceAlert.disabled = !ready;
-  el.priceAlertHint.textContent = ready ? `${selectedPriceAlertAsset.name} · ${(selectedPriceAlertAsset.sym || "").toUpperCase()}` : "";
+const priceAlertSelections = { settings: null, home: null };
+
+function priceAlertForm(scope = "settings") {
+  const home = scope === "home";
+  return {
+    search: home ? el.homePriceAlertSearch : el.priceAlertSearch,
+    dropdown: home ? el.homePriceAlertDd : el.priceAlertDd,
+    condition: home ? el.homePriceAlertCondition : el.priceAlertCondition,
+    target: home ? el.homePriceAlertTarget : el.priceAlertTarget,
+    add: home ? el.homeAddPriceAlert : el.addPriceAlert,
+    hint: home ? el.homePriceAlertHint : el.priceAlertHint,
+    list: home ? el.homePriceAlertList : el.priceAlertList,
+  };
+}
+
+function priceAlertSelectionText(asset) {
+  return `${asset.name}${asset.sym ? " · " + String(asset.sym).toUpperCase() : ""}`;
+}
+
+function syncPriceAlertSelectionUi(scope = "settings") {
+  const form = priceAlertForm(scope);
+  if (!form.search) return;
+  const selected = priceAlertSelections[scope];
+  const ready = !!selected;
+  form.target.disabled = !ready;
+  form.condition.disabled = !ready;
+  form.add.disabled = !ready;
+  if (ready) form.hint.textContent = priceAlertSelectionText(selected);
+  else form.hint.textContent = scope === "home" ? t(state.notifications.enabled ? "home_alert_ready" : "home_alert_off") : "";
+}
+
+function renderPriceAlertList(container) {
+  if (!container) return;
+  const alerts = state.notifications.priceAlerts;
+  if (!alerts.length) {
+    container.innerHTML = `<p class="settings-note">${escapeHtml(t("alert_empty"))}</p>`;
+    return;
+  }
+  container.innerHTML = alerts.map((a) => {
+    const condition = a.condition === "below" ? t("alert_below") : t("alert_above");
+    return `<div class="alert-row"><div><strong>${escapeHtml(a.name || a.key)}</strong><span>${escapeHtml(condition)} · ${escapeHtml(formatAlertPrice(a.target, a.ccy))}</span></div><button type="button" data-alert-del="${escapeHtml(a.id)}" aria-label="${escapeHtml(t("alert_remove"))}">×</button></div>`;
+  }).join("");
+  container.querySelectorAll("[data-alert-del]").forEach((button) => button.addEventListener("click", () => {
+    state.notifications.priceAlerts = state.notifications.priceAlerts.filter((a) => a.id !== button.dataset.alertDel);
+    saveState();
+    sfx("remove");
+    renderNotificationSettings();
+  }));
 }
 
 function renderNotificationSettings() {
-  if (!el.priceAlertSearch) return;
   renderNotificationStatus();
-  el.vehicleNotifyDays.value = String(state.notifications.vehicleDays);
-  el.priceAlertSearch.placeholder = t("alert_search_ph");
-  syncPriceAlertSelectionUi();
-
-  const alerts = state.notifications.priceAlerts;
-  if (!alerts.length) {
-    el.priceAlertList.innerHTML = `<p class="settings-note">${escapeHtml(t("alert_empty"))}</p>`;
-  } else {
-    el.priceAlertList.innerHTML = alerts.map((a) => {
-      const condition = a.condition === "below" ? t("alert_below") : t("alert_above");
-      return `<div class="alert-row"><div><strong>${escapeHtml(a.name || a.key)}</strong><span>${escapeHtml(condition)} · ${escapeHtml(formatAlertPrice(a.target, a.ccy))}</span></div><button type="button" data-alert-del="${escapeHtml(a.id)}" aria-label="${escapeHtml(t("alert_remove"))}">×</button></div>`;
-    }).join("");
-    el.priceAlertList.querySelectorAll("[data-alert-del]").forEach((button) => button.addEventListener("click", () => {
-      state.notifications.priceAlerts = state.notifications.priceAlerts.filter((a) => a.id !== button.dataset.alertDel);
-      saveState(); renderNotificationSettings();
-    }));
-  }
+  if (el.vehicleNotifyDays) el.vehicleNotifyDays.value = String(state.notifications.vehicleDays);
+  ["settings", "home"].forEach((scope) => {
+    const form = priceAlertForm(scope);
+    if (!form.search) return;
+    form.search.placeholder = t("alert_search_ph");
+    syncPriceAlertSelectionUi(scope);
+    renderPriceAlertList(form.list);
+  });
 
   if (el.backupStatus) {
     let last = "";
@@ -3089,19 +3128,20 @@ async function setNotificationsEnabled(enabled) {
     }
     state.notifications.enabled = permission !== "denied";
   }
-  saveState(); renderNotificationStatus();
+  saveState(); renderNotificationSettings();
   if (state.notifications.enabled) {
     runNotificationChecks();
     await registerPwa();
     await syncPushSubscription(true);
   } else await removePushSubscription();
-  renderNotificationStatus();
+  renderNotificationSettings();
 }
 
 function deliverUserAlert(id, title, body, daily = false) {
   if (!state.notifications.enabled) return false;
   const today = localDateKey();
   if (daily && state.notifications.sent[id] === today) return false;
+  sfx("alert");
   showAppToast(`${title}: ${body}`);
   if (notificationPermission() === "granted") {
     if ("serviceWorker" in navigator) {
@@ -3112,19 +3152,24 @@ function deliverUserAlert(id, title, body, daily = false) {
   return true;
 }
 
-function addPriceAlertFromSettings() {
-  const target = parseDecimal(el.priceAlertTarget.value);
-  const w = selectedPriceAlertAsset;
+function addPriceAlert(scope = "settings") {
+  const form = priceAlertForm(scope);
+  const target = parseDecimal(form.target.value);
+  const w = priceAlertSelections[scope];
   if (!w || !(target > 0)) { showAppToast(t("alert_invalid")); return; }
   state.notifications.priceAlerts.push({
     id: "pa" + ++state.notifications.seq, type: w.type, key: w.key, name: w.name, sym: w.sym || "",
-    condition: el.priceAlertCondition.value === "below" ? "below" : "above",
+    condition: form.condition.value === "below" ? "below" : "above",
     target, ccy: watchDisplayCcy(w), triggered: false,
   });
-  selectedPriceAlertAsset = null;
-  el.priceAlertSearch.value = "";
-  el.priceAlertTarget.value = "";
-  saveState(); renderNotificationSettings(); refreshWatchData();
+  priceAlertSelections[scope] = null;
+  form.search.value = "";
+  form.target.value = "";
+  saveState();
+  renderNotificationSettings();
+  refreshWatchData();
+  sfx("success");
+  showAppToast(t("alert_added"));
 }
 
 function checkPriceAlerts() {
@@ -3819,28 +3864,30 @@ function wireWatchSearch() {
   search.addEventListener("blur", () => setTimeout(() => { dd.hidden = true; }, 150));
 }
 
-function wirePriceAlertSearch() {
-  const search = el.priceAlertSearch, dd = el.priceAlertDd;
+function wirePriceAlertSearch(scope = "settings") {
+  const form = priceAlertForm(scope);
+  const search = form.search, dd = form.dropdown;
   if (!search || !dd) return;
   let currentMatches = [];
   const close = () => { dd.hidden = true; search.setAttribute("aria-expanded", "false"); };
   const choose = (item) => {
-    selectedPriceAlertAsset = { type: item.type, key: item.key, name: item.name, sym: item.sym || "" };
-    search.value = `${item.name}${item.sym ? " · " + String(item.sym).toUpperCase() : ""}`;
-    close(); syncPriceAlertSelectionUi(); el.priceAlertTarget.focus();
+    priceAlertSelections[scope] = { type: item.type, key: item.key, name: item.name, sym: item.sym || "" };
+    search.value = priceAlertSelectionText(priceAlertSelections[scope]);
+    close(); syncPriceAlertSelectionUi(scope); form.target.focus();
   };
   const render = () => {
-    if (selectedPriceAlertAsset && search.value !== `${selectedPriceAlertAsset.name}${selectedPriceAlertAsset.sym ? " · " + String(selectedPriceAlertAsset.sym).toUpperCase() : ""}`) {
-      selectedPriceAlertAsset = null; syncPriceAlertSelectionUi();
+    const selected = priceAlertSelections[scope];
+    if (selected && search.value !== priceAlertSelectionText(selected)) {
+      priceAlertSelections[scope] = null; syncPriceAlertSelectionUi(scope);
     }
     const q = search.value.trim().toLocaleLowerCase(state.lang === "tr" ? "tr-TR" : "en-US");
-    if (!q || selectedPriceAlertAsset) { currentMatches = []; close(); return; }
+    if (!q || priceAlertSelections[scope]) { currentMatches = []; close(); return; }
     currentMatches = watchSearchPool().filter((item) => item.name.toLocaleLowerCase(state.lang === "tr" ? "tr-TR" : "en-US").includes(q) || String(item.sym || "").toLowerCase().includes(q)).slice(0, 12);
     if (!currentMatches.length) { close(); return; }
     dd.innerHTML = currentMatches.map((item, i) => `<button type="button" class="coin-opt" role="option" data-alert-result="${i}">${escapeHtml(item.name)} <span>${escapeHtml(item.sym || "")} · ${escapeHtml(item.tag)}</span></button>`).join("");
     dd.hidden = false; search.setAttribute("aria-expanded", "true");
     dd.querySelectorAll("[data-alert-result]").forEach((button) => {
-      button.addEventListener("mousedown", (e) => { e.preventDefault(); choose(currentMatches[+button.dataset.alertResult]); });
+      button.addEventListener("mousedown", (e) => e.preventDefault());
       button.addEventListener("click", () => choose(currentMatches[+button.dataset.alertResult]));
     });
   };
@@ -3850,7 +3897,7 @@ function wirePriceAlertSearch() {
   search.addEventListener("keydown", (e) => {
     if (e.key === "Escape") { close(); return; }
     if (e.key === "ArrowDown" && !dd.hidden) { e.preventDefault(); const first = dd.querySelector("[data-alert-result]"); if (first) first.focus(); }
-    else if (e.key === "Enter" && currentMatches.length && !selectedPriceAlertAsset) { e.preventDefault(); choose(currentMatches[0]); }
+    else if (e.key === "Enter" && currentMatches.length && !priceAlertSelections[scope]) { e.preventDefault(); choose(currentMatches[0]); }
   });
 }
 
@@ -3960,31 +4007,96 @@ if (tvCloseBtn) tvCloseBtn.addEventListener("click", closeChartModal);
 if (tvBackdrop) tvBackdrop.addEventListener("click", closeChartModal);
 document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeChartModal(); });
 
-// ---- Sound effects (Web Audio, synthesized; respects the Sound setting) ----
+// ---- Soft interface sounds (Web Audio; respects the Sound setting) ----
 let audioCtx = null;
+let audioMaster = null;
+let audioNoiseBuffer = null;
+
+function ensureAudioGraph() {
+  const AC = window.AudioContext || window.webkitAudioContext;
+  if (!AC) return null;
+  if (!audioCtx) audioCtx = new AC();
+  if (!audioMaster) {
+    const compressor = audioCtx.createDynamicsCompressor();
+    compressor.threshold.value = -26;
+    compressor.knee.value = 20;
+    compressor.ratio.value = 4;
+    compressor.attack.value = 0.004;
+    compressor.release.value = 0.13;
+    audioMaster = audioCtx.createGain();
+    audioMaster.gain.value = 0.72;
+    audioMaster.connect(compressor);
+    compressor.connect(audioCtx.destination);
+  }
+  if (!audioNoiseBuffer) {
+    const length = Math.max(1, Math.floor(audioCtx.sampleRate * 0.08));
+    audioNoiseBuffer = audioCtx.createBuffer(1, length, audioCtx.sampleRate);
+    const data = audioNoiseBuffer.getChannelData(0);
+    for (let i = 0; i < length; i++) data[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / length, 2.4);
+  }
+  if (audioCtx.state === "suspended") audioCtx.resume().catch(() => {});
+  return audioCtx;
+}
+
+function softTone(ctx, frequency, endFrequency, when, duration, gainValue) {
+  const oscillator = ctx.createOscillator();
+  const filter = ctx.createBiquadFilter();
+  const gain = ctx.createGain();
+  oscillator.type = "sine";
+  oscillator.frequency.setValueAtTime(Math.max(1, frequency), when);
+  oscillator.frequency.exponentialRampToValueAtTime(Math.max(1, endFrequency), when + duration);
+  filter.type = "lowpass";
+  filter.frequency.value = 2400;
+  filter.Q.value = 0.45;
+  gain.gain.setValueAtTime(0.0001, when);
+  gain.gain.exponentialRampToValueAtTime(gainValue, when + Math.min(0.012, duration * 0.24));
+  gain.gain.exponentialRampToValueAtTime(0.0001, when + duration);
+  oscillator.connect(filter);
+  filter.connect(gain);
+  gain.connect(audioMaster);
+  oscillator.start(when);
+  oscillator.stop(when + duration + 0.025);
+}
+
+function softTick(ctx, when, duration = 0.018, gainValue = 0.0028) {
+  const source = ctx.createBufferSource();
+  const filter = ctx.createBiquadFilter();
+  const gain = ctx.createGain();
+  source.buffer = audioNoiseBuffer;
+  filter.type = "bandpass";
+  filter.frequency.value = 1750;
+  filter.Q.value = 0.7;
+  gain.gain.setValueAtTime(gainValue, when);
+  gain.gain.exponentialRampToValueAtTime(0.0001, when + duration);
+  source.connect(filter);
+  filter.connect(gain);
+  gain.connect(audioMaster);
+  source.start(when);
+  source.stop(when + duration + 0.01);
+}
+
 function sfx(name) {
   if (!state.sound) return;
   try {
-    const AC = window.AudioContext || window.webkitAudioContext;
-    if (!AC) return;
-    if (!audioCtx) audioCtx = new AC();
-    if (audioCtx.state === "suspended") audioCtx.resume();
-    const now = audioCtx.currentTime;
-    const P = {
-      tap:    { type: "sine",     f1: 380, f2: 300, dur: 0.06, gain: 0.05 },
-      add:    { type: "triangle", f1: 520, f2: 820, dur: 0.13, gain: 0.06 },
-      remove: { type: "triangle", f1: 480, f2: 200, dur: 0.13, gain: 0.06 },
-      toggle: { type: "square",   f1: 660, f2: 660, dur: 0.05, gain: 0.035 },
-    }[name] || { type: "sine", f1: 380, f2: 300, dur: 0.06, gain: 0.05 };
-    const osc = audioCtx.createOscillator(), g = audioCtx.createGain();
-    osc.type = P.type;
-    osc.frequency.setValueAtTime(P.f1, now);
-    osc.frequency.exponentialRampToValueAtTime(P.f2, now + P.dur);
-    g.gain.setValueAtTime(0.0001, now);
-    g.gain.exponentialRampToValueAtTime(P.gain, now + 0.012);
-    g.gain.exponentialRampToValueAtTime(0.0001, now + P.dur);
-    osc.connect(g); g.connect(audioCtx.destination);
-    osc.start(now); osc.stop(now + P.dur + 0.03);
+    const ctx = ensureAudioGraph();
+    if (!ctx) return;
+    const now = ctx.currentTime + 0.006;
+    if (name === "add" || name === "success") {
+      softTone(ctx, 494, 554, now, 0.07, 0.016);
+      softTone(ctx, 659, 740, now + 0.045, 0.09, 0.015);
+    } else if (name === "remove") {
+      softTone(ctx, 330, 230, now, 0.075, 0.014);
+      softTick(ctx, now, 0.022, 0.0024);
+    } else if (name === "toggle") {
+      softTone(ctx, 480, 580, now, 0.052, 0.014);
+      softTone(ctx, 960, 1160, now, 0.042, 0.0035);
+    } else if (name === "alert") {
+      softTone(ctx, 659, 740, now, 0.11, 0.018);
+      softTone(ctx, 880, 988, now + 0.075, 0.13, 0.016);
+    } else {
+      softTone(ctx, 360, 300, now, 0.045, 0.012);
+      softTick(ctx, now, 0.016, 0.0025);
+    }
   } catch (e) {}
 }
 // One delegated listener picks the right sound from the clicked control.
@@ -3992,6 +4104,7 @@ document.addEventListener("click", (e) => {
   if (!state.sound) return;
   const t = e.target;
   if (t.closest(".cat-remove, .watch-del")) sfx("remove");
+  else if (t.closest(".alert-search-dd .coin-opt")) sfx("toggle");
   else if (t.closest(".add-cat, .veh-add-btn, .coin-opt")) sfx("add");
   else if (t.closest(".opt, .exp-paid, .net-tax-btn, .port-ccy-toggle, .exp-hist-toggle, .switch, .watch-grip, .donut-seg")) sfx("toggle");
   else if (t.closest(".tab")) sfx("tap");
@@ -4045,8 +4158,10 @@ el.vehicleNotifyDays.addEventListener("change", () => {
   el.vehicleNotifyDays.value = String(state.notifications.vehicleDays);
   saveState(); checkVehicleNotifications();
 });
-el.addPriceAlert.addEventListener("click", addPriceAlertFromSettings);
-el.priceAlertTarget.addEventListener("keydown", (e) => { if (e.key === "Enter") addPriceAlertFromSettings(); });
+el.addPriceAlert.addEventListener("click", () => addPriceAlert("settings"));
+el.priceAlertTarget.addEventListener("keydown", (e) => { if (e.key === "Enter") addPriceAlert("settings"); });
+el.homeAddPriceAlert.addEventListener("click", () => addPriceAlert("home"));
+el.homePriceAlertTarget.addEventListener("keydown", (e) => { if (e.key === "Enter") addPriceAlert("home"); });
 el.resetHomeCards.addEventListener("click", resetHomeLayout);
 el.installPwa.addEventListener("click", installPwa);
 el.exportData.addEventListener("click", exportBackup);
@@ -4334,7 +4449,8 @@ applyLanguage(state.lang); // builds layout + savings, applies all translations
 if (isFirstRun) showOnboarding();
 else { try { if (!localStorage.getItem("numbr_guide_seen")) showGuide(); } catch (e) {} }
 wireWatchSearch();
-wirePriceAlertSearch();
+wirePriceAlertSearch("settings");
+wirePriceAlertSearch("home");
 wireHomeDashboard();
 registerPwa();
 refreshCryptoPrices(); // fetch live crypto prices (works on the deployed site)

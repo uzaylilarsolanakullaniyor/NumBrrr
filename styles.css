@@ -617,12 +617,14 @@ body {
 .dashboard-widget:nth-child(5) { animation-delay: 140ms; }
 .dashboard-widget:nth-child(6) { animation-delay: 175ms; }
 .dashboard-widget:nth-child(7) { animation-delay: 210ms; }
+.dashboard-widget:nth-child(8) { animation-delay: 245ms; }
 @keyframes dashboardWidgetIn {
   from { opacity: 0; transform: translateY(10px) scale(.992); }
   to { opacity: 1; transform: translateY(0) scale(1); }
 }
 .dashboard-widget[hidden] { display: none; }
 .dashboard-widget--freedom,
+.dashboard-widget--alerts,
 .dashboard-widget--countdown { grid-column: 1 / -1; }
 .dashboard-widget--compact { min-height: 174px; }
 .dashboard-widget-icon {
@@ -732,11 +734,19 @@ body {
   background-color: rgba(3, 10, 25, .2);
 }
 
-/* Countdown widget */
+/* Price alert and countdown widgets */
+.dashboard-widget--alerts,
 .dashboard-widget--countdown { padding: 20px; }
+.dashboard-widget--alerts { overflow: visible; }
+.dashboard-widget--alerts:focus-within { z-index: 12; }
+.dashboard-feature-head,
 .countdown-head { display: flex; align-items: center; gap: 12px; margin-bottom: 18px; }
+.dashboard-feature-head h2,
 .countdown-head h2 { margin: 0 0 4px; font-family: "Sora", sans-serif; font-size: 18px; }
+.dashboard-feature-head p,
 .countdown-head p { margin: 0; color: var(--text-faint); font-size: 12.5px; line-height: 1.4; }
+.home-alert-hint { min-height: 18px; margin: 10px 2px 0; }
+.dashboard-widget--alerts .alert-list { max-height: 248px; overflow-y: auto; overscroll-behavior: contain; padding-right: 2px; }
 .countdown-form {
   display: grid;
   grid-template-columns: minmax(150px, 1.35fr) minmax(130px, 1fr) minmax(150px, 1fr) 112px auto;
@@ -824,6 +834,7 @@ body {
 @media (max-width: 860px) {
   .dashboard-widget { grid-column: span 3; }
   .dashboard-widget--freedom,
+  .dashboard-widget--alerts,
   .dashboard-widget--countdown { grid-column: 1 / -1; }
   .countdown-form { grid-template-columns: 1fr 1fr; }
   .countdown-form .settings-action { width: 100%; }
@@ -836,11 +847,13 @@ body {
   .dashboard-grid { grid-template-columns: minmax(0, 1fr); gap: 12px; }
   .dashboard-widget,
   .dashboard-widget--freedom,
+  .dashboard-widget--alerts,
   .dashboard-widget--countdown { grid-column: 1; }
   .dashboard-widget--compact,
   .dashboard-widget-open { min-height: 154px; }
   .dashboard-freedom-toggle { padding: 15px; }
   .freedom-widget-body { padding: 2px 10px 10px; }
+  .dashboard-widget--alerts,
   .dashboard-widget--countdown { padding: 16px; }
   .countdown-form { grid-template-columns: 1fr 1fr; }
   .countdown-form label:first-child,
