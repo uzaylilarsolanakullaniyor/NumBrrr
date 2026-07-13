@@ -2670,7 +2670,6 @@ function refreshPortfolio() {
   document.querySelectorAll("#view-portfolio .savings-symbol").forEach((s) => (s.textContent = meta.symbol));
   const total = state.portfolio.holdings.reduce((sum, h) => sum + (h.value || 0), 0);
   updatePortfolioHoldingCount();
-  recordNetWorthSnapshot(total);
   saveState();
 
   // --- Monthly cash flow (Income incl. portfolio yield − Expenses) ---
@@ -2693,8 +2692,6 @@ function refreshPortfolio() {
   // --- Holdings total + donut (categorized Cash / Investment) ---
   renderPortTotal(total);
   renderPort24h(total);
-  renderNetWorth(total);
-
   const segs = state.portfolio.holdings.filter((h) => h.value > 0);
   if (!segs.length) {
     el.portChart.hidden = true;
@@ -4758,16 +4755,6 @@ el.expHistToggle.addEventListener("click", () => {
 el.addHolding.addEventListener("click", addHolding);
 el.addIncome.addEventListener("click", addIncome);
 el.portCcyToggle.addEventListener("click", () => { state.portTotalUSD = !state.portTotalUSD; refreshPortfolio(); });
-el.netWorthDebtInput.addEventListener("input", () => {
-  state.netWorth.liabilities[state.currency] = Math.max(0, parseNumber(el.netWorthDebtInput.value));
-  const total = state.portfolio.holdings.reduce((sum, holding) => sum + (holding.value || 0), 0);
-  recordNetWorthSnapshot(total); renderNetWorth(total); saveState();
-});
-el.netWorthDebtInput.addEventListener("blur", () => {
-  const debt = netWorthLiability();
-  el.netWorthDebtInput.value = debt > 0 ? formatThousands(debt) : "";
-});
-
 el.expenses.addEventListener("input", () => { state.monthlyExpenses = parseNumber(el.expenses.value); refresh(); });
 el.expenses.addEventListener("blur", () => { if (state.monthlyExpenses > 0) el.expenses.value = formatThousands(state.monthlyExpenses); });
 

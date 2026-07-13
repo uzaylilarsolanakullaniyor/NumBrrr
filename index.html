@@ -21,7 +21,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <noscript><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Sora:wght@600;700;800&family=Cinzel:wght@600;700;800&family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet" /></noscript>
-  <link rel="stylesheet" href="styles.css?v=14" />
+  <link rel="stylesheet" href="styles.css?v=15" />
 </head>
 <body>
   <div class="offline-banner" id="offlineBanner" role="status" aria-live="polite" hidden data-i18n="offline_banner">Çevrimdışısın · son kaydedilen veriler gösteriliyor</div>
@@ -596,33 +596,6 @@
         <p class="savings-note" id="portEmpty" data-i18n="portfolio_empty">Add holdings below to see the breakdown.</p>
       </section>
 
-      <!-- Net worth history: portfolio assets minus liabilities -->
-      <section class="glass net-worth-card" aria-labelledby="netWorthTitle">
-        <div class="feature-section-head">
-          <div>
-            <h3 class="settings-label" id="netWorthTitle" data-i18n="net_worth_title">Net worth</h3>
-            <p class="feature-section-note" data-i18n="net_worth_sub">Monthly portfolio assets minus your total debt.</p>
-          </div>
-          <span class="feature-month-chip" data-i18n="net_worth_auto">Auto saved</span>
-        </div>
-        <div class="net-worth-stats">
-          <div><span data-i18n="net_worth_assets">Assets</span><strong id="netWorthAssets">—</strong></div>
-          <div><span data-i18n="net_worth_debt">Debt</span><strong id="netWorthDebt">—</strong></div>
-          <div><span data-i18n="net_worth_net">Net worth</span><strong id="netWorthValue">—</strong></div>
-        </div>
-        <div class="net-worth-chart-wrap">
-          <svg class="net-worth-chart" id="netWorthChart" viewBox="0 0 640 250" role="img" aria-labelledby="netWorthChartTitle netWorthChartDesc">
-            <title id="netWorthChartTitle">Net worth history</title>
-            <desc id="netWorthChartDesc">No monthly record yet.</desc>
-          </svg>
-          <p class="feature-empty" id="netWorthEmpty" data-i18n="net_worth_empty">Add a portfolio asset or debt to start the graph.</p>
-        </div>
-        <label class="net-worth-debt-field" for="netWorthDebtInput">
-          <span><strong data-i18n="net_worth_debt_input">Total debt</strong><small data-i18n="net_worth_debt_note">Credit cards, loans and other outstanding debt.</small></span>
-          <span class="money-input money-input--sm"><span class="money-symbol savings-symbol">$</span><input id="netWorthDebtInput" type="text" inputmode="numeric" placeholder="0" /></span>
-        </label>
-      </section>
-
       <section class="glass flow-card" aria-label="Monthly cash flow">
         <h3 class="settings-label" data-i18n="flow_title">Monthly cash flow</h3>
         <div class="flow-row"><span data-i18n="flow_income">Income</span><span class="flow-val pos" id="flowIncome">—</span></div>
@@ -801,7 +774,7 @@
     </div>
   </div>
 
-  <script src="app.js?v=14"></script>
+  <script src="app.js?v=15"></script>
 
   <!-- Vercel Web Analytics (static-site injection; loads only on the deployed Vercel domain) -->
   <script>
