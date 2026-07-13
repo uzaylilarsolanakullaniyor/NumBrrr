@@ -2836,7 +2836,7 @@ function makeIncomeRow(id, isCustom) {
 
   const labelHtml = isCustom
     ? `<input class="cat-name" data-inc-name="${escapeHtml(id)}" value="${escapeHtml(label || "")}" placeholder="${escapeHtml(t("income_ph"))}" />`
-    : label;
+    : `<span class="inc-source-name">${escapeHtml(label)}</span>`;
 
   // Type badge: fixed (read-only) for preset categories, clickable only for custom ones.
   const badge = isCustom

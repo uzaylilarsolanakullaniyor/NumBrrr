@@ -3325,12 +3325,16 @@ body {
   font-family: "Sora", sans-serif; font-size: 16px; font-weight: 800;
 }
 .inc-row.is-passive .inc-source-icon { color: var(--good); background: color-mix(in srgb, var(--good) 9%, transparent); border-color: color-mix(in srgb, var(--good) 22%, transparent); }
-.inc-row .cat-label { min-width: 0; font-weight: 700; }
-.inc-row .cat-name { font-weight: 700; }
+.inc-row .cat-label {
+  display: flex; flex-direction: column; align-items: flex-start; min-width: 0;
+  gap: 6px; font-weight: 700;
+}
+.inc-source-name { min-width: 0; line-height: 1.35; }
+.inc-row .cat-name { width: 100%; min-width: 90px; font-weight: 700; }
 .inc-row .cat-amount { width: 100%; min-width: 0; border-radius: 11px; }
 .inc-row .cat-remove { width: 36px; height: 36px; border-radius: 11px; }
-.inc-type { margin-top: 5px; margin-left: 0; }
-.inc-from-port { margin-top: 4px; }
+.inc-row .inc-type { flex: none; margin: 0; }
+.inc-row .inc-from-port { margin: 0; }
 .income-sources-panel #addIncome { min-height: 48px; border-style: dashed; border-radius: 14px; }
 .income-summary-card {
   position: relative; overflow: hidden; padding: 24px; border-radius: 22px;
