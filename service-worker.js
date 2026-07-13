@@ -1,0 +1,108 @@
+const SHELL_CACHE = "numbrrr-shell-v1";
+const DATA_CACHE = "numbrrr-data-v1";
+const APP_SHELL = [
+  "/",
+  "/index.html",
+  "/styles.css",
+  "/app.js",
+  "/turkey-locations.js",
+  "/manifest.webmanifest",
+  "/vendor/leaflet/leaflet.css",
+  "/vendor/leaflet/leaflet.js",
+  "/vendor/leaflet/images/marker-icon.png",
+  "/vendor/leaflet/images/marker-icon-2x.png",
+  "/vendor/leaflet/images/marker-shadow.png",
+  "/icons/icon.svg",
+  "/icons/icon-192.png",
+  "/icons/icon-512.png",
+  "/icons/icon-maskable-512.png",
+  "/icons/apple-touch-icon.png",
+  "/icons/badge-96.png"
+];
+
+self.addEventListener("install", (event) => {
+  event.waitUntil((async () => {
+    const cache = await caches.open(SHELL_CACHE);
+    await Promise.allSettled(APP_SHELL.map(async (url) => {
+      const response = await fetch(url, { cache: "reload" });
+      if (response.ok) await cache.put(url, response);
+    }));
+    await self.skipWaiting();
+  })());
+});
+
+self.addEventListener("activate", (event) => {
+  event.waitUntil((async () => {
+    const keep = new Set([SHELL_CACHE, DATA_CACHE]);
+    await Promise.all((await caches.keys()).filter((key) => !keep.has(key)).map((key) => caches.delete(key)));
+    await self.clients.claim();
+  })());
+});
+
+async function networkFirst(request, fallbackUrl) {
+  const cache = await caches.open(DATA_CACHE);
+  try {
+    const response = await fetch(request);
+    if (response && response.ok) await cache.put(request, response.clone());
+    return response;
+  } catch (error) {
+    return (await cache.match(request)) || (fallbackUrl ? await caches.match(fallbackUrl) : undefined) || Response.error();
+  }
+}
+
+async function staleWhileRevalidate(request) {
+  const cache = await caches.open(request.url.startsWith(self.location.origin) ? SHELL_CACHE : DATA_CACHE);
+  const cached = await cache.match(request);
+  const update = fetch(request).then((response) => {
+    if (response && (response.ok || response.type === "opaque")) cache.put(request, response.clone());
+    return response;
+  }).catch(() => null);
+  return cached || await update || Response.error();
+}
+
+self.addEventListener("fetch", (event) => {
+  const request = event.request;
+  if (request.method !== "GET") return;
+  const url = new URL(request.url);
+  if (request.mode === "navigate") {
+    event.respondWith(networkFirst(request, "/index.html"));
+    return;
+  }
+  if (url.origin === self.location.origin && url.pathname.startsWith("/api/")) {
+    event.respondWith(networkFirst(request));
+    return;
+  }
+  if (url.origin === self.location.origin || url.hostname === "fonts.googleapis.com" || url.hostname === "fonts.gstatic.com" || url.hostname === "api.coingecko.com") {
+    event.respondWith(staleWhileRevalidate(request));
+  }
+});
+
+self.addEventListener("push", (event) => {
+  let data = {};
+  try { data = event.data ? event.data.json() : {}; } catch (error) { data = { body: event.data ? event.data.text() : "" }; }
+  const title = data.title || "NumBrrr";
+  event.waitUntil(self.registration.showNotification(title, {
+    body: data.body || "",
+    tag: data.tag || "numbrrr-alert",
+    icon: "/icons/icon-192.png",
+    badge: "/icons/badge-96.png",
+    renotify: false,
+    data: { url: data.url || "/" }
+  }));
+});
+
+self.addEventListener("notificationclick", (event) => {
+  event.notification.close();
+  const target = new URL((event.notification.data && event.notification.data.url) || "/", self.location.origin).href;
+  event.waitUntil((async () => {
+    const windows = await self.clients.matchAll({ type: "window", includeUncontrolled: true });
+    for (const client of windows) {
+      if (new URL(client.url).origin === self.location.origin) {
+        await client.focus();
+        if ("navigate" in client) await client.navigate(target);
+        return;
+      }
+    }
+    await self.clients.openWindow(target);
+  })());
+});

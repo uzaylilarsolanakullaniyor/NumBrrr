@@ -272,8 +272,11 @@ const I18N = {
     punch_empty: "Toggle on the habits you want to quit and type what you spend to see your number.",
     savings_note: "Projection compounds yearly contributions: FV = annual × [((1 + r)ⁿ − 1) / r], where r is the selected annual return. Returns are assumptions, not guarantees.",
     settings_title: "Settings", language: "Language", theme: "Theme", country: "Country", sound: "Sound", sound_fx: "Sound effects",
-    notify_title: "Notifications", notify_desc: "Get price alerts and reminders for upcoming vehicle maintenance. Alerts are checked while the app is open.", notify_enable: "Enable notifications",
-    notify_active: "Notifications are active.", notify_inapp: "System notifications are unavailable; alerts will appear inside the app.", notify_blocked: "Notification permission is blocked in browser settings.", notify_off: "Notifications are off.",
+    home_customize_title: "Home screen", home_customize_desc: "Reorder the Freedom screen cards or hide the ones you do not use.", home_customize_reset: "Reset layout", home_move_up: "Move up", home_move_down: "Move down", home_hide: "Show this card", home_last_card: "At least one card must remain visible.",
+    home_card_inputs: "Monthly expenses", home_card_result: "Freedom result", home_card_rule: "4% rule", home_card_compare: "Instrument comparison", home_card_chart: "Savings chart", home_card_disclaimer: "Information note",
+    pwa_title: "App & offline use", pwa_desc: "Install NumBrrr on your phone and keep using saved data without internet.", pwa_install: "Install app", pwa_ready: "Offline use is ready.", pwa_installed: "NumBrrr is installed on this device.", pwa_ios: "Use your browser's Add to Home Screen command to install.", pwa_unsupported: "This browser does not support app installation.", offline_banner: "You are offline · showing the latest saved data",
+    notify_title: "Notifications", notify_desc: "Get price alerts and upcoming vehicle maintenance reminders, including while the app is closed when background service is available.", notify_enable: "Enable notifications",
+    notify_active: "Background notifications are active.", notify_syncing: "Connecting background notifications…", notify_background_unavailable: "Background service is not configured; alerts will still work while the app is open.", notify_inapp: "System notifications are unavailable; alerts will appear inside the app.", notify_blocked: "Notification permission is blocked in browser settings.", notify_off: "Notifications are off.", notify_privacy: "Only alert conditions and maintenance dates are synced for background delivery.",
     vehicle_notify: "Vehicle maintenance reminder", days_before: "days before",
     price_alerts: "Price alerts", alert_asset: "Asset", alert_search_ph: "Search gold, stocks, crypto…", alert_condition: "Condition", alert_above: "Rises above", alert_below: "Falls below", alert_target: "Target price", alert_add: "Add alert",
     alert_empty: "No price alerts yet.", alert_watch_empty: "Add an asset to your Watch list first.", alert_invalid: "Choose an asset and enter a valid target price.", alert_remove: "Remove alert",
@@ -429,8 +432,11 @@ const I18N = {
     punch_empty: "Bırakmak istediğin alışkanlıkları aç ve harcamanı yaz; rakamını gör.",
     savings_note: "Projeksiyon yıllık katkıları bileşik hesaplar: GD = yıllık × [((1 + r)ⁿ − 1) / r], r seçilen yıllık getiridir. Getiriler varsayımdır, garanti değildir.",
     settings_title: "Ayarlar", language: "Dil", theme: "Tema", country: "Ülke", sound: "Ses", sound_fx: "Ses efektleri",
-    notify_title: "Bildirimler", notify_desc: "Fiyat alarmlarını ve yaklaşan araç bakım hatırlatmalarını al. Alarmlar uygulama açıkken kontrol edilir.", notify_enable: "Bildirimleri aç",
-    notify_active: "Bildirimler aktif.", notify_inapp: "Sistem bildirimi kullanılamıyor; uyarılar uygulama içinde gösterilecek.", notify_blocked: "Bildirim izni tarayıcı ayarlarından engellenmiş.", notify_off: "Bildirimler kapalı.",
+    home_customize_title: "Ana ekran", home_customize_desc: "Özgürlük ekranındaki kartları sırala veya kullanmadıklarını gizle.", home_customize_reset: "Düzeni sıfırla", home_move_up: "Yukarı taşı", home_move_down: "Aşağı taşı", home_hide: "Bu kartı göster", home_last_card: "En az bir kart görünür kalmalı.",
+    home_card_inputs: "Aylık giderler", home_card_result: "Özgürlük sonucu", home_card_rule: "%4 kuralı", home_card_compare: "Yatırım araçları", home_card_chart: "Birikim grafiği", home_card_disclaimer: "Bilgilendirme notu",
+    pwa_title: "Uygulama ve çevrimdışı kullanım", pwa_desc: "NumBrrr'ı telefonuna kur; internet yokken kayıtlı verilerinle kullanmaya devam et.", pwa_install: "Uygulamayı yükle", pwa_ready: "Çevrimdışı kullanım hazır.", pwa_installed: "NumBrrr bu cihaza yüklendi.", pwa_ios: "Yüklemek için tarayıcı menüsündeki Ana Ekrana Ekle seçeneğini kullan.", pwa_unsupported: "Bu tarayıcı uygulama yüklemeyi desteklemiyor.", offline_banner: "Çevrimdışısın · son kaydedilen veriler gösteriliyor",
+    notify_title: "Bildirimler", notify_desc: "Fiyat alarmlarını ve yaklaşan araç bakım hatırlatmalarını, arka plan hizmeti hazırsa uygulama kapalıyken de al.", notify_enable: "Bildirimleri aç",
+    notify_active: "Arka plan bildirimleri aktif.", notify_syncing: "Arka plan bildirimleri bağlanıyor…", notify_background_unavailable: "Arka plan hizmeti henüz yapılandırılmamış; alarmlar uygulama açıkken çalışmaya devam edecek.", notify_inapp: "Sistem bildirimi kullanılamıyor; uyarılar uygulama içinde gösterilecek.", notify_blocked: "Bildirim izni tarayıcı ayarlarından engellenmiş.", notify_off: "Bildirimler kapalı.", notify_privacy: "Arka planda göndermek için yalnızca alarm koşulları ve bakım tarihleri eşitlenir.",
     vehicle_notify: "Araç bakım hatırlatması", days_before: "gün önceden",
     price_alerts: "Fiyat alarmları", alert_asset: "Varlık", alert_search_ph: "Altın, hisse, kripto ara…", alert_condition: "Koşul", alert_above: "Üzerine çıkarsa", alert_below: "Altına düşerse", alert_target: "Hedef fiyat", alert_add: "Alarm ekle",
     alert_empty: "Henüz fiyat alarmı yok.", alert_watch_empty: "Önce Takip listesine bir varlık ekle.", alert_invalid: "Bir varlık seç ve geçerli hedef fiyat gir.", alert_remove: "Alarmı kaldır",
@@ -534,6 +540,7 @@ const I18N = {
 };
 
 // ---- State ----
+const HOME_CARD_IDS = ["inputs", "result", "rule", "compare", "chart", "disclaimer"];
 const state = {
   lang: "en",
   theme: "black",
@@ -574,6 +581,7 @@ const state = {
   portTotalUSD: false, // when currency is TL, show the total portfolio value in USD instead
   watchlist: [], // [{ type, key, name }] — assets to monitor (price + 24h/1mo/1yr performance)
   notifications: { enabled: false, vehicleDays: 7, priceAlerts: [], seq: 0, sent: {} },
+  homeLayout: { order: [...HOME_CARD_IDS], hidden: [] },
   income: { amounts: {}, passive: {}, custom: [], seq: 0 },
 };
 INCOME_CATEGORIES.forEach((c) => { state.income.amounts[c.id] = 0; state.income.passive[c.id] = c.passive; });
@@ -690,6 +698,11 @@ const el = {
   watchEmpty: document.getElementById("watchEmpty"),
   watchBubblesSec: document.getElementById("watchBubblesSec"),
   watchBubbles: document.getElementById("watchBubbles"),
+  homeCardList: document.getElementById("homeCardList"),
+  resetHomeCards: document.getElementById("resetHomeCards"),
+  offlineBanner: document.getElementById("offlineBanner"),
+  pwaStatus: document.getElementById("pwaStatus"),
+  installPwa: document.getElementById("installPwa"),
   notifyToggle: document.getElementById("notifyToggle"),
   notifyStatus: document.getElementById("notifyStatus"),
   vehicleNotifyDays: document.getElementById("vehicleNotifyDays"),
@@ -2450,6 +2463,111 @@ function refreshIncome() {
 }
 
 // ============================================================
+//  Home screen personalization
+// ============================================================
+function normalizeHomeLayout(value) {
+  const source = value && typeof value === "object" ? value : {};
+  const supplied = Array.isArray(source.order) ? source.order.filter((id) => HOME_CARD_IDS.includes(id)) : [];
+  const order = [...new Set(supplied)];
+  HOME_CARD_IDS.forEach((id) => { if (!order.includes(id)) order.push(id); });
+  const hidden = Array.isArray(source.hidden) ? [...new Set(source.hidden.filter((id) => HOME_CARD_IDS.includes(id)))] : [];
+  if (hidden.length >= HOME_CARD_IDS.length) hidden.pop();
+  return { order, hidden };
+}
+
+function applyHomeLayout() {
+  const view = document.getElementById("view-home");
+  if (!view) return;
+  state.homeLayout = normalizeHomeLayout(state.homeLayout);
+  state.homeLayout.order.forEach((id) => {
+    const card = view.querySelector(`[data-home-card="${id}"]`);
+    if (!card) return;
+    card.hidden = state.homeLayout.hidden.includes(id);
+    view.appendChild(card);
+  });
+}
+
+function moveHomeCard(id, direction) {
+  const order = state.homeLayout.order;
+  const from = order.indexOf(id);
+  const to = from + direction;
+  if (from < 0 || to < 0 || to >= order.length) return;
+  [order[from], order[to]] = [order[to], order[from]];
+  saveState(); applyHomeLayout(); renderHomeCardSettings();
+}
+
+function syncHomeOrderFromList() {
+  if (!el.homeCardList) return;
+  const order = [...el.homeCardList.querySelectorAll("[data-home-item]")].map((row) => row.dataset.homeItem);
+  state.homeLayout = normalizeHomeLayout({ order, hidden: state.homeLayout.hidden });
+  saveState(); applyHomeLayout(); renderHomeCardSettings();
+}
+
+function startHomeCardReorder(event) {
+  event.preventDefault();
+  const list = el.homeCardList;
+  const handle = event.currentTarget;
+  const row = handle.closest("[data-home-item]");
+  if (!list || !row) return;
+  row.classList.add("is-dragging");
+  if (handle.setPointerCapture) try { handle.setPointerCapture(event.pointerId); } catch (e) {}
+  const move = (e) => {
+    const siblings = [...list.querySelectorAll("[data-home-item]:not(.is-dragging)")];
+    const before = siblings.find((item) => {
+      const rect = item.getBoundingClientRect();
+      return e.clientY < rect.top + rect.height / 2;
+    });
+    if (before) list.insertBefore(row, before); else list.appendChild(row);
+  };
+  const finish = () => {
+    document.removeEventListener("pointermove", move);
+    document.removeEventListener("pointerup", finish);
+    document.removeEventListener("pointercancel", finish);
+    row.classList.remove("is-dragging");
+    syncHomeOrderFromList();
+  };
+  document.addEventListener("pointermove", move);
+  document.addEventListener("pointerup", finish);
+  document.addEventListener("pointercancel", finish);
+}
+
+function renderHomeCardSettings() {
+  if (!el.homeCardList) return;
+  state.homeLayout = normalizeHomeLayout(state.homeLayout);
+  el.homeCardList.innerHTML = state.homeLayout.order.map((id, index) => {
+    const visible = !state.homeLayout.hidden.includes(id);
+    return `<div class="home-card-row${visible ? "" : " is-hidden"}" data-home-item="${id}">
+      <button class="home-card-grip" type="button" aria-label="${escapeHtml(t("home_customize_desc"))}" title="${escapeHtml(t("home_customize_desc"))}"><span aria-hidden="true">⠿</span></button>
+      <span class="home-card-name">${escapeHtml(t("home_card_" + id))}</span>
+      <div class="home-card-actions">
+        <button type="button" data-home-up="${id}" aria-label="${escapeHtml(t("home_move_up"))}"${index === 0 ? " disabled" : ""}>↑</button>
+        <button type="button" data-home-down="${id}" aria-label="${escapeHtml(t("home_move_down"))}"${index === state.homeLayout.order.length - 1 ? " disabled" : ""}>↓</button>
+      </div>
+      <label class="switch home-card-switch" title="${escapeHtml(t("home_hide"))}">
+        <input type="checkbox" data-home-visible="${id}" ${visible ? "checked" : ""} aria-label="${escapeHtml(t("home_card_" + id))}" />
+        <span class="switch-track"><span class="switch-thumb"></span></span>
+      </label>
+    </div>`;
+  }).join("");
+  el.homeCardList.querySelectorAll(".home-card-grip").forEach((button) => button.addEventListener("pointerdown", startHomeCardReorder));
+  el.homeCardList.querySelectorAll("[data-home-up]").forEach((button) => button.addEventListener("click", () => moveHomeCard(button.dataset.homeUp, -1)));
+  el.homeCardList.querySelectorAll("[data-home-down]").forEach((button) => button.addEventListener("click", () => moveHomeCard(button.dataset.homeDown, 1)));
+  el.homeCardList.querySelectorAll("[data-home-visible]").forEach((input) => input.addEventListener("change", () => {
+    const id = input.dataset.homeVisible;
+    if (!input.checked && state.homeLayout.hidden.length >= HOME_CARD_IDS.length - 1) {
+      input.checked = true; showAppToast(t("home_last_card")); return;
+    }
+    state.homeLayout.hidden = input.checked ? state.homeLayout.hidden.filter((item) => item !== id) : [...state.homeLayout.hidden, id];
+    saveState(); applyHomeLayout(); renderHomeCardSettings();
+  }));
+}
+
+function resetHomeLayout() {
+  state.homeLayout = { order: [...HOME_CARD_IDS], hidden: [] };
+  saveState(); applyHomeLayout(); renderHomeCardSettings();
+}
+
+// ============================================================
 //  Watchlist
 // ============================================================
 function watchSearchPool() {
@@ -2538,6 +2656,156 @@ function formatAlertPrice(value, ccy) {
   }).format(value);
 }
 
+// ============================================================
+//  Installable PWA, offline state and background Web Push
+// ============================================================
+let deferredInstallPrompt = null;
+let pwaRegistration = null;
+let backgroundPushState = "unknown";
+let pushSyncTimer = 0;
+let lastPushFingerprint = "";
+
+function isStandaloneApp() {
+  return window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone === true;
+}
+
+function renderPwaSettings() {
+  if (el.offlineBanner) el.offlineBanner.hidden = navigator.onLine !== false;
+  if (!el.pwaStatus || !el.installPwa) return;
+  const supported = "serviceWorker" in navigator;
+  el.installPwa.hidden = !deferredInstallPrompt || isStandaloneApp();
+  if (isStandaloneApp()) el.pwaStatus.textContent = t("pwa_installed");
+  else if (!supported) el.pwaStatus.textContent = t("pwa_unsupported");
+  else if (/iPad|iPhone|iPod/.test(navigator.userAgent)) el.pwaStatus.textContent = t("pwa_ios");
+  else el.pwaStatus.textContent = t("pwa_ready");
+}
+
+async function installPwa() {
+  if (!deferredInstallPrompt) { renderPwaSettings(); return; }
+  deferredInstallPrompt.prompt();
+  try { await deferredInstallPrompt.userChoice; } catch (e) {}
+  deferredInstallPrompt = null;
+  renderPwaSettings();
+}
+
+async function registerPwa() {
+  renderPwaSettings();
+  if (!("serviceWorker" in navigator)) return null;
+  try {
+    pwaRegistration = await navigator.serviceWorker.register("/service-worker.js", { scope: "/" });
+    await navigator.serviceWorker.ready;
+    renderPwaSettings();
+    if (state.notifications.enabled && notificationPermission() === "granted") syncPushSubscription();
+    return pwaRegistration;
+  } catch (e) {
+    renderPwaSettings();
+    return null;
+  }
+}
+
+window.addEventListener("beforeinstallprompt", (event) => {
+  event.preventDefault();
+  deferredInstallPrompt = event;
+  renderPwaSettings();
+});
+window.addEventListener("appinstalled", () => { deferredInstallPrompt = null; renderPwaSettings(); });
+window.addEventListener("online", () => { renderPwaSettings(); if (state.notifications.enabled) syncPushSubscription(); });
+window.addEventListener("offline", renderPwaSettings);
+
+function urlBase64ToUint8Array(value) {
+  const padding = "=".repeat((4 - value.length % 4) % 4);
+  const base64 = (value + padding).replace(/-/g, "+").replace(/_/g, "/");
+  const raw = atob(base64);
+  return Uint8Array.from([...raw].map((char) => char.charCodeAt(0)));
+}
+
+function pushClientId() {
+  const key = "numbr_push_client";
+  try {
+    let id = localStorage.getItem(key);
+    if (!id) {
+      id = crypto.randomUUID ? crypto.randomUUID() : `client-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+      localStorage.setItem(key, id);
+    }
+    return id;
+  } catch (e) { return ""; }
+}
+
+function backgroundPushPayload(subscription) {
+  return {
+    clientId: pushClientId(),
+    subscription: subscription.toJSON ? subscription.toJSON() : subscription,
+    lang: state.lang === "tr" ? "tr" : "en",
+    currency: state.currency === "TL" ? "TRY" : "USD",
+    vehicleDays: state.notifications.vehicleDays,
+    priceAlerts: state.notifications.priceAlerts.map((alert) => ({
+      id: alert.id, type: alert.type, key: alert.key, name: alert.name, sym: alert.sym || "",
+      condition: alert.condition, target: alert.target, ccy: alert.ccy,
+    })),
+    vehicles: state.vehicles.map((vehicle) => ({
+      id: vehicle.id, plate: vehicle.plate || "",
+      sched: (vehicle.sched || []).filter((item) => item && item.date && !item.paidMonth).map((item) => ({ id: item.id, label: item.label || "", date: item.date })),
+    })),
+  };
+}
+
+async function removePushSubscription() {
+  const clientId = pushClientId();
+  try {
+    await fetch("/api/push-subscription", {
+      method: "DELETE", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ clientId }), keepalive: true,
+    });
+  } catch (e) {}
+  try {
+    const registration = pwaRegistration || await navigator.serviceWorker.ready;
+    const subscription = registration.pushManager ? await registration.pushManager.getSubscription() : null;
+    if (subscription) await subscription.unsubscribe();
+  } catch (e) {}
+  backgroundPushState = "unknown";
+  lastPushFingerprint = "";
+}
+
+async function syncPushSubscription(force = false) {
+  if (!state.notifications.enabled || notificationPermission() !== "granted" || navigator.onLine === false) return false;
+  if (!("serviceWorker" in navigator) || !("PushManager" in window)) {
+    backgroundPushState = "fallback"; renderNotificationStatus(); return false;
+  }
+  backgroundPushState = "syncing"; renderNotificationStatus();
+  try {
+    const configResponse = await fetch("/api/push-config", { cache: "no-store" });
+    if (!configResponse.ok) throw new Error("push config unavailable");
+    const config = await configResponse.json();
+    if (!config.enabled || !config.publicKey) throw new Error("push not configured");
+    const registration = pwaRegistration || await navigator.serviceWorker.ready;
+    pwaRegistration = registration;
+    let subscription = await registration.pushManager.getSubscription();
+    if (!subscription) {
+      subscription = await registration.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: urlBase64ToUint8Array(config.publicKey) });
+    }
+    const payload = backgroundPushPayload(subscription);
+    const fingerprint = JSON.stringify(payload);
+    if (!force && fingerprint === lastPushFingerprint) {
+      backgroundPushState = "ready"; renderNotificationStatus(); return true;
+    }
+    const response = await fetch("/api/push-subscription", {
+      method: "POST", headers: { "Content-Type": "application/json" }, body: fingerprint,
+    });
+    if (!response.ok) throw new Error("push subscription failed");
+    lastPushFingerprint = fingerprint;
+    backgroundPushState = "ready"; renderNotificationStatus();
+    return true;
+  } catch (e) {
+    backgroundPushState = "fallback"; renderNotificationStatus();
+    return false;
+  }
+}
+
+function schedulePushSync() {
+  clearTimeout(pushSyncTimer);
+  if (!state.notifications.enabled) return;
+  pushSyncTimer = setTimeout(() => syncPushSubscription(), 1400);
+}
+
 function notificationPermission() {
   return "Notification" in window ? Notification.permission : "unsupported";
 }
@@ -2547,7 +2815,9 @@ function renderNotificationStatus() {
   const permission = notificationPermission();
   el.notifyToggle.checked = !!state.notifications.enabled;
   if (!state.notifications.enabled) el.notifyStatus.textContent = permission === "denied" ? t("notify_blocked") : t("notify_off");
-  else if (permission === "granted") el.notifyStatus.textContent = t("notify_active");
+  else if (permission === "granted" && backgroundPushState === "ready") el.notifyStatus.textContent = t("notify_active");
+  else if (permission === "granted" && backgroundPushState === "syncing") el.notifyStatus.textContent = t("notify_syncing");
+  else if (permission === "granted") el.notifyStatus.textContent = t("notify_background_unavailable");
   else el.notifyStatus.textContent = t("notify_inapp");
 }
 
@@ -2603,7 +2873,12 @@ async function setNotificationsEnabled(enabled) {
     state.notifications.enabled = permission !== "denied";
   }
   saveState(); renderNotificationStatus();
-  if (state.notifications.enabled) runNotificationChecks();
+  if (state.notifications.enabled) {
+    runNotificationChecks();
+    await registerPwa();
+    await syncPushSubscription(true);
+  } else await removePushSubscription();
+  renderNotificationStatus();
 }
 
 function deliverUserAlert(id, title, body, daily = false) {
@@ -2612,7 +2887,9 @@ function deliverUserAlert(id, title, body, daily = false) {
   if (daily && state.notifications.sent[id] === today) return false;
   showAppToast(`${title}: ${body}`);
   if (notificationPermission() === "granted") {
-    try { new Notification(title, { body, tag: "numbrrr-" + id }); } catch (e) {}
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.ready.then((registration) => registration.showNotification(title, { body, tag: "numbrrr-" + id, icon: "/icons/icon-192.png", badge: "/icons/badge-96.png", data: { url: "/" } })).catch(() => {});
+    } else try { new Notification(title, { body, tag: "numbrrr-" + id }); } catch (e) {}
   }
   if (daily) state.notifications.sent[id] = today;
   return true;
@@ -3374,6 +3651,9 @@ function applyLanguage(lang) {
   buildPortfolio(); refreshPortfolio();
   buildIncome(); refreshIncome();
   buildWatchlist();
+  applyHomeLayout();
+  renderHomeCardSettings();
+  renderPwaSettings();
   renderNotificationSettings();
   updateSettingsActive();
   try { localStorage.setItem("numbr_lang", lang); } catch (e) {}
@@ -3538,6 +3818,8 @@ el.vehicleNotifyDays.addEventListener("change", () => {
 });
 el.addPriceAlert.addEventListener("click", addPriceAlertFromSettings);
 el.priceAlertTarget.addEventListener("keydown", (e) => { if (e.key === "Enter") addPriceAlertFromSettings(); });
+el.resetHomeCards.addEventListener("click", resetHomeLayout);
+el.installPwa.addEventListener("click", installPwa);
 el.exportData.addEventListener("click", exportBackup);
 el.importData.addEventListener("change", importBackup);
 
@@ -3567,7 +3849,7 @@ document.querySelectorAll("[data-theme-pick]").forEach((b) => b.addEventListener
     if (name === "income") refreshIncome();
     if (name === "watch") { refreshWatchData(); buildTopPerformers(); buildTrPanel(); buildIpoList(); kickBubbles(); }
     else stopBubbles(); // pause the bubble animation loop off the Watch view
-    if (name === "settings") { preloadThemeWallpapers(); renderNotificationSettings(); }
+    if (name === "settings") { preloadThemeWallpapers(); renderHomeCardSettings(); renderPwaSettings(); renderNotificationSettings(); }
     window.scrollTo({ top: 0, behavior: "auto" });
   }
   tabs.forEach((tab) => {
@@ -3593,12 +3875,13 @@ function persistedState() {
     expenses: state.expenses, vehicles: state.vehicles, vehSeq: state.vehSeq,
     vehicleHub: state.vehicleHub,
     income: state.income, portfolio: state.portfolio, watchlist: state.watchlist,
-    notifications: state.notifications, portTotalUSD: state.portTotalUSD,
+    notifications: state.notifications, homeLayout: state.homeLayout, portTotalUSD: state.portTotalUSD,
   };
 }
 
 function saveState() {
   try { localStorage.setItem("numbr_state", JSON.stringify(persistedState())); } catch (e) {}
+  schedulePushSync();
 }
 
 function exportBackup() {
@@ -3760,6 +4043,7 @@ function loadState() {
       sent,
     };
   }
+  state.homeLayout = normalizeHomeLayout(s.homeLayout);
   if (typeof s.portTotalUSD === "boolean") state.portTotalUSD = s.portTotalUSD;
   // normalize any legacy/removed asset types from older saves
   if (state.portfolio && Array.isArray(state.portfolio.holdings)) {
@@ -3798,6 +4082,7 @@ if (isFirstRun) showOnboarding();
 else { try { if (!localStorage.getItem("numbr_guide_seen")) showGuide(); } catch (e) {} }
 wireWatchSearch();
 wirePriceAlertSearch();
+registerPwa();
 refreshCryptoPrices(); // fetch live crypto prices (works on the deployed site)
 refreshWatchData(); // fetch performance for any saved watchlist items
 runNotificationChecks();

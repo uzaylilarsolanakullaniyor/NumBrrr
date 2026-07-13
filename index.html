@@ -4,7 +4,14 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="description" content="NumBrrr, calculate the total savings you need to become financially free." />
+  <meta name="theme-color" content="#07101f" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="NumBrrr" />
   <title>NumBrrr</title>
+  <link rel="manifest" href="/manifest.webmanifest" />
+  <link rel="icon" href="/icons/icon.svg" type="image/svg+xml" />
+  <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Sora:wght@600;700;800&family=Cinzel:wght@600;700;800&family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet" />
@@ -12,6 +19,7 @@
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
+  <div class="offline-banner" id="offlineBanner" role="status" aria-live="polite" hidden data-i18n="offline_banner">Çevrimdışısın · son kaydedilen veriler gösteriliyor</div>
   <!-- Fluid gradient background -->
   <div class="bg" aria-hidden="true">
     <span class="blob blob-1"></span>
@@ -41,7 +49,7 @@
     <div class="view" id="view-home" hidden>
 
     <!-- Controls -->
-    <section class="glass controls" aria-label="Inputs">
+    <section class="glass controls" aria-label="Inputs" data-home-card="inputs">
       <div class="control-row">
         <!-- Monthly expenses -->
         <div class="field field-grow">
@@ -77,7 +85,7 @@
     </section>
 
     <!-- Headline result -->
-    <section class="glass headline" id="headline">
+    <section class="glass headline" id="headline" data-home-card="result">
       <div class="headline-tag" data-i18n="headline_tag">Your easiest path to freedom</div>
       <div class="headline-body">
         <div class="headline-amount" id="bestAmount">—</div>
@@ -91,7 +99,7 @@
     </section>
 
     <!-- The 4% Rule / Trinity Study -->
-    <section id="learn" class="glass rule" aria-label="The 4% rule and the Trinity Study">
+    <section id="learn" class="glass rule" aria-label="The 4% rule and the Trinity Study" data-home-card="rule">
       <div class="rule-head">
         <span class="rule-badge" data-i18n="rule_badge">📚 The 4% Rule · Trinity Study</span>
         <h2 data-i18n="rule_title">25× your annual expenses</h2>
@@ -111,7 +119,7 @@
     </section>
 
     <!-- Comparison cards -->
-    <section id="compare" aria-label="Investment comparison">
+    <section id="compare" aria-label="Investment comparison" data-home-card="compare">
       <div class="section-head">
         <h2 data-i18n="compare_title">Compare instruments</h2>
       </div>
@@ -119,7 +127,7 @@
     </section>
 
     <!-- Bar chart -->
-    <section class="glass chart" aria-label="Savings required comparison chart">
+    <section class="glass chart" aria-label="Savings required comparison chart" data-home-card="chart">
       <div class="section-head section-head--chart">
         <h2 data-i18n="chart_title">Savings required</h2>
       </div>
@@ -127,7 +135,7 @@
     </section>
 
     <!-- Disclaimer -->
-    <footer class="disclaimer glass">
+    <footer class="disclaimer glass" data-home-card="disclaimer">
       <p data-i18n="disc_1">Estimates for education, not financial advice. Returns are historical or assumed, not guaranteed, and every rate is editable.</p>
     </footer>
     </div><!-- /view-home -->
@@ -270,6 +278,20 @@
         </label>
       </section>
 
+      <section class="glass settings-group settings-tools" aria-labelledby="homeCustomizeTitle">
+        <h3 class="settings-label" id="homeCustomizeTitle" data-i18n="home_customize_title">Home screen</h3>
+        <p class="settings-note" data-i18n="home_customize_desc">Reorder the Freedom screen cards or hide the ones you do not use.</p>
+        <div class="home-card-list" id="homeCardList"></div>
+        <button class="settings-action" id="resetHomeCards" type="button" data-i18n="home_customize_reset">Reset layout</button>
+      </section>
+
+      <section class="glass settings-group settings-tools" aria-labelledby="pwaTitle">
+        <h3 class="settings-label" id="pwaTitle" data-i18n="pwa_title">App & offline use</h3>
+        <p class="settings-note" data-i18n="pwa_desc">Install NumBrrr on your phone and keep using saved data without internet.</p>
+        <p class="settings-status" id="pwaStatus" role="status" aria-live="polite"></p>
+        <button class="settings-action settings-action--primary" id="installPwa" type="button" data-i18n="pwa_install" hidden>Install app</button>
+      </section>
+
       <section class="glass settings-group settings-tools" aria-labelledby="notifyTitle">
         <h3 class="settings-label" id="notifyTitle" data-i18n="notify_title">Notifications</h3>
         <p class="settings-note" data-i18n="notify_desc">Get price alerts and reminders for upcoming vehicle maintenance.</p>
@@ -279,6 +301,7 @@
           <span class="switch-label" data-i18n="notify_enable">Enable notifications</span>
         </label>
         <p class="settings-status" id="notifyStatus" role="status" aria-live="polite"></p>
+        <p class="settings-note" data-i18n="notify_privacy">Only alert conditions and maintenance dates are synced for background delivery.</p>
 
         <div class="settings-subgroup">
           <label class="settings-field" for="vehicleNotifyDays">
