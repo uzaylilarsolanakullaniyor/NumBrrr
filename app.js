@@ -2753,11 +2753,18 @@ function addCountdown(event) {
   const target = parseDateInput(date);
   const today = new Date(); today.setHours(0, 0, 0, 0);
   if (!name || !target || target <= today) { showAppToast(t("countdown_invalid")); return; }
-  state.countdowns.items.push({ id: "cd" + ++state.countdowns.seq, name: name.slice(0, 80), category: category.slice(0, 40), date, target: target.toISOString(), unit });
+  const id = "cd" + ++state.countdowns.seq;
+  state.countdowns.items.push({ id, name: name.slice(0, 80), category: category.slice(0, 40), date, target: target.toISOString(), unit });
   el.countdownName.value = "";
   el.countdownCategory.value = "";
   el.countdownDate.value = "";
-  saveState(); renderCountdowns(); showAppToast(t("countdown_added"));
+  saveState(); renderCountdowns();
+  const row = el.countdownList.querySelector(`[data-countdown-id="${id}"]`);
+  if (row && !window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    row.classList.add("is-new");
+    row.addEventListener("animationend", () => row.classList.remove("is-new"), { once: true });
+  }
+  showAppToast(t("countdown_added"));
 }
 
 function wireHomeDashboard() {

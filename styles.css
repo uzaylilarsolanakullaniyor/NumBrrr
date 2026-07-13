@@ -554,6 +554,11 @@ body {
 
 /* ---------- Views (Home / Savings) ---------- */
 .view { display: flex; flex-direction: column; gap: 26px; }
+.view:not([hidden]) { animation: viewEnter .34s cubic-bezier(.2, .72, .2, 1) both; }
+@keyframes viewEnter {
+  from { opacity: 0; transform: translateY(7px); }
+  to { opacity: 1; transform: translateY(0); }
+}
 #view-home { gap: 16px; } /* tighter, more compact home page */
 .view[hidden] { display: none; }
 .view-intro { text-align: center; }
@@ -603,6 +608,18 @@ body {
   min-width: 0;
   overflow: hidden;
   grid-column: span 2;
+  transition: transform .24s cubic-bezier(.2, .72, .2, 1), border-color .2s ease, box-shadow .2s ease;
+  animation: dashboardWidgetIn .42s cubic-bezier(.2, .72, .2, 1) backwards;
+}
+.dashboard-widget:nth-child(2) { animation-delay: 35ms; }
+.dashboard-widget:nth-child(3) { animation-delay: 70ms; }
+.dashboard-widget:nth-child(4) { animation-delay: 105ms; }
+.dashboard-widget:nth-child(5) { animation-delay: 140ms; }
+.dashboard-widget:nth-child(6) { animation-delay: 175ms; }
+.dashboard-widget:nth-child(7) { animation-delay: 210ms; }
+@keyframes dashboardWidgetIn {
+  from { opacity: 0; transform: translateY(10px) scale(.992); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
 }
 .dashboard-widget[hidden] { display: none; }
 .dashboard-widget--freedom,
@@ -618,6 +635,7 @@ body {
   border-radius: 14px;
   background: linear-gradient(135deg, color-mix(in srgb, var(--accent) 18%, transparent), color-mix(in srgb, var(--accent-2) 12%, transparent));
   font-size: 20px;
+  transition: transform .24s cubic-bezier(.2, .72, .2, 1), border-color .2s ease;
 }
 .dashboard-widget-open,
 .dashboard-freedom-toggle {
@@ -637,7 +655,8 @@ body {
   gap: 12px;
   padding: 18px;
 }
-.dashboard-widget-open:active { background: rgba(255,255,255,.035); }
+.dashboard-widget-open { transition: background .18s ease, transform .16s ease; }
+.dashboard-widget-open:active { background: rgba(255,255,255,.035); transform: scale(.992); }
 .dashboard-widget-top {
   display: grid;
   grid-template-columns: 42px minmax(0, 1fr) auto;
@@ -648,7 +667,7 @@ body {
   font-weight: 700;
 }
 .dashboard-widget-top > span:nth-child(2) { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.dashboard-widget-top > span:last-child { color: var(--text-faint); font-size: 18px; }
+.dashboard-widget-top > span:last-child { color: var(--text-faint); font-size: 18px; transition: transform .2s ease, color .2s ease; }
 .dashboard-widget-value {
   display: block;
   min-width: 0;
@@ -700,6 +719,11 @@ body {
   border-top: 1px solid var(--glass-border-soft);
 }
 .freedom-widget-body[hidden] { display: none; }
+.freedom-widget-body:not([hidden]) { animation: freedomReveal .3s cubic-bezier(.2, .72, .2, 1) both; }
+@keyframes freedomReveal {
+  from { opacity: 0; transform: translateY(-6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
 /* Avoid stacking expensive full-screen blur layers inside the Freedom widget. */
 .freedom-widget-body > .glass {
   -webkit-backdrop-filter: none;
@@ -746,6 +770,12 @@ body {
   border: 1px solid var(--glass-border-soft);
   border-radius: 14px;
   background: rgba(0,0,0,.14);
+  transition: transform .2s ease, border-color .2s ease, background .2s ease;
+}
+.countdown-row.is-new { animation: countdownEnter .36s cubic-bezier(.2, .8, .2, 1) both; }
+@keyframes countdownEnter {
+  from { opacity: 0; transform: translateY(7px) scale(.99); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
 }
 .countdown-row.is-done { opacity: .58; }
 .countdown-main { min-width: 0; display: flex; flex-direction: column; align-items: flex-start; gap: 3px; }
@@ -783,6 +813,13 @@ body {
   cursor: pointer;
 }
 .countdown-actions button:last-child { width: 44px; padding: 0; font-size: 19px; }
+
+@media (hover: hover) and (pointer: fine) {
+  .dashboard-widget--compact:hover { transform: translateY(-3px); border-color: color-mix(in srgb, var(--accent-2) 28%, var(--glass-border-soft)); }
+  .dashboard-widget--compact:hover .dashboard-widget-icon { transform: translateY(-1px) scale(1.045) rotate(-2deg); border-color: color-mix(in srgb, var(--accent-2) 45%, transparent); }
+  .dashboard-widget-open:hover .dashboard-widget-top > span:last-child { transform: translateX(3px); color: var(--text-dim); }
+  .countdown-row:hover { transform: translateX(2px); border-color: color-mix(in srgb, var(--accent-2) 28%, var(--glass-border-soft)); background: rgba(255,255,255,.035); }
+}
 
 @media (max-width: 860px) {
   .dashboard-widget { grid-column: span 3; }
@@ -1610,7 +1647,12 @@ body {
 @media (prefers-reduced-motion: reduce) {
   .blob { animation: none; }
   .money-rain { display: none; }
-  * { transition-duration: 0.001ms !important; }
+  *, *::before, *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
 }
 
 /* ============================================================
