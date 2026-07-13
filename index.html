@@ -205,8 +205,8 @@
           <form class="countdown-form" id="countdownForm">
             <label><span data-i18n="countdown_name">Name</span><input id="countdownName" type="text" maxlength="80" autocomplete="off" /></label>
             <label><span data-i18n="countdown_category">Category</span><input id="countdownCategory" type="text" maxlength="40" autocomplete="off" /></label>
-            <label><span data-i18n="countdown_duration">Duration</span><input id="countdownValue" type="number" min="1" max="36500" inputmode="numeric" value="20" /></label>
-            <label><span data-i18n="countdown_unit">Unit</span><select id="countdownUnit"><option value="days" data-i18n="countdown_days">Days</option><option value="months" data-i18n="countdown_months">Months</option></select></label>
+            <label><span data-i18n="countdown_date">Target date</span><input id="countdownDate" type="date" required /></label>
+            <label><span data-i18n="countdown_unit">Show as</span><select id="countdownUnit"><option value="days" data-i18n="countdown_days">Days</option><option value="months" data-i18n="countdown_months">Months</option></select></label>
             <button class="settings-action settings-action--primary" type="submit" data-i18n="countdown_add">Add countdown</button>
           </form>
           <div class="countdown-list" id="countdownList" aria-live="polite"></div>
@@ -550,6 +550,10 @@
 
   <!-- Bottom navigation (app-style) -->
   <nav class="tabbar" aria-label="Primary">
+    <button class="tab is-active" type="button" data-view="home" aria-current="page">
+      <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 3 2 12h3v9h6v-6h2v6h6v-9h3L12 3z"/></svg>
+      <span data-i18n="nav_home">Home</span>
+    </button>
     <button class="tab" type="button" data-view="portfolio">
       <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20 6h-4V4c0-1.11-.89-2-2-2h-4c-1.11 0-2 .89-2 2v2H4c-1.11 0-2 .89-2 2v11c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V8c0-1.11-.89-2-2-2zm-6 0h-4V4h4v2z"/></svg>
       <span data-i18n="nav_portfolio">Portfolio</span>
@@ -565,10 +569,6 @@
     <button class="tab" type="button" data-view="car">
       <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M18.92 6.01C18.72 5.42 18.16 5 17.5 5h-11c-.66 0-1.21.42-1.42 1.01L3 12v8c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h12v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-8l-2.08-5.99zM6.5 16c-.83 0-1.5-.67-1.5-1.5S5.67 13 6.5 13s1.5.67 1.5 1.5S7.33 16 6.5 16zm11 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zM5 11l1.5-4.5h11L19 11H5z"/></svg>
       <span data-i18n="nav_car">My car</span>
-    </button>
-    <button class="tab is-active" type="button" data-view="home" aria-current="page">
-      <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 3 2 12h3v9h6v-6h2v6h6v-9h3L12 3z"/></svg>
-      <span data-i18n="nav_home">Home</span>
     </button>
     <button class="tab" type="button" data-view="watch">
       <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
@@ -631,11 +631,11 @@
       <h2 class="guide-title" data-i18n="guide_title">Quick guide</h2>
       <p class="guide-intro" data-i18n="guide_intro">What each tab does:</p>
       <div class="guide-list">
+        <div class="guide-item"><span class="guide-ico">🏠</span><div class="guide-txt"><b data-i18n="nav_home">Home</b><p data-i18n="guide_freedom">—</p></div></div>
         <div class="guide-item"><span class="guide-ico">💼</span><div class="guide-txt"><b data-i18n="nav_portfolio">Portfolio</b><p data-i18n="guide_portfolio">—</p></div></div>
         <div class="guide-item"><span class="guide-ico">👛</span><div class="guide-txt"><b data-i18n="nav_income">Income</b><p data-i18n="guide_income">—</p></div></div>
         <div class="guide-item"><span class="guide-ico">🧾</span><div class="guide-txt"><b data-i18n="nav_savings">Expenses</b><p data-i18n="guide_expenses">—</p></div></div>
         <div class="guide-item"><span class="guide-ico">🚗</span><div class="guide-txt"><b data-i18n="nav_car">My car</b><p data-i18n="guide_car">—</p></div></div>
-        <div class="guide-item"><span class="guide-ico">🏠</span><div class="guide-txt"><b data-i18n="nav_home">Home</b><p data-i18n="guide_freedom">—</p></div></div>
         <div class="guide-item"><span class="guide-ico">⭐</span><div class="guide-txt"><b data-i18n="nav_watchlist">Watch</b><p data-i18n="guide_watch">—</p></div></div>
       </div>
       <button class="onboard-start" id="guideStart" type="button" data-i18n="guide_ok">Got it</button>

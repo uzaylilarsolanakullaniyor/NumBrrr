@@ -276,7 +276,7 @@ const I18N = {
     home_customize_title: "Home screen", home_customize_desc: "Reorder widgets or hide the ones you do not use.", home_customize_reset: "Reset layout", home_move_up: "Move up", home_move_down: "Move down", home_hide: "Show this widget", home_last_card: "At least one widget must remain visible.",
     home_widget_freedom: "Freedom calculator", home_widget_portfolio: "Portfolio", home_widget_income: "Income", home_widget_expenses: "Expenses", home_widget_car: "My car", home_widget_watch: "Watchlist", home_widget_countdown: "Countdowns",
     home_holdings: "{count} holdings", home_passive: "{amount} passive / month", home_upcoming: "{count} upcoming payments", home_vehicles: "{count} vehicles", home_last_trip: "Last trip: {route}", home_no_route: "No saved route", home_watch_count: "{count} tracked assets", home_watch_empty: "No tracked assets", home_freedom_summary: "{amount} · {name}",
-    countdown_title: "Countdowns", countdown_sub: "Count down to anything in days or months.", countdown_name: "Name", countdown_category: "Category", countdown_duration: "Duration", countdown_unit: "Unit", countdown_days: "Days", countdown_months: "Months", countdown_add: "Add countdown", countdown_name_ph: "Vacation, exam, goal…", countdown_category_ph: "Travel, work, personal…", countdown_empty: "No countdown yet.", countdown_invalid: "Enter a name and a valid duration.", countdown_day_left: "day left", countdown_days_left: "days left", countdown_month_left: "month left", countdown_months_left: "months left", countdown_done: "Time's up", countdown_target: "Target: {date}", countdown_remove: "Remove countdown", countdown_switch_unit: "Switch days / months", countdown_added: "Countdown added ✓", countdown_active: "{count} active countdowns",
+    countdown_title: "Countdowns", countdown_sub: "Pick a target date from the calendar and follow it in days or months.", countdown_name: "Name", countdown_category: "Category", countdown_date: "Target date", countdown_unit: "Show as", countdown_days: "Days", countdown_months: "Months", countdown_add: "Add countdown", countdown_name_ph: "Vacation, exam, goal…", countdown_category_ph: "Travel, work, personal…", countdown_empty: "No countdown yet.", countdown_invalid: "Enter a name and choose a future date.", countdown_day_left: "day left", countdown_days_left: "days left", countdown_month_left: "month left", countdown_months_left: "months left", countdown_done: "Time's up", countdown_target: "Target: {date}", countdown_remove: "Remove countdown", countdown_switch_unit: "Switch days / months", countdown_added: "Countdown added ✓", countdown_active: "{count} active countdowns",
     pwa_title: "App & offline use", pwa_desc: "Install NumBrrr on your phone and keep using saved data without internet.", pwa_install: "Install app", pwa_ready: "Offline use is ready.", pwa_installed: "NumBrrr is installed on this device.", pwa_ios: "Use your browser's Add to Home Screen command to install.", pwa_unsupported: "This browser does not support app installation.", offline_banner: "You are offline · showing the latest saved data",
     notify_title: "Notifications", notify_desc: "Get price alerts and upcoming vehicle maintenance reminders, including while the app is closed when background service is available.", notify_enable: "Enable notifications",
     notify_active: "Background notifications are active.", notify_syncing: "Connecting background notifications…", notify_background_unavailable: "Background service is not configured; alerts will still work while the app is open.", notify_inapp: "System notifications are unavailable; alerts will appear inside the app.", notify_blocked: "Notification permission is blocked in browser settings.", notify_off: "Notifications are off.", notify_privacy: "Only alert conditions and maintenance dates are synced for background delivery.",
@@ -439,7 +439,7 @@ const I18N = {
     home_customize_title: "Ana sayfa", home_customize_desc: "Widget'ları sırala veya kullanmadıklarını gizle.", home_customize_reset: "Düzeni sıfırla", home_move_up: "Yukarı taşı", home_move_down: "Aşağı taşı", home_hide: "Bu widget'ı göster", home_last_card: "En az bir widget görünür kalmalı.",
     home_widget_freedom: "Özgürlük hesaplayıcısı", home_widget_portfolio: "Portföy", home_widget_income: "Gelirler", home_widget_expenses: "Giderler", home_widget_car: "Aracım", home_widget_watch: "Takip listesi", home_widget_countdown: "Geri sayımlar",
     home_holdings: "{count} varlık", home_passive: "Aylık {amount} pasif", home_upcoming: "{count} yaklaşan ödeme", home_vehicles: "{count} araç", home_last_trip: "Son yolculuk: {route}", home_no_route: "Kayıtlı rota yok", home_watch_count: "{count} takip edilen varlık", home_watch_empty: "Takip edilen varlık yok", home_freedom_summary: "{name} · {amount}",
-    countdown_title: "Geri sayımlar", countdown_sub: "Herhangi bir hedefe gün veya ay olarak geri say.", countdown_name: "Başlık", countdown_category: "Kategori", countdown_duration: "Süre", countdown_unit: "Birim", countdown_days: "Gün", countdown_months: "Ay", countdown_add: "Geri sayım ekle", countdown_name_ph: "Tatil, sınav, hedef…", countdown_category_ph: "Seyahat, iş, kişisel…", countdown_empty: "Henüz geri sayım yok.", countdown_invalid: "Bir başlık ve geçerli süre gir.", countdown_day_left: "gün kaldı", countdown_days_left: "gün kaldı", countdown_month_left: "ay kaldı", countdown_months_left: "ay kaldı", countdown_done: "Süre doldu", countdown_target: "Hedef: {date}", countdown_remove: "Geri sayımı kaldır", countdown_switch_unit: "Gün / ay görünümünü değiştir", countdown_added: "Geri sayım eklendi ✓", countdown_active: "{count} aktif geri sayım",
+    countdown_title: "Geri sayımlar", countdown_sub: "Takvimden hedef tarihi seç; gün veya ay olarak takip et.", countdown_name: "Başlık", countdown_category: "Kategori", countdown_date: "Hedef tarih", countdown_unit: "Gösterim", countdown_days: "Gün", countdown_months: "Ay", countdown_add: "Geri sayım ekle", countdown_name_ph: "Tatil, sınav, hedef…", countdown_category_ph: "Seyahat, iş, kişisel…", countdown_empty: "Henüz geri sayım yok.", countdown_invalid: "Bir başlık gir ve takvimden ileri bir tarih seç.", countdown_day_left: "gün kaldı", countdown_days_left: "gün kaldı", countdown_month_left: "ay kaldı", countdown_months_left: "ay kaldı", countdown_done: "Süre doldu", countdown_target: "Hedef: {date}", countdown_remove: "Geri sayımı kaldır", countdown_switch_unit: "Gün / ay görünümünü değiştir", countdown_added: "Geri sayım eklendi ✓", countdown_active: "{count} aktif geri sayım",
     pwa_title: "Uygulama ve çevrimdışı kullanım", pwa_desc: "NumBrrr'ı telefonuna kur; internet yokken kayıtlı verilerinle kullanmaya devam et.", pwa_install: "Uygulamayı yükle", pwa_ready: "Çevrimdışı kullanım hazır.", pwa_installed: "NumBrrr bu cihaza yüklendi.", pwa_ios: "Yüklemek için tarayıcı menüsündeki Ana Ekrana Ekle seçeneğini kullan.", pwa_unsupported: "Bu tarayıcı uygulama yüklemeyi desteklemiyor.", offline_banner: "Çevrimdışısın · son kaydedilen veriler gösteriliyor",
     notify_title: "Bildirimler", notify_desc: "Fiyat alarmlarını ve yaklaşan araç bakım hatırlatmalarını, arka plan hizmeti hazırsa uygulama kapalıyken de al.", notify_enable: "Bildirimleri aç",
     notify_active: "Arka plan bildirimleri aktif.", notify_syncing: "Arka plan bildirimleri bağlanıyor…", notify_background_unavailable: "Arka plan hizmeti henüz yapılandırılmamış; alarmlar uygulama açıkken çalışmaya devam edecek.", notify_inapp: "Sistem bildirimi kullanılamıyor; uyarılar uygulama içinde gösterilecek.", notify_blocked: "Bildirim izni tarayıcı ayarlarından engellenmiş.", notify_off: "Bildirimler kapalı.", notify_privacy: "Arka planda göndermek için yalnızca alarm koşulları ve bakım tarihleri eşitlenir.",
@@ -725,7 +725,7 @@ const el = {
   countdownForm: document.getElementById("countdownForm"),
   countdownName: document.getElementById("countdownName"),
   countdownCategory: document.getElementById("countdownCategory"),
-  countdownValue: document.getElementById("countdownValue"),
+  countdownDate: document.getElementById("countdownDate"),
   countdownUnit: document.getElementById("countdownUnit"),
   countdownList: document.getElementById("countdownList"),
   offlineBanner: document.getElementById("offlineBanner"),
@@ -2645,6 +2645,10 @@ function renderHomeSummaries() {
   if (el.homeWatchNote) el.homeWatchNote.textContent = firstWatch ? `${firstWatch.name} · ${watchPriceLabel(firstWatch)}` : t("watch_search_ph");
   if (el.countdownName) el.countdownName.placeholder = t("countdown_name_ph");
   if (el.countdownCategory) el.countdownCategory.placeholder = t("countdown_category_ph");
+  if (el.countdownDate) {
+    const tomorrow = new Date(); tomorrow.setDate(tomorrow.getDate() + 1);
+    el.countdownDate.min = dateInputValue(tomorrow);
+  }
 }
 
 function renderHomeDashboard() {
@@ -2654,17 +2658,45 @@ function renderHomeDashboard() {
   renderCountdowns();
 }
 
-function addMonthsClamped(date, months) {
-  const target = new Date(date);
-  const day = target.getDate();
-  target.setDate(1);
-  target.setMonth(target.getMonth() + months);
-  const end = new Date(target.getFullYear(), target.getMonth() + 1, 0).getDate();
-  target.setDate(Math.min(day, end));
-  return target;
+function dateInputValue(date) {
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+}
+
+function parseDateInput(value) {
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value || "");
+  if (!match) return null;
+  const year = Number(match[1]), month = Number(match[2]), day = Number(match[3]);
+  const date = new Date(year, month - 1, day);
+  return date.getFullYear() === year && date.getMonth() === month - 1 && date.getDate() === day ? date : null;
+}
+
+function calendarDayDistance(from, to) {
+  const fromUtc = Date.UTC(from.getFullYear(), from.getMonth(), from.getDate());
+  const toUtc = Date.UTC(to.getFullYear(), to.getMonth(), to.getDate());
+  return Math.round((toUtc - fromUtc) / 86400000);
+}
+
+function countdownTargetDate(item) {
+  const calendarDate = parseDateInput(item.date);
+  if (calendarDate) return calendarDate;
+  const target = new Date(item.target);
+  return Number.isFinite(target.getTime()) ? target : null;
 }
 
 function countdownParts(item, now = Date.now()) {
+  const calendarTarget = parseDateInput(item.date);
+  if (calendarTarget) {
+    const from = new Date(now);
+    const days = calendarDayDistance(from, calendarTarget);
+    if (days <= 0) return { done: true, value: 0, label: t("countdown_done") };
+    if (item.unit === "months") {
+      let months = (calendarTarget.getFullYear() - from.getFullYear()) * 12 + calendarTarget.getMonth() - from.getMonth();
+      if (calendarTarget.getDate() > from.getDate()) months += 1;
+      months = Math.max(1, months);
+      return { done: false, value: months, label: t(months === 1 ? "countdown_month_left" : "countdown_months_left") };
+    }
+    return { done: false, value: days, label: t(days === 1 ? "countdown_day_left" : "countdown_days_left") };
+  }
   const target = Date.parse(item.target);
   const diff = target - now;
   if (!Number.isFinite(target) || diff <= 0) return { done: true, value: 0, label: t("countdown_done") };
@@ -2691,8 +2723,8 @@ function renderCountdowns() {
   const locale = state.lang === "tr" ? "tr-TR" : "en-US";
   el.countdownList.innerHTML = items.map((item) => {
     const remaining = countdownParts(item);
-    const target = new Date(item.target);
-    const date = Number.isFinite(target.getTime()) ? target.toLocaleDateString(locale, { day: "numeric", month: "long", year: "numeric" }) : "—";
+    const target = countdownTargetDate(item);
+    const date = target ? target.toLocaleDateString(locale, { day: "numeric", month: "long", year: "numeric" }) : "—";
     const category = item.category ? `<span class="countdown-category">${escapeHtml(item.category)}</span>` : "";
     return `<article class="countdown-row${remaining.done ? " is-done" : ""}" data-countdown-id="${escapeHtml(item.id)}">
       <div class="countdown-main">${category}<strong>${escapeHtml(item.name)}</strong><small>${escapeHtml(t("countdown_target", { date }))}</small></div>
@@ -2717,15 +2749,14 @@ function addCountdown(event) {
   const name = el.countdownName.value.trim();
   const category = el.countdownCategory.value.trim();
   const unit = el.countdownUnit.value === "months" ? "months" : "days";
-  const max = unit === "months" ? 1200 : 36500;
-  const value = Math.min(max, Math.max(0, Math.round(Number(el.countdownValue.value) || 0)));
-  if (!name || value < 1) { showAppToast(t("countdown_invalid")); return; }
-  const now = new Date();
-  const target = unit === "months" ? addMonthsClamped(now, value) : new Date(now);
-  if (unit === "days") target.setDate(target.getDate() + value);
-  state.countdowns.items.push({ id: "cd" + ++state.countdowns.seq, name: name.slice(0, 80), category: category.slice(0, 40), target: target.toISOString(), unit });
+  const date = el.countdownDate.value;
+  const target = parseDateInput(date);
+  const today = new Date(); today.setHours(0, 0, 0, 0);
+  if (!name || !target || target <= today) { showAppToast(t("countdown_invalid")); return; }
+  state.countdowns.items.push({ id: "cd" + ++state.countdowns.seq, name: name.slice(0, 80), category: category.slice(0, 40), date, target: target.toISOString(), unit });
   el.countdownName.value = "";
   el.countdownCategory.value = "";
+  el.countdownDate.value = "";
   saveState(); renderCountdowns(); showAppToast(t("countdown_added"));
 }
 
@@ -2743,11 +2774,6 @@ function wireHomeDashboard() {
     setTimeout(() => document.getElementById("homeCustomizeTitle").scrollIntoView({ block: "start", behavior: "smooth" }), 0);
   });
   el.countdownForm.addEventListener("submit", addCountdown);
-  el.countdownUnit.addEventListener("change", () => {
-    const max = el.countdownUnit.value === "months" ? 1200 : 36500;
-    el.countdownValue.max = String(max);
-    if (Number(el.countdownValue.value) > max) el.countdownValue.value = String(max);
-  });
 }
 
 // ============================================================
@@ -4232,13 +4258,18 @@ function loadState() {
   state.homeLayout = normalizeHomeLayout(s.homeLayout);
   if (s.countdowns && typeof s.countdowns === "object") {
     const seenCountdownIds = new Set();
-    const items = Array.isArray(s.countdowns.items) ? s.countdowns.items.map((item) => ({
-      id: typeof item.id === "string" ? item.id.slice(0, 80) : "",
-      name: typeof item.name === "string" ? item.name.slice(0, 80) : "",
-      category: typeof item.category === "string" ? item.category.slice(0, 40) : "",
-      target: typeof item.target === "string" && Number.isFinite(Date.parse(item.target)) ? new Date(item.target).toISOString() : "",
-      unit: item.unit === "months" ? "months" : "days",
-    })).filter((item) => {
+    const items = Array.isArray(s.countdowns.items) ? s.countdowns.items.map((item) => {
+      const date = typeof item.date === "string" && parseDateInput(item.date) ? item.date : "";
+      const storedTarget = typeof item.target === "string" && Number.isFinite(Date.parse(item.target)) ? new Date(item.target).toISOString() : "";
+      return {
+        id: typeof item.id === "string" ? item.id.slice(0, 80) : "",
+        name: typeof item.name === "string" ? item.name.slice(0, 80) : "",
+        category: typeof item.category === "string" ? item.category.slice(0, 40) : "",
+        date,
+        target: storedTarget || (date ? parseDateInput(date).toISOString() : ""),
+        unit: item.unit === "months" ? "months" : "days",
+      };
+    }).filter((item) => {
       if (!item.id || !item.name || !item.target || seenCountdownIds.has(item.id)) return false;
       seenCountdownIds.add(item.id); return true;
     }).slice(0, 200) : [];

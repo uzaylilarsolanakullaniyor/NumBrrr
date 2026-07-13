@@ -715,7 +715,7 @@ body {
 .countdown-head p { margin: 0; color: var(--text-faint); font-size: 12.5px; line-height: 1.4; }
 .countdown-form {
   display: grid;
-  grid-template-columns: minmax(150px, 1.35fr) minmax(130px, 1fr) 104px 112px auto;
+  grid-template-columns: minmax(150px, 1.35fr) minmax(130px, 1fr) minmax(150px, 1fr) 112px auto;
   gap: 9px;
   align-items: end;
 }
@@ -733,6 +733,7 @@ body {
   font: inherit;
   font-size: 13px;
 }
+.countdown-form input[type="date"] { color-scheme: dark; }
 .countdown-list { display: flex; flex-direction: column; gap: 8px; margin-top: 16px; }
 .countdown-empty { margin: 2px 0 0; color: var(--text-faint); font-size: 12.5px; }
 .countdown-row {
@@ -1445,6 +1446,8 @@ body {
 }
 .tab svg { width: 20px; height: 20px; display: block; flex: none; transition: filter 0.25s ease; }
 .tab span { max-width: 100%; overflow: hidden; text-overflow: ellipsis; }
+.tabbar .tab[data-view="home"] { min-width: 72px; }
+.tabbar .tab[data-view="home"] span { overflow: visible; text-overflow: clip; }
 .tab > * { position: relative; z-index: 1; }
 .tab:hover { color: var(--text-dim); }
 .tab:active { transform: scale(0.9); }
@@ -1587,6 +1590,7 @@ body {
   /* fill the screen width so 7 tabs share space evenly instead of shrink-wrapping */
   .tabbar { gap: 0; padding: 7px; width: calc(100% - 24px); max-width: calc(100% - 24px); }
   .tab { min-width: 0; font-size: 9.5px; letter-spacing: 0; padding: 9px 1px 7px; }
+  .tabbar .tab[data-view="home"] { flex: 1.25; min-width: 0; font-size: 9px; letter-spacing: -.02em; }
   .tab svg { width: 21px; height: 21px; }
   .watch-ccy, .watch-chart, .watch-del, .cat-remove, .exp-paid { min-width: 44px; width: 44px; height: 44px; }
   .bar-row { grid-template-columns: 1fr; gap: 7px; }
@@ -1802,6 +1806,7 @@ body {
 }
 [data-theme="xp"] .countdown-form input,
 [data-theme="xp"] .countdown-form select { background: #fff; border-color: #7f9db9; color: #0a0a0a; border-radius: 3px; }
+[data-theme="xp"] .countdown-form input[type="date"] { color-scheme: light; }
 [data-theme="xp"] .rule-link, [data-theme="xp"] .add-cat, [data-theme="xp"] .invest-pick select {
   background: linear-gradient(180deg, #ffffff 0%, #f1efe2 45%, #d7d3c0 55%, #ECE9D8 100%);
   border: 1px solid #707070; border-radius: 4px; color: #0a0a0a;
@@ -1881,6 +1886,7 @@ body {
 [data-theme="medieval"] input { color: #2b1c0c; }
 [data-theme="medieval"] .countdown-form input,
 [data-theme="medieval"] .countdown-form select { background: #d8c39a; border-color: #6b4f2a; color: #2b1c0c; }
+[data-theme="medieval"] .countdown-form input[type="date"] { color-scheme: light; }
 [data-theme="medieval"] .rule-link {
   background: radial-gradient(circle at 40% 30%, #a5402a, #6e1f12);
   border: 1px solid #3a120a; border-radius: 40px; color: #f3e3c4;
@@ -1968,6 +1974,7 @@ body {
 }
 [data-theme="doge"] .countdown-form input,
 [data-theme="doge"] .countdown-form select { background: #fff; border: 2px solid #ead9a8; color: #3a2e16; border-radius: 14px; }
+[data-theme="doge"] .countdown-form input[type="date"] { color-scheme: light; }
 [data-theme="doge"] .rule-link, [data-theme="doge"] .add-cat, [data-theme="doge"] .invest-pick select {
   background: #ffe066; border: 2px solid #e8b04d; border-radius: 14px; color: #3a2e16;
   box-shadow: 0 4px 0 rgba(232, 176, 77, 0.5); -webkit-text-fill-color: initial;
