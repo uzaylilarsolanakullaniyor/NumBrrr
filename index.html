@@ -16,7 +16,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Sora:wght@600;700;800&family=Cinzel:wght@600;700;800&family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="vendor/leaflet/leaflet.css" />
-  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="styles.css?v=2" />
 </head>
 <body>
   <div class="offline-banner" id="offlineBanner" role="status" aria-live="polite" hidden data-i18n="offline_banner">Çevrimdışısın · son kaydedilen veriler gösteriliyor</div>
@@ -45,11 +45,27 @@
 
   <main class="shell">
 
-    <!-- ============ HOME VIEW (Freedom calculator) ============ -->
-    <div class="view" id="view-home" hidden>
+    <!-- ============ HOME DASHBOARD ============ -->
+    <div class="view" id="view-home">
+      <header class="home-dashboard-head">
+        <div>
+          <h1 class="view-title" data-i18n="dashboard_title">Home</h1>
+          <p class="subtagline" data-i18n="dashboard_sub">Everything important, at a glance.</p>
+        </div>
+        <button class="dashboard-edit" id="editHome" type="button" data-i18n="dashboard_edit">Edit widgets</button>
+      </header>
+
+      <section class="dashboard-grid" id="dashboardGrid" aria-label="Home widgets">
+        <article class="glass dashboard-widget dashboard-widget--freedom" data-home-widget="freedom">
+          <button class="dashboard-freedom-toggle" id="freedomWidgetToggle" type="button" aria-expanded="false" aria-controls="freedomWidgetBody">
+            <span class="dashboard-widget-icon" aria-hidden="true">🎯</span>
+            <span class="dashboard-widget-heading"><strong data-i18n="home_widget_freedom">Freedom calculator</strong><small id="homeFreedomSummary">—</small></span>
+            <span class="dashboard-widget-caret" aria-hidden="true">⌄</span>
+          </button>
+          <div class="freedom-widget-body" id="freedomWidgetBody" hidden>
 
     <!-- Controls -->
-    <section class="glass controls" aria-label="Inputs" data-home-card="inputs">
+    <section class="glass controls" aria-label="Inputs">
       <div class="control-row">
         <!-- Monthly expenses -->
         <div class="field field-grow">
@@ -85,7 +101,7 @@
     </section>
 
     <!-- Headline result -->
-    <section class="glass headline" id="headline" data-home-card="result">
+    <section class="glass headline" id="headline">
       <div class="headline-tag" data-i18n="headline_tag">Your easiest path to freedom</div>
       <div class="headline-body">
         <div class="headline-amount" id="bestAmount">—</div>
@@ -99,7 +115,7 @@
     </section>
 
     <!-- The 4% Rule / Trinity Study -->
-    <section id="learn" class="glass rule" aria-label="The 4% rule and the Trinity Study" data-home-card="rule">
+    <section id="learn" class="glass rule" aria-label="The 4% rule and the Trinity Study">
       <div class="rule-head">
         <span class="rule-badge" data-i18n="rule_badge">📚 The 4% Rule · Trinity Study</span>
         <h2 data-i18n="rule_title">25× your annual expenses</h2>
@@ -119,7 +135,7 @@
     </section>
 
     <!-- Comparison cards -->
-    <section id="compare" aria-label="Investment comparison" data-home-card="compare">
+    <section id="compare" aria-label="Investment comparison">
       <div class="section-head">
         <h2 data-i18n="compare_title">Compare instruments</h2>
       </div>
@@ -127,7 +143,7 @@
     </section>
 
     <!-- Bar chart -->
-    <section class="glass chart" aria-label="Savings required comparison chart" data-home-card="chart">
+    <section class="glass chart" aria-label="Savings required comparison chart">
       <div class="section-head section-head--chart">
         <h2 data-i18n="chart_title">Savings required</h2>
       </div>
@@ -135,9 +151,67 @@
     </section>
 
     <!-- Disclaimer -->
-    <footer class="disclaimer glass" data-home-card="disclaimer">
+    <footer class="disclaimer glass">
       <p data-i18n="disc_1">Estimates for education, not financial advice. Returns are historical or assumed, not guaranteed, and every rate is editable.</p>
     </footer>
+          </div>
+        </article>
+
+        <article class="glass dashboard-widget dashboard-widget--compact" data-home-widget="portfolio">
+          <button class="dashboard-widget-open" type="button" data-open-view="portfolio">
+            <span class="dashboard-widget-top"><span class="dashboard-widget-icon" aria-hidden="true">💼</span><span data-i18n="home_widget_portfolio">Portfolio</span><span aria-hidden="true">→</span></span>
+            <strong class="dashboard-widget-value" id="homePortfolioValue">—</strong>
+            <small class="dashboard-widget-note" id="homePortfolioNote">—</small>
+          </button>
+        </article>
+
+        <article class="glass dashboard-widget dashboard-widget--compact" data-home-widget="income">
+          <button class="dashboard-widget-open" type="button" data-open-view="income">
+            <span class="dashboard-widget-top"><span class="dashboard-widget-icon" aria-hidden="true">👛</span><span data-i18n="home_widget_income">Income</span><span aria-hidden="true">→</span></span>
+            <strong class="dashboard-widget-value" id="homeIncomeValue">—</strong>
+            <small class="dashboard-widget-note" id="homeIncomeNote">—</small>
+          </button>
+        </article>
+
+        <article class="glass dashboard-widget dashboard-widget--compact" data-home-widget="expenses">
+          <button class="dashboard-widget-open" type="button" data-open-view="savings">
+            <span class="dashboard-widget-top"><span class="dashboard-widget-icon" aria-hidden="true">🧾</span><span data-i18n="home_widget_expenses">Expenses</span><span aria-hidden="true">→</span></span>
+            <strong class="dashboard-widget-value" id="homeExpensesValue">—</strong>
+            <small class="dashboard-widget-note" id="homeExpensesNote">—</small>
+          </button>
+        </article>
+
+        <article class="glass dashboard-widget dashboard-widget--compact" data-home-widget="car">
+          <button class="dashboard-widget-open" type="button" data-open-view="car">
+            <span class="dashboard-widget-top"><span class="dashboard-widget-icon" aria-hidden="true">🚗</span><span data-i18n="home_widget_car">My car</span><span aria-hidden="true">→</span></span>
+            <strong class="dashboard-widget-value dashboard-widget-value--text" id="homeCarValue">—</strong>
+            <small class="dashboard-widget-note" id="homeCarNote">—</small>
+          </button>
+        </article>
+
+        <article class="glass dashboard-widget dashboard-widget--compact" data-home-widget="watch">
+          <button class="dashboard-widget-open" type="button" data-open-view="watch">
+            <span class="dashboard-widget-top"><span class="dashboard-widget-icon" aria-hidden="true">⭐</span><span data-i18n="home_widget_watch">Watchlist</span><span aria-hidden="true">→</span></span>
+            <strong class="dashboard-widget-value dashboard-widget-value--text" id="homeWatchValue">—</strong>
+            <small class="dashboard-widget-note" id="homeWatchNote">—</small>
+          </button>
+        </article>
+
+        <article class="glass dashboard-widget dashboard-widget--countdown" data-home-widget="countdown">
+          <div class="countdown-head">
+            <span class="dashboard-widget-icon" aria-hidden="true">⏳</span>
+            <div><h2 data-i18n="countdown_title">Countdowns</h2><p data-i18n="countdown_sub">Count down to anything in days or months.</p></div>
+          </div>
+          <form class="countdown-form" id="countdownForm">
+            <label><span data-i18n="countdown_name">Name</span><input id="countdownName" type="text" maxlength="80" autocomplete="off" /></label>
+            <label><span data-i18n="countdown_category">Category</span><input id="countdownCategory" type="text" maxlength="40" autocomplete="off" /></label>
+            <label><span data-i18n="countdown_duration">Duration</span><input id="countdownValue" type="number" min="1" max="36500" inputmode="numeric" value="20" /></label>
+            <label><span data-i18n="countdown_unit">Unit</span><select id="countdownUnit"><option value="days" data-i18n="countdown_days">Days</option><option value="months" data-i18n="countdown_months">Months</option></select></label>
+            <button class="settings-action settings-action--primary" type="submit" data-i18n="countdown_add">Add countdown</button>
+          </form>
+          <div class="countdown-list" id="countdownList" aria-live="polite"></div>
+        </article>
+      </section>
     </div><!-- /view-home -->
 
     <!-- ============ EXPENSES VIEW (Gider) ============ -->
@@ -373,7 +447,7 @@
     </div><!-- /view-settings -->
 
     <!-- ============ PORTFOLIO VIEW ============ -->
-    <div class="view" id="view-portfolio">
+    <div class="view" id="view-portfolio" hidden>
       <section class="glass savings-result port-total-card" aria-label="Total portfolio value">
         <div class="savings-total">
           <div class="port-total-head">
@@ -476,7 +550,7 @@
 
   <!-- Bottom navigation (app-style) -->
   <nav class="tabbar" aria-label="Primary">
-    <button class="tab is-active" type="button" data-view="portfolio" aria-current="page">
+    <button class="tab" type="button" data-view="portfolio">
       <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20 6h-4V4c0-1.11-.89-2-2-2h-4c-1.11 0-2 .89-2 2v2H4c-1.11 0-2 .89-2 2v11c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V8c0-1.11-.89-2-2-2zm-6 0h-4V4h4v2z"/></svg>
       <span data-i18n="nav_portfolio">Portfolio</span>
     </button>
@@ -492,9 +566,9 @@
       <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M18.92 6.01C18.72 5.42 18.16 5 17.5 5h-11c-.66 0-1.21.42-1.42 1.01L3 12v8c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h12v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-8l-2.08-5.99zM6.5 16c-.83 0-1.5-.67-1.5-1.5S5.67 13 6.5 13s1.5.67 1.5 1.5S7.33 16 6.5 16zm11 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zM5 11l1.5-4.5h11L19 11H5z"/></svg>
       <span data-i18n="nav_car">My car</span>
     </button>
-    <button class="tab" type="button" data-view="home">
-      <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm3-8c0 1.66-1.34 3-3 3s-3-1.34-3-3 1.34-3 3-3 3 1.34 3 3z"/></svg>
-      <span data-i18n="nav_home">Freedom</span>
+    <button class="tab is-active" type="button" data-view="home" aria-current="page">
+      <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 3 2 12h3v9h6v-6h2v6h6v-9h3L12 3z"/></svg>
+      <span data-i18n="nav_home">Home</span>
     </button>
     <button class="tab" type="button" data-view="watch">
       <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
@@ -561,7 +635,7 @@
         <div class="guide-item"><span class="guide-ico">👛</span><div class="guide-txt"><b data-i18n="nav_income">Income</b><p data-i18n="guide_income">—</p></div></div>
         <div class="guide-item"><span class="guide-ico">🧾</span><div class="guide-txt"><b data-i18n="nav_savings">Expenses</b><p data-i18n="guide_expenses">—</p></div></div>
         <div class="guide-item"><span class="guide-ico">🚗</span><div class="guide-txt"><b data-i18n="nav_car">My car</b><p data-i18n="guide_car">—</p></div></div>
-        <div class="guide-item"><span class="guide-ico">🎯</span><div class="guide-txt"><b data-i18n="nav_home">Freedom</b><p data-i18n="guide_freedom">—</p></div></div>
+        <div class="guide-item"><span class="guide-ico">🏠</span><div class="guide-txt"><b data-i18n="nav_home">Home</b><p data-i18n="guide_freedom">—</p></div></div>
         <div class="guide-item"><span class="guide-ico">⭐</span><div class="guide-txt"><b data-i18n="nav_watchlist">Watch</b><p data-i18n="guide_watch">—</p></div></div>
       </div>
       <button class="onboard-start" id="guideStart" type="button" data-i18n="guide_ok">Got it</button>
@@ -569,8 +643,8 @@
   </div>
 
   <script src="vendor/leaflet/leaflet.js"></script>
-  <script src="turkey-locations.js"></script>
-  <script src="app.js"></script>
+  <script src="turkey-locations.js?v=2"></script>
+  <script src="app.js?v=2"></script>
 
   <!-- Vercel Web Analytics (static-site injection; loads only on the deployed Vercel domain) -->
   <script>

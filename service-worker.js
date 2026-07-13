@@ -1,11 +1,11 @@
-const SHELL_CACHE = "numbrrr-shell-v1";
-const DATA_CACHE = "numbrrr-data-v1";
+const SHELL_CACHE = "numbrrr-shell-v2";
+const DATA_CACHE = "numbrrr-data-v2";
 const APP_SHELL = [
   "/",
   "/index.html",
-  "/styles.css",
-  "/app.js",
-  "/turkey-locations.js",
+  "/styles.css?v=2",
+  "/app.js?v=2",
+  "/turkey-locations.js?v=2",
   "/manifest.webmanifest",
   "/vendor/leaflet/leaflet.css",
   "/vendor/leaflet/leaflet.js",
@@ -72,7 +72,11 @@ self.addEventListener("fetch", (event) => {
     event.respondWith(networkFirst(request));
     return;
   }
-  if (url.origin === self.location.origin || url.hostname === "fonts.googleapis.com" || url.hostname === "fonts.gstatic.com" || url.hostname === "api.coingecko.com") {
+  if (url.origin === self.location.origin) {
+    event.respondWith(networkFirst(request));
+    return;
+  }
+  if (url.hostname === "fonts.googleapis.com" || url.hostname === "fonts.gstatic.com" || url.hostname === "api.coingecko.com") {
     event.respondWith(staleWhileRevalidate(request));
   }
 });

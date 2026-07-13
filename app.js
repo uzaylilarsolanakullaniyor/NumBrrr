@@ -219,8 +219,9 @@ let watchData = {}; // key -> { price, ccy, chg24, chg1mo, chg1y } for watchlist
 // ============================================================
 const I18N = {
   en: {
-    nav_home: "Freedom", nav_savings: "Expenses", nav_settings: "Settings", nav_more: "More",
+    nav_home: "Home", nav_savings: "Expenses", nav_settings: "Settings", nav_more: "More",
     home_title: "Freedom", home_sub: "See how much to save so passive returns cover your expenses.",
+    dashboard_title: "Home", dashboard_sub: "Everything important, at a glance.", dashboard_edit: "Edit widgets",
     currency: "Currency", monthly_expenses: "Monthly expenses", per_month: "/ month",
     real_mode: "Real return mode", real_mode_sub: "Subtract inflation from each rate",
     inflation_label: "Inflation (annual %)",
@@ -272,8 +273,10 @@ const I18N = {
     punch_empty: "Toggle on the habits you want to quit and type what you spend to see your number.",
     savings_note: "Projection compounds yearly contributions: FV = annual × [((1 + r)ⁿ − 1) / r], where r is the selected annual return. Returns are assumptions, not guarantees.",
     settings_title: "Settings", language: "Language", theme: "Theme", country: "Country", sound: "Sound", sound_fx: "Sound effects",
-    home_customize_title: "Home screen", home_customize_desc: "Reorder the Freedom screen cards or hide the ones you do not use.", home_customize_reset: "Reset layout", home_move_up: "Move up", home_move_down: "Move down", home_hide: "Show this card", home_last_card: "At least one card must remain visible.",
-    home_card_inputs: "Monthly expenses", home_card_result: "Freedom result", home_card_rule: "4% rule", home_card_compare: "Instrument comparison", home_card_chart: "Savings chart", home_card_disclaimer: "Information note",
+    home_customize_title: "Home screen", home_customize_desc: "Reorder widgets or hide the ones you do not use.", home_customize_reset: "Reset layout", home_move_up: "Move up", home_move_down: "Move down", home_hide: "Show this widget", home_last_card: "At least one widget must remain visible.",
+    home_widget_freedom: "Freedom calculator", home_widget_portfolio: "Portfolio", home_widget_income: "Income", home_widget_expenses: "Expenses", home_widget_car: "My car", home_widget_watch: "Watchlist", home_widget_countdown: "Countdowns",
+    home_holdings: "{count} holdings", home_passive: "{amount} passive / month", home_upcoming: "{count} upcoming payments", home_vehicles: "{count} vehicles", home_last_trip: "Last trip: {route}", home_no_route: "No saved route", home_watch_count: "{count} tracked assets", home_watch_empty: "No tracked assets", home_freedom_summary: "{amount} · {name}",
+    countdown_title: "Countdowns", countdown_sub: "Count down to anything in days or months.", countdown_name: "Name", countdown_category: "Category", countdown_duration: "Duration", countdown_unit: "Unit", countdown_days: "Days", countdown_months: "Months", countdown_add: "Add countdown", countdown_name_ph: "Vacation, exam, goal…", countdown_category_ph: "Travel, work, personal…", countdown_empty: "No countdown yet.", countdown_invalid: "Enter a name and a valid duration.", countdown_day_left: "day left", countdown_days_left: "days left", countdown_month_left: "month left", countdown_months_left: "months left", countdown_done: "Time's up", countdown_target: "Target: {date}", countdown_remove: "Remove countdown", countdown_switch_unit: "Switch days / months", countdown_added: "Countdown added ✓", countdown_active: "{count} active countdowns",
     pwa_title: "App & offline use", pwa_desc: "Install NumBrrr on your phone and keep using saved data without internet.", pwa_install: "Install app", pwa_ready: "Offline use is ready.", pwa_installed: "NumBrrr is installed on this device.", pwa_ios: "Use your browser's Add to Home Screen command to install.", pwa_unsupported: "This browser does not support app installation.", offline_banner: "You are offline · showing the latest saved data",
     notify_title: "Notifications", notify_desc: "Get price alerts and upcoming vehicle maintenance reminders, including while the app is closed when background service is available.", notify_enable: "Enable notifications",
     notify_active: "Background notifications are active.", notify_syncing: "Connecting background notifications…", notify_background_unavailable: "Background service is not configured; alerts will still work while the app is open.", notify_inapp: "System notifications are unavailable; alerts will appear inside the app.", notify_blocked: "Notification permission is blocked in browser settings.", notify_off: "Notifications are off.", notify_privacy: "Only alert conditions and maintenance dates are synced for background delivery.",
@@ -291,7 +294,7 @@ const I18N = {
     guide_income: "Enter your monthly income. Tick the passive ones like rent and interest, since only those count toward freedom.",
     guide_expenses: "Enter this month's spending, set reminders for your regular bills, and add what your car costs you.",
     guide_car: "Plan routes by province and district with distance, time, and fuel cost; save car profiles and track trip expenses.",
-    guide_freedom: "Works out how much you need saved for your passive income alone to cover your expenses (the 4% rule).",
+    guide_freedom: "Your editable dashboard: open summaries, countdowns and the Freedom calculator from one place.",
     guide_watch: "Search for the assets you care about, favorite them, and keep an eye on their prices.",
     theme_glass: "Liquid Glass", theme_glass_desc: "Modern frosted glass (default)",
     theme_xp: "Windows XP", theme_xp_desc: "Nostalgic early-2000s Luna blue",
@@ -379,8 +382,9 @@ const I18N = {
   },
 
   tr: {
-    nav_home: "Özgürlük", nav_savings: "Gider", nav_settings: "Ayarlar", nav_more: "Daha",
+    nav_home: "Ana Sayfa", nav_savings: "Gider", nav_settings: "Ayarlar", nav_more: "Daha",
     home_title: "Özgürlük", home_sub: "Giderlerini pasif gelirle karşılamak için ne kadar biriktirmen gerektiğini gör.",
+    dashboard_title: "Ana Sayfa", dashboard_sub: "Önemli olan her şey tek bakışta.", dashboard_edit: "Widget'ları düzenle",
     currency: "Para Birimi", monthly_expenses: "Aylık giderler", per_month: "/ ay",
     real_mode: "Reel getiri modu", real_mode_sub: "Her orandan enflasyonu düş",
     inflation_label: "Enflasyon (yıllık %)",
@@ -432,8 +436,10 @@ const I18N = {
     punch_empty: "Bırakmak istediğin alışkanlıkları aç ve harcamanı yaz; rakamını gör.",
     savings_note: "Projeksiyon yıllık katkıları bileşik hesaplar: GD = yıllık × [((1 + r)ⁿ − 1) / r], r seçilen yıllık getiridir. Getiriler varsayımdır, garanti değildir.",
     settings_title: "Ayarlar", language: "Dil", theme: "Tema", country: "Ülke", sound: "Ses", sound_fx: "Ses efektleri",
-    home_customize_title: "Ana ekran", home_customize_desc: "Özgürlük ekranındaki kartları sırala veya kullanmadıklarını gizle.", home_customize_reset: "Düzeni sıfırla", home_move_up: "Yukarı taşı", home_move_down: "Aşağı taşı", home_hide: "Bu kartı göster", home_last_card: "En az bir kart görünür kalmalı.",
-    home_card_inputs: "Aylık giderler", home_card_result: "Özgürlük sonucu", home_card_rule: "%4 kuralı", home_card_compare: "Yatırım araçları", home_card_chart: "Birikim grafiği", home_card_disclaimer: "Bilgilendirme notu",
+    home_customize_title: "Ana sayfa", home_customize_desc: "Widget'ları sırala veya kullanmadıklarını gizle.", home_customize_reset: "Düzeni sıfırla", home_move_up: "Yukarı taşı", home_move_down: "Aşağı taşı", home_hide: "Bu widget'ı göster", home_last_card: "En az bir widget görünür kalmalı.",
+    home_widget_freedom: "Özgürlük hesaplayıcısı", home_widget_portfolio: "Portföy", home_widget_income: "Gelirler", home_widget_expenses: "Giderler", home_widget_car: "Aracım", home_widget_watch: "Takip listesi", home_widget_countdown: "Geri sayımlar",
+    home_holdings: "{count} varlık", home_passive: "Aylık {amount} pasif", home_upcoming: "{count} yaklaşan ödeme", home_vehicles: "{count} araç", home_last_trip: "Son yolculuk: {route}", home_no_route: "Kayıtlı rota yok", home_watch_count: "{count} takip edilen varlık", home_watch_empty: "Takip edilen varlık yok", home_freedom_summary: "{name} · {amount}",
+    countdown_title: "Geri sayımlar", countdown_sub: "Herhangi bir hedefe gün veya ay olarak geri say.", countdown_name: "Başlık", countdown_category: "Kategori", countdown_duration: "Süre", countdown_unit: "Birim", countdown_days: "Gün", countdown_months: "Ay", countdown_add: "Geri sayım ekle", countdown_name_ph: "Tatil, sınav, hedef…", countdown_category_ph: "Seyahat, iş, kişisel…", countdown_empty: "Henüz geri sayım yok.", countdown_invalid: "Bir başlık ve geçerli süre gir.", countdown_day_left: "gün kaldı", countdown_days_left: "gün kaldı", countdown_month_left: "ay kaldı", countdown_months_left: "ay kaldı", countdown_done: "Süre doldu", countdown_target: "Hedef: {date}", countdown_remove: "Geri sayımı kaldır", countdown_switch_unit: "Gün / ay görünümünü değiştir", countdown_added: "Geri sayım eklendi ✓", countdown_active: "{count} aktif geri sayım",
     pwa_title: "Uygulama ve çevrimdışı kullanım", pwa_desc: "NumBrrr'ı telefonuna kur; internet yokken kayıtlı verilerinle kullanmaya devam et.", pwa_install: "Uygulamayı yükle", pwa_ready: "Çevrimdışı kullanım hazır.", pwa_installed: "NumBrrr bu cihaza yüklendi.", pwa_ios: "Yüklemek için tarayıcı menüsündeki Ana Ekrana Ekle seçeneğini kullan.", pwa_unsupported: "Bu tarayıcı uygulama yüklemeyi desteklemiyor.", offline_banner: "Çevrimdışısın · son kaydedilen veriler gösteriliyor",
     notify_title: "Bildirimler", notify_desc: "Fiyat alarmlarını ve yaklaşan araç bakım hatırlatmalarını, arka plan hizmeti hazırsa uygulama kapalıyken de al.", notify_enable: "Bildirimleri aç",
     notify_active: "Arka plan bildirimleri aktif.", notify_syncing: "Arka plan bildirimleri bağlanıyor…", notify_background_unavailable: "Arka plan hizmeti henüz yapılandırılmamış; alarmlar uygulama açıkken çalışmaya devam edecek.", notify_inapp: "Sistem bildirimi kullanılamıyor; uyarılar uygulama içinde gösterilecek.", notify_blocked: "Bildirim izni tarayıcı ayarlarından engellenmiş.", notify_off: "Bildirimler kapalı.", notify_privacy: "Arka planda göndermek için yalnızca alarm koşulları ve bakım tarihleri eşitlenir.",
@@ -451,7 +457,7 @@ const I18N = {
     guide_income: "Aylık gelirlerini gir. Kira, faiz gibi pasif olanları işaretle, çünkü özgürlük hesabına sadece onlar giriyor.",
     guide_expenses: "Bu ayın harcamalarını gir, düzenli faturaların için hatırlatıcı kur, araç masraflarını da ekle.",
     guide_car: "İl ve ilçe bazında rota planla: mesafe, süre ve yakıt maliyetini hesapla; araç profilleri kaydet ve yolculuk harcamalarını takip et.",
-    guide_freedom: "Giderlerini sadece pasif gelirinle karşılaman için ne kadar birikim gerektiğini hesaplar (%4 kuralı).",
+    guide_freedom: "Düzenlenebilir ana sayfan: özetlere, geri sayımlara ve Özgürlük hesaplayıcısına tek yerden ulaş.",
     guide_watch: "Merak ettiğin varlıkları ara, favorine ekle ve fiyatlarını takip et.",
     theme_glass: "Sıvı Cam", theme_glass_desc: "Modern buzlu cam (varsayılan)",
     theme_xp: "Windows XP", theme_xp_desc: "Nostaljik 2000'ler Luna mavisi",
@@ -540,7 +546,7 @@ const I18N = {
 };
 
 // ---- State ----
-const HOME_CARD_IDS = ["inputs", "result", "rule", "compare", "chart", "disclaimer"];
+const HOME_WIDGET_IDS = ["freedom", "portfolio", "income", "expenses", "car", "watch", "countdown"];
 const state = {
   lang: "en",
   theme: "black",
@@ -581,7 +587,8 @@ const state = {
   portTotalUSD: false, // when currency is TL, show the total portfolio value in USD instead
   watchlist: [], // [{ type, key, name }] — assets to monitor (price + 24h/1mo/1yr performance)
   notifications: { enabled: false, vehicleDays: 7, priceAlerts: [], seq: 0, sent: {} },
-  homeLayout: { order: [...HOME_CARD_IDS], hidden: [] },
+  homeLayout: { order: [...HOME_WIDGET_IDS], hidden: [], freedomExpanded: false },
+  countdowns: { items: [], seq: 0 },
   income: { amounts: {}, passive: {}, custom: [], seq: 0 },
 };
 INCOME_CATEGORIES.forEach((c) => { state.income.amounts[c.id] = 0; state.income.passive[c.id] = c.passive; });
@@ -700,6 +707,27 @@ const el = {
   watchBubbles: document.getElementById("watchBubbles"),
   homeCardList: document.getElementById("homeCardList"),
   resetHomeCards: document.getElementById("resetHomeCards"),
+  dashboardGrid: document.getElementById("dashboardGrid"),
+  editHome: document.getElementById("editHome"),
+  freedomWidgetToggle: document.getElementById("freedomWidgetToggle"),
+  freedomWidgetBody: document.getElementById("freedomWidgetBody"),
+  homeFreedomSummary: document.getElementById("homeFreedomSummary"),
+  homePortfolioValue: document.getElementById("homePortfolioValue"),
+  homePortfolioNote: document.getElementById("homePortfolioNote"),
+  homeIncomeValue: document.getElementById("homeIncomeValue"),
+  homeIncomeNote: document.getElementById("homeIncomeNote"),
+  homeExpensesValue: document.getElementById("homeExpensesValue"),
+  homeExpensesNote: document.getElementById("homeExpensesNote"),
+  homeCarValue: document.getElementById("homeCarValue"),
+  homeCarNote: document.getElementById("homeCarNote"),
+  homeWatchValue: document.getElementById("homeWatchValue"),
+  homeWatchNote: document.getElementById("homeWatchNote"),
+  countdownForm: document.getElementById("countdownForm"),
+  countdownName: document.getElementById("countdownName"),
+  countdownCategory: document.getElementById("countdownCategory"),
+  countdownValue: document.getElementById("countdownValue"),
+  countdownUnit: document.getElementById("countdownUnit"),
+  countdownList: document.getElementById("countdownList"),
   offlineBanner: document.getElementById("offlineBanner"),
   pwaStatus: document.getElementById("pwaStatus"),
   installPwa: document.getElementById("installPwa"),
@@ -953,6 +981,7 @@ function refresh() {
 
   renderHeadline(best, results, reachable.length);
   renderRule();
+  renderHomeSummaries();
 }
 
 function updateCard(card, r, best) {
@@ -2467,24 +2496,28 @@ function refreshIncome() {
 // ============================================================
 function normalizeHomeLayout(value) {
   const source = value && typeof value === "object" ? value : {};
-  const supplied = Array.isArray(source.order) ? source.order.filter((id) => HOME_CARD_IDS.includes(id)) : [];
+  const supplied = Array.isArray(source.order) ? source.order.filter((id) => HOME_WIDGET_IDS.includes(id)) : [];
   const order = [...new Set(supplied)];
-  HOME_CARD_IDS.forEach((id) => { if (!order.includes(id)) order.push(id); });
-  const hidden = Array.isArray(source.hidden) ? [...new Set(source.hidden.filter((id) => HOME_CARD_IDS.includes(id)))] : [];
-  if (hidden.length >= HOME_CARD_IDS.length) hidden.pop();
-  return { order, hidden };
+  HOME_WIDGET_IDS.forEach((id) => { if (!order.includes(id)) order.push(id); });
+  const hidden = Array.isArray(source.hidden) ? [...new Set(source.hidden.filter((id) => HOME_WIDGET_IDS.includes(id)))] : [];
+  if (hidden.length >= HOME_WIDGET_IDS.length) hidden.pop();
+  return { order, hidden, freedomExpanded: !!source.freedomExpanded };
 }
 
 function applyHomeLayout() {
-  const view = document.getElementById("view-home");
-  if (!view) return;
+  if (!el.dashboardGrid) return;
   state.homeLayout = normalizeHomeLayout(state.homeLayout);
   state.homeLayout.order.forEach((id) => {
-    const card = view.querySelector(`[data-home-card="${id}"]`);
-    if (!card) return;
-    card.hidden = state.homeLayout.hidden.includes(id);
-    view.appendChild(card);
+    const widget = el.dashboardGrid.querySelector(`[data-home-widget="${id}"]`);
+    if (!widget) return;
+    widget.hidden = state.homeLayout.hidden.includes(id);
+    el.dashboardGrid.appendChild(widget);
   });
+  if (el.freedomWidgetBody && el.freedomWidgetToggle) {
+    el.freedomWidgetBody.hidden = !state.homeLayout.freedomExpanded;
+    el.freedomWidgetToggle.setAttribute("aria-expanded", String(state.homeLayout.freedomExpanded));
+    el.freedomWidgetToggle.closest(".dashboard-widget").classList.toggle("is-expanded", state.homeLayout.freedomExpanded);
+  }
 }
 
 function moveHomeCard(id, direction) {
@@ -2499,7 +2532,7 @@ function moveHomeCard(id, direction) {
 function syncHomeOrderFromList() {
   if (!el.homeCardList) return;
   const order = [...el.homeCardList.querySelectorAll("[data-home-item]")].map((row) => row.dataset.homeItem);
-  state.homeLayout = normalizeHomeLayout({ order, hidden: state.homeLayout.hidden });
+  state.homeLayout = normalizeHomeLayout({ order, hidden: state.homeLayout.hidden, freedomExpanded: state.homeLayout.freedomExpanded });
   saveState(); applyHomeLayout(); renderHomeCardSettings();
 }
 
@@ -2538,13 +2571,13 @@ function renderHomeCardSettings() {
     const visible = !state.homeLayout.hidden.includes(id);
     return `<div class="home-card-row${visible ? "" : " is-hidden"}" data-home-item="${id}">
       <button class="home-card-grip" type="button" aria-label="${escapeHtml(t("home_customize_desc"))}" title="${escapeHtml(t("home_customize_desc"))}"><span aria-hidden="true">⠿</span></button>
-      <span class="home-card-name">${escapeHtml(t("home_card_" + id))}</span>
+      <span class="home-card-name">${escapeHtml(t("home_widget_" + id))}</span>
       <div class="home-card-actions">
         <button type="button" data-home-up="${id}" aria-label="${escapeHtml(t("home_move_up"))}"${index === 0 ? " disabled" : ""}>↑</button>
         <button type="button" data-home-down="${id}" aria-label="${escapeHtml(t("home_move_down"))}"${index === state.homeLayout.order.length - 1 ? " disabled" : ""}>↓</button>
       </div>
       <label class="switch home-card-switch" title="${escapeHtml(t("home_hide"))}">
-        <input type="checkbox" data-home-visible="${id}" ${visible ? "checked" : ""} aria-label="${escapeHtml(t("home_card_" + id))}" />
+        <input type="checkbox" data-home-visible="${id}" ${visible ? "checked" : ""} aria-label="${escapeHtml(t("home_widget_" + id))}" />
         <span class="switch-track"><span class="switch-thumb"></span></span>
       </label>
     </div>`;
@@ -2554,7 +2587,7 @@ function renderHomeCardSettings() {
   el.homeCardList.querySelectorAll("[data-home-down]").forEach((button) => button.addEventListener("click", () => moveHomeCard(button.dataset.homeDown, 1)));
   el.homeCardList.querySelectorAll("[data-home-visible]").forEach((input) => input.addEventListener("change", () => {
     const id = input.dataset.homeVisible;
-    if (!input.checked && state.homeLayout.hidden.length >= HOME_CARD_IDS.length - 1) {
+    if (!input.checked && state.homeLayout.hidden.length >= HOME_WIDGET_IDS.length - 1) {
       input.checked = true; showAppToast(t("home_last_card")); return;
     }
     state.homeLayout.hidden = input.checked ? state.homeLayout.hidden.filter((item) => item !== id) : [...state.homeLayout.hidden, id];
@@ -2563,8 +2596,158 @@ function renderHomeCardSettings() {
 }
 
 function resetHomeLayout() {
-  state.homeLayout = { order: [...HOME_CARD_IDS], hidden: [] };
+  state.homeLayout = { order: [...HOME_WIDGET_IDS], hidden: [], freedomExpanded: false };
   saveState(); applyHomeLayout(); renderHomeCardSettings();
+}
+
+function setFreedomWidgetExpanded(expanded) {
+  state.homeLayout.freedomExpanded = !!expanded;
+  saveState(); applyHomeLayout();
+}
+
+function meaningfulHoldingCount() {
+  return state.portfolio.holdings.filter((holding) => (holding.value || 0) > 0 || (holding.qty || 0) > 0 || (holding.shares || 0) > 0 || (holding.grams || 0) > 0 || (holding.oz || 0) > 0 || (holding.usd || 0) > 0).length;
+}
+
+function passiveIncomeTotal() {
+  let total = 0;
+  INCOME_CATEGORIES.forEach((category) => { if (state.income.passive[category.id]) total += state.income.amounts[category.id] || 0; });
+  state.income.custom.forEach((category) => { if (state.income.passive[category.id]) total += state.income.amounts[category.id] || 0; });
+  const portfolio = portfolioYield();
+  return total + portfolio.interest + portfolio.rental;
+}
+
+function upcomingPaymentCount() {
+  let count = state.expenses.recurring.filter((item) => !item.paid && ((item.amount || 0) > 0 || item.cat)).length;
+  state.vehicles.forEach((vehicle) => { count += (vehicle.sched || []).filter((item) => item.date && !item.paidMonth).length; });
+  return count;
+}
+
+function renderHomeSummaries() {
+  if (!el.dashboardGrid) return;
+  if (el.homeFreedomSummary) {
+    const amount = el.bestAmount && el.bestAmount.textContent !== "—" ? el.bestAmount.textContent : formatMoney(state.monthlyExpenses * 12 * 25);
+    const name = el.bestLabel && el.bestLabel.textContent !== "—" ? el.bestLabel.textContent : t("home_widget_freedom");
+    el.homeFreedomSummary.textContent = t("home_freedom_summary", { amount, name });
+  }
+  if (el.homePortfolioValue) el.homePortfolioValue.textContent = el.portTotal && el.portTotal.textContent ? el.portTotal.textContent : formatMoney(0);
+  if (el.homePortfolioNote) el.homePortfolioNote.textContent = t("home_holdings", { count: meaningfulHoldingCount() });
+  if (el.homeIncomeValue) el.homeIncomeValue.textContent = el.incTotal && el.incTotal.textContent ? el.incTotal.textContent : formatMoney(0);
+  if (el.homeIncomeNote) el.homeIncomeNote.textContent = t("home_passive", { amount: formatMoney(passiveIncomeTotal()) });
+  if (el.homeExpensesValue) el.homeExpensesValue.textContent = el.expTotal && el.expTotal.textContent ? el.expTotal.textContent : formatMoney(expensesTotal());
+  if (el.homeExpensesNote) el.homeExpensesNote.textContent = t("home_upcoming", { count: upcomingPaymentCount() });
+  const vehicle = activeVehicle();
+  if (el.homeCarValue) el.homeCarValue.textContent = vehicle && vehicle.plate ? vehicle.plate : t("home_vehicles", { count: state.vehicles.length });
+  const lastTrip = state.vehicleHub.trips[0];
+  if (el.homeCarNote) el.homeCarNote.textContent = lastTrip ? t("home_last_trip", { route: `${lastTrip.from} → ${lastTrip.to}` }) : t("home_no_route");
+  if (el.homeWatchValue) el.homeWatchValue.textContent = state.watchlist.length ? t("home_watch_count", { count: state.watchlist.length }) : t("home_watch_empty");
+  const firstWatch = state.watchlist[0];
+  if (el.homeWatchNote) el.homeWatchNote.textContent = firstWatch ? `${firstWatch.name} · ${watchPriceLabel(firstWatch)}` : t("watch_search_ph");
+  if (el.countdownName) el.countdownName.placeholder = t("countdown_name_ph");
+  if (el.countdownCategory) el.countdownCategory.placeholder = t("countdown_category_ph");
+}
+
+function renderHomeDashboard() {
+  if (!el.dashboardGrid) return;
+  renderHomeSummaries();
+  applyHomeLayout();
+  renderCountdowns();
+}
+
+function addMonthsClamped(date, months) {
+  const target = new Date(date);
+  const day = target.getDate();
+  target.setDate(1);
+  target.setMonth(target.getMonth() + months);
+  const end = new Date(target.getFullYear(), target.getMonth() + 1, 0).getDate();
+  target.setDate(Math.min(day, end));
+  return target;
+}
+
+function countdownParts(item, now = Date.now()) {
+  const target = Date.parse(item.target);
+  const diff = target - now;
+  if (!Number.isFinite(target) || diff <= 0) return { done: true, value: 0, label: t("countdown_done") };
+  const days = Math.max(1, Math.ceil(diff / 86400000));
+  if (item.unit === "months") {
+    const from = new Date(now), to = new Date(target);
+    let months = (to.getFullYear() - from.getFullYear()) * 12 + to.getMonth() - from.getMonth();
+    const fromClock = from.getDate() * 86400000 + from.getHours() * 3600000 + from.getMinutes() * 60000 + from.getSeconds() * 1000 + from.getMilliseconds();
+    const toClock = to.getDate() * 86400000 + to.getHours() * 3600000 + to.getMinutes() * 60000 + to.getSeconds() * 1000 + to.getMilliseconds();
+    if (toClock > fromClock) months += 1;
+    months = Math.max(1, months);
+    return { done: false, value: months, label: t(months === 1 ? "countdown_month_left" : "countdown_months_left") };
+  }
+  return { done: false, value: days, label: t(days === 1 ? "countdown_day_left" : "countdown_days_left") };
+}
+
+function renderCountdowns() {
+  if (!el.countdownList) return;
+  const items = [...state.countdowns.items].sort((a, b) => Date.parse(a.target) - Date.parse(b.target));
+  if (!items.length) {
+    el.countdownList.innerHTML = `<p class="countdown-empty">${escapeHtml(t("countdown_empty"))}</p>`;
+    return;
+  }
+  const locale = state.lang === "tr" ? "tr-TR" : "en-US";
+  el.countdownList.innerHTML = items.map((item) => {
+    const remaining = countdownParts(item);
+    const target = new Date(item.target);
+    const date = Number.isFinite(target.getTime()) ? target.toLocaleDateString(locale, { day: "numeric", month: "long", year: "numeric" }) : "—";
+    const category = item.category ? `<span class="countdown-category">${escapeHtml(item.category)}</span>` : "";
+    return `<article class="countdown-row${remaining.done ? " is-done" : ""}" data-countdown-id="${escapeHtml(item.id)}">
+      <div class="countdown-main">${category}<strong>${escapeHtml(item.name)}</strong><small>${escapeHtml(t("countdown_target", { date }))}</small></div>
+      <div class="countdown-remaining"><b>${remaining.done ? "✓" : remaining.value}</b><span>${escapeHtml(remaining.label)}</span></div>
+      <div class="countdown-actions"><button type="button" data-countdown-unit="${escapeHtml(item.id)}" aria-label="${escapeHtml(t("countdown_switch_unit"))}">${item.unit === "months" ? t("countdown_days") : t("countdown_months")}</button><button type="button" data-countdown-del="${escapeHtml(item.id)}" aria-label="${escapeHtml(t("countdown_remove"))}">×</button></div>
+    </article>`;
+  }).join("");
+  el.countdownList.querySelectorAll("[data-countdown-del]").forEach((button) => button.addEventListener("click", () => {
+    state.countdowns.items = state.countdowns.items.filter((item) => item.id !== button.dataset.countdownDel);
+    saveState(); renderCountdowns();
+  }));
+  el.countdownList.querySelectorAll("[data-countdown-unit]").forEach((button) => button.addEventListener("click", () => {
+    const item = state.countdowns.items.find((entry) => entry.id === button.dataset.countdownUnit);
+    if (!item) return;
+    item.unit = item.unit === "months" ? "days" : "months";
+    saveState(); renderCountdowns();
+  }));
+}
+
+function addCountdown(event) {
+  event.preventDefault();
+  const name = el.countdownName.value.trim();
+  const category = el.countdownCategory.value.trim();
+  const unit = el.countdownUnit.value === "months" ? "months" : "days";
+  const max = unit === "months" ? 1200 : 36500;
+  const value = Math.min(max, Math.max(0, Math.round(Number(el.countdownValue.value) || 0)));
+  if (!name || value < 1) { showAppToast(t("countdown_invalid")); return; }
+  const now = new Date();
+  const target = unit === "months" ? addMonthsClamped(now, value) : new Date(now);
+  if (unit === "days") target.setDate(target.getDate() + value);
+  state.countdowns.items.push({ id: "cd" + ++state.countdowns.seq, name: name.slice(0, 80), category: category.slice(0, 40), target: target.toISOString(), unit });
+  el.countdownName.value = "";
+  el.countdownCategory.value = "";
+  saveState(); renderCountdowns(); showAppToast(t("countdown_added"));
+}
+
+function wireHomeDashboard() {
+  if (!el.dashboardGrid) return;
+  el.freedomWidgetToggle.addEventListener("click", () => setFreedomWidgetExpanded(!state.homeLayout.freedomExpanded));
+  el.dashboardGrid.querySelectorAll("[data-open-view]").forEach((button) => button.addEventListener("click", () => {
+    const tab = document.querySelector(`.tab[data-view="${button.dataset.openView}"]`);
+    if (tab) tab.click();
+  }));
+  el.editHome.addEventListener("click", () => {
+    const settingsTab = document.querySelector('.tab[data-view="settings"]');
+    if (!settingsTab) return;
+    settingsTab.click();
+    setTimeout(() => document.getElementById("homeCustomizeTitle").scrollIntoView({ block: "start", behavior: "smooth" }), 0);
+  });
+  el.countdownForm.addEventListener("submit", addCountdown);
+  el.countdownUnit.addEventListener("change", () => {
+    const max = el.countdownUnit.value === "months" ? 1200 : 36500;
+    el.countdownValue.max = String(max);
+    if (Number(el.countdownValue.value) > max) el.countdownValue.value = String(max);
+  });
 }
 
 // ============================================================
@@ -3299,7 +3482,7 @@ function monitoredPriceItems() {
 
 async function refreshWatchData() {
   const monitored = monitoredPriceItems();
-  if (!monitored.length) return;
+  if (!monitored.length) { renderHomeSummaries(); return; }
   const vs = state.currency === "TL" ? "try" : "usd";
   const ids = [...new Set(monitored.filter((w) => w.type === "crypto").map((w) => w.key))];
   if (monitored.some((w) => w.type === "gold" || w.type === "goldoz")) ids.push("pax-gold");
@@ -3326,6 +3509,7 @@ async function refreshWatchData() {
   buildWatchlist();
   renderNotificationSettings();
   checkPriceAlerts();
+  renderHomeSummaries();
 }
 
 // ---- Best 1-year performers (fixed pool: top-10 crypto, top-10 US stocks, gold,
@@ -3651,7 +3835,7 @@ function applyLanguage(lang) {
   buildPortfolio(); refreshPortfolio();
   buildIncome(); refreshIncome();
   buildWatchlist();
-  applyHomeLayout();
+  renderHomeDashboard();
   renderHomeCardSettings();
   renderPwaSettings();
   renderNotificationSettings();
@@ -3688,6 +3872,7 @@ function setCurrency(cur) {
   buildLayout(); refresh(); refreshExpenses(); buildCarHub(); buildPortfolio(); refreshPortfolio(); refreshIncome();
   refreshCryptoPrices(); // refetch crypto prices in the new currency
   buildWatchlist(); refreshWatchData();
+  renderHomeDashboard();
   renderNotificationSettings();
   updateSettingsActive();
   try { localStorage.setItem("numbr_currency", cur); } catch (e) {}
@@ -3850,6 +4035,7 @@ document.querySelectorAll("[data-theme-pick]").forEach((b) => b.addEventListener
     if (name === "watch") { refreshWatchData(); buildTopPerformers(); buildTrPanel(); buildIpoList(); kickBubbles(); }
     else stopBubbles(); // pause the bubble animation loop off the Watch view
     if (name === "settings") { preloadThemeWallpapers(); renderHomeCardSettings(); renderPwaSettings(); renderNotificationSettings(); }
+    if (name === "home") renderHomeDashboard();
     window.scrollTo({ top: 0, behavior: "auto" });
   }
   tabs.forEach((tab) => {
@@ -3875,7 +4061,7 @@ function persistedState() {
     expenses: state.expenses, vehicles: state.vehicles, vehSeq: state.vehSeq,
     vehicleHub: state.vehicleHub,
     income: state.income, portfolio: state.portfolio, watchlist: state.watchlist,
-    notifications: state.notifications, homeLayout: state.homeLayout, portTotalUSD: state.portTotalUSD,
+    notifications: state.notifications, homeLayout: state.homeLayout, countdowns: state.countdowns, portTotalUSD: state.portTotalUSD,
   };
 }
 
@@ -4044,6 +4230,22 @@ function loadState() {
     };
   }
   state.homeLayout = normalizeHomeLayout(s.homeLayout);
+  if (s.countdowns && typeof s.countdowns === "object") {
+    const seenCountdownIds = new Set();
+    const items = Array.isArray(s.countdowns.items) ? s.countdowns.items.map((item) => ({
+      id: typeof item.id === "string" ? item.id.slice(0, 80) : "",
+      name: typeof item.name === "string" ? item.name.slice(0, 80) : "",
+      category: typeof item.category === "string" ? item.category.slice(0, 40) : "",
+      target: typeof item.target === "string" && Number.isFinite(Date.parse(item.target)) ? new Date(item.target).toISOString() : "",
+      unit: item.unit === "months" ? "months" : "days",
+    })).filter((item) => {
+      if (!item.id || !item.name || !item.target || seenCountdownIds.has(item.id)) return false;
+      seenCountdownIds.add(item.id); return true;
+    }).slice(0, 200) : [];
+    const highestItemSeq = items.reduce((max, item) => Math.max(max, Number((/^cd(\d+)$/.exec(item.id) || [])[1]) || 0), 0);
+    const savedSeq = Number.isFinite(s.countdowns.seq) ? Math.max(0, Math.round(s.countdowns.seq)) : 0;
+    state.countdowns = { items, seq: Math.max(savedSeq, highestItemSeq) };
+  }
   if (typeof s.portTotalUSD === "boolean") state.portTotalUSD = s.portTotalUSD;
   // normalize any legacy/removed asset types from older saves
   if (state.portfolio && Array.isArray(state.portfolio.holdings)) {
@@ -4082,11 +4284,13 @@ if (isFirstRun) showOnboarding();
 else { try { if (!localStorage.getItem("numbr_guide_seen")) showGuide(); } catch (e) {} }
 wireWatchSearch();
 wirePriceAlertSearch();
+wireHomeDashboard();
 registerPwa();
 refreshCryptoPrices(); // fetch live crypto prices (works on the deployed site)
 refreshWatchData(); // fetch performance for any saved watchlist items
 runNotificationChecks();
 setInterval(() => { checkVehicleNotifications(); refreshWatchData(); }, 60 * 60 * 1000);
+setInterval(renderCountdowns, 60 * 1000);
 document.addEventListener("visibilitychange", () => { if (!document.hidden) { checkVehicleNotifications(); refreshWatchData(); } });
 // Prefetch theme wallpapers once the page is idle so theme switches are instant.
 if (typeof requestIdleCallback === "function") requestIdleCallback(preloadThemeWallpapers, { timeout: 3000 });
