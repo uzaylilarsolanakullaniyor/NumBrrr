@@ -727,6 +727,7 @@ const el = {
   carMapWrap: document.getElementById("carMapWrap"),
   carMap: document.getElementById("carMap"),
   carSaveTrip: document.getElementById("carSaveTrip"),
+  carTripType: document.getElementById("carTripType"),
   carOneWay: document.getElementById("carOneWay"),
   carRoundTrip: document.getElementById("carRoundTrip"),
   carFavorite: document.getElementById("carFavorite"),
@@ -1817,6 +1818,7 @@ function tripFactor() { return state.vehicleHub.tripType === "roundtrip" ? 2 : 1
 function carExtraTotal(extras = state.vehicleHub.extras) { return (extras.toll || 0) + (extras.parking || 0) + (extras.other || 0); }
 function syncCarOptions() {
   const h = state.vehicleHub;
+  el.carTripType.classList.toggle("is-roundtrip", h.tripType === "roundtrip");
   el.carOneWay.classList.toggle("is-active", h.tripType !== "roundtrip");
   el.carRoundTrip.classList.toggle("is-active", h.tripType === "roundtrip");
   el.carOneWay.setAttribute("aria-pressed", String(h.tripType !== "roundtrip"));
@@ -1824,6 +1826,14 @@ function syncCarOptions() {
   el.carToll.value = h.extras.toll ? formatThousands(h.extras.toll) : "";
   el.carParking.value = h.extras.parking ? formatThousands(h.extras.parking) : "";
   el.carOther.value = h.extras.other ? formatThousands(h.extras.other) : "";
+}
+function setCarTripType(type) {
+  const next = type === "roundtrip" ? "roundtrip" : "oneway";
+  if (state.vehicleHub.tripType === next) return;
+  state.vehicleHub.tripType = next;
+  syncCarOptions();
+  renderCarRoute(false);
+  saveState();
 }
 function mapUrlForRoute(r) {
   if (!r || !Number.isFinite(r.fromLat) || !Number.isFinite(r.fromLng) || !Number.isFinite(r.toLat) || !Number.isFinite(r.toLng)) return "";
@@ -1897,7 +1907,7 @@ async function calcCarRoute() {
   saveState();
 }
 
-function renderCarRoute() {
+function renderCarRoute(refreshMap = true) {
   const h = state.vehicleHub, r = h.lastRoute;
   if (!r) { el.carResults.hidden = true; el.carMapWrap.hidden = true; el.carSaveTrip.hidden = true; el.carRouteMsg.hidden = true; return; }
   el.carResults.hidden = false; el.carSaveTrip.hidden = false;
@@ -1920,7 +1930,7 @@ function renderCarRoute() {
     ${mapUrl ? `<div class="car-result-actions"><a class="car-map-link" href="${mapUrl}" target="_blank" rel="noopener noreferrer">${t("car_open_map")}</a></div>` : ""}
     ${fuel == null ? `<p class="car-hint">${t("car_no_profile")}</p>` : ""}`;
   el.carRouteMsg.hidden = true;
-  renderEmbeddedRouteMap(r);
+  if (refreshMap || el.carMapWrap.hidden) renderEmbeddedRouteMap(r);
 }
 
 let embeddedCarMap = null;
@@ -4768,10 +4778,19 @@ el.carCalc.addEventListener("click", calcCarRoute);
 el.carSaveTrip.addEventListener("click", saveCarTrip);
 el.carFavorite.addEventListener("click", toggleFavoriteRoute);
 el.carClear.addEventListener("click", () => clearCarRoute(true));
-el.carOneWay.addEventListener("click", () => { state.vehicleHub.tripType = "oneway"; syncCarOptions(); renderCarRoute(); saveState(); });
-el.carRoundTrip.addEventListener("click", () => { state.vehicleHub.tripType = "roundtrip"; syncCarOptions(); renderCarRoute(); saveState(); });
+el.carOneWay.addEventListener("click", (event) => {
+  setCarTripType("oneway");
+  if (event.detail > 0) event.currentTarget.blur();
+});
+el.carRoundTrip.addEventListener("click", (event) => {
+  setCarTripType("roundtrip");
+  if (event.detail > 0) event.currentTarget.blur();
+});
+[el.carOneWay, el.carRoundTrip].forEach((button) => {
+  button.addEventListener("pointerup", () => button.blur());
+});
 [[el.carToll, "toll"], [el.carParking, "parking"], [el.carOther, "other"]].forEach(([input, key]) => {
-  input.addEventListener("input", () => { state.vehicleHub.extras[key] = parseNumber(input.value); renderCarRoute(); saveState(); });
+  input.addEventListener("input", () => { state.vehicleHub.extras[key] = parseNumber(input.value); renderCarRoute(false); saveState(); });
   input.addEventListener("blur", () => { if (state.vehicleHub.extras[key]) input.value = formatThousands(state.vehicleHub.extras[key]); });
 });
 el.carFromP.addEventListener("change", () => { const h = state.vehicleHub; h.fromP = el.carFromP.value; h.fromD = ""; fillDistrictSelect(el.carFromD, h.fromP, ""); clearCarRoute(); renderCarFavorites(); });

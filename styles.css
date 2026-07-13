@@ -3462,3 +3462,35 @@ body {
   .ipo-row { gap: 8px; padding-left: 10px; padding-right: 10px; }
   .ipo-sym { min-width: 48px; }
 }
+
+/* Stable segmented control: one indicator moves between options, so rapid taps
+   cannot leave two gradient layers animating over each other. */
+.car-trip-type {
+  position: relative; isolation: isolate; overflow: hidden;
+}
+.car-trip-type::before {
+  content: ""; position: absolute; z-index: 0; top: 5px; bottom: 5px; left: 5px;
+  width: calc((100% - 16px) / 2); border-radius: 10px; pointer-events: none;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  box-shadow: 0 7px 19px color-mix(in srgb, var(--accent) 20%, transparent);
+  transition: left .18s cubic-bezier(.2,.75,.2,1);
+}
+.car-trip-type.is-roundtrip::before { left: calc(50% + 3px); }
+.car-trip-type button,
+[data-theme="glass"] .car-trip-type button {
+  position: relative; z-index: 1; background: transparent; box-shadow: none;
+  transition: color .16s ease, opacity .16s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+.car-trip-type button:hover,
+.car-trip-type button.is-active,
+.car-trip-type button.is-active:hover,
+[data-theme="glass"] .car-trip-type button.is-active {
+  background: transparent; box-shadow: none;
+}
+.car-trip-type button:not(.is-active):hover { background: rgba(255,255,255,.035); }
+.car-trip-type button:active { transform: none; opacity: .82; }
+.car-trip-type button:focus-visible {
+  outline: none !important;
+  box-shadow: inset 0 0 0 2px rgba(255,255,255,.42) !important;
+}
