@@ -2423,51 +2423,84 @@ body {
 .port-ccy-toggle:active { transform: scale(0.97); }
 .port-ccy-toggle[hidden] { display: none; }
 
-/* ============ Portfolio holding cards (cleaner rows) ============ */
-#portList { gap: 10px; }
+/* ============ Portfolio holdings: compact, scannable asset cards ============ */
+.portfolio-holdings-panel { padding: 20px 22px 22px; overflow: visible; }
+.portfolio-holdings-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 16px; }
+.portfolio-holdings-head > div { min-width: 0; }
+.portfolio-holdings-head .settings-label { margin: 0 0 5px; color: var(--text); }
+.portfolio-holdings-head p { margin: 0; color: var(--text-faint); font-size: 12.5px; line-height: 1.45; }
+.portfolio-count {
+  flex: none; padding: 7px 11px; border-radius: 999px; border: 1px solid var(--glass-border-soft);
+  background: color-mix(in srgb, var(--accent) 10%, transparent); color: var(--text-dim);
+  font-size: 11px; font-weight: 750; white-space: nowrap;
+}
+#portList { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; overflow: visible; }
 .port-row {
-  padding: 12px 14px;
-  gap: 12px;
-  background: rgba(0, 0, 0, 0.16);
-  border: 1px solid var(--glass-border-soft);
-  border-radius: 14px;
-  transition: border-color 0.2s ease, background 0.2s ease;
+  position: relative; display: grid; grid-template-columns: 44px minmax(0, 1fr) 132px 36px;
+  align-items: center; gap: 12px; min-height: 116px; padding: 14px;
+  background: linear-gradient(145deg, rgba(255,255,255,.045), rgba(255,255,255,.012));
+  border: 1px solid var(--glass-border-soft); border-radius: 17px;
+  transition: border-color .2s ease, background .2s ease, transform .18s ease, box-shadow .2s ease;
 }
 .port-row:last-of-type { border-bottom: 1px solid var(--glass-border-soft); }
-.port-row:focus-within {
-  border-color: color-mix(in srgb, var(--accent) 50%, transparent);
-  background: rgba(124, 92, 255, 0.06);
+.port-row:hover { border-color: color-mix(in srgb, var(--accent-2) 34%, var(--glass-border-soft)); background: color-mix(in srgb, var(--accent) 5%, rgba(255,255,255,.025)); transform: translateY(-1px); }
+.port-row:focus-within { z-index: 5; border-color: color-mix(in srgb, var(--accent) 56%, transparent); background: color-mix(in srgb, var(--accent) 8%, transparent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 11%, transparent); }
+.port-asset-icon {
+  grid-column: 1; display: grid; place-items: center; width: 44px; height: 44px; border-radius: 14px;
+  background: color-mix(in srgb, var(--accent-2) 13%, transparent); border: 1px solid color-mix(in srgb, var(--accent-2) 28%, transparent);
+  color: var(--accent-2); font-family: "Sora", sans-serif; font-size: 13px; font-weight: 800; letter-spacing: -.02em;
 }
-/* clean editable name (drop the dashed underline) */
-.port-row .cat-name {
-  border-bottom: 1px solid transparent;
-  font-size: 15px; font-weight: 600; padding: 2px 0;
-}
-.port-row .cat-name::placeholder { color: var(--text-faint); font-weight: 500; }
+.port-row[data-asset-type="crypto"] .port-asset-icon { color: var(--warn); background: color-mix(in srgb, var(--warn) 12%, transparent); border-color: color-mix(in srgb, var(--warn) 27%, transparent); font-size: 18px; }
+.port-row[data-asset-type="gold"] .port-asset-icon { color: #f2c94c; background: rgba(242,201,76,.11); border-color: rgba(242,201,76,.26); }
+.port-row[data-asset-type="usd"] .port-asset-icon,
+.port-row[data-asset-type="cash"] .port-asset-icon { color: var(--good); background: color-mix(in srgb, var(--good) 11%, transparent); border-color: color-mix(in srgb, var(--good) 27%, transparent); }
+.port-namecell { grid-column: 2; min-width: 0; display: flex; flex-direction: column; align-items: flex-start; gap: 8px; }
+.port-row .cat-name { border-bottom: 1px solid transparent; font-size: 15px; font-weight: 700; padding: 3px 0; }
+.port-row .cat-name::placeholder { color: var(--text-faint); font-weight: 600; }
 .port-row .cat-name:focus { border-bottom-color: color-mix(in srgb, var(--accent) 55%, transparent); }
-/* asset-type select: a touch more substantial */
-.port-row .hold-type { padding: 6px 32px 6px 14px; font-size: 12px; }
-/* ghost circular remove button */
-.port-row .cat-remove {
-  width: 28px; height: 28px; border-radius: 50%;
-  border-color: transparent; background: rgba(255, 255, 255, 0.05);
-  font-size: 16px; align-self: center;
+.port-row .hold-type { padding: 6px 32px 6px 13px; font-size: 11.5px; background-color: rgba(255,255,255,.035); }
+.port-field-label { color: var(--text-faint); font-size: 9.5px; font-weight: 750; letter-spacing: .07em; text-transform: uppercase; }
+.port-row .crypto-cell, .port-amount-cell { grid-column: 3; width: 132px; min-width: 0; display: flex; flex-direction: column; align-items: stretch; gap: 6px; }
+.port-row .qty-field, .port-row .money-input {
+  min-height: 42px; border-radius: 12px; background: rgba(255,255,255,.035); border-color: var(--glass-border-soft);
 }
-.port-row .cat-remove:hover { color: #ff8a8a; background: rgba(255, 120, 120, 0.14); border-color: transparent; }
-/* computed balance: the prominent result under the qty field */
-.port-row .crypto-value {
-  font-size: 15.5px; font-weight: 800; letter-spacing: -0.01em;
-  color: var(--text); padding-right: 2px;
-}
-.port-row .crypto-value:empty::before { color: var(--text-faint); font-weight: 700; }
-/* value cell: a bit wider, numbers right-aligned and sized to fit (beats the
-   mobile .money-input rule via higher specificity so big amounts don't clip) */
-.port-row .cat-amount, .port-row .crypto-cell { width: 132px; }
-.port-row .cat-amount input, .port-row .qty-field { font-size: 16px; text-align: right; }
-.port-row .money-input--sm { padding: 4px 12px; }
-.port-row .usd-input { width: 100%; padding: 4px 12px; }
-.port-row .usd-input input { font-size: 16px; text-align: right; min-width: 0; }
+.port-row .qty-field { padding: 9px 11px; font-size: 15px; text-align: right; }
+.port-row .money-input--sm { padding: 4px 10px; }
+.port-row .cat-amount { width: 100%; }
+.port-row .cat-amount input, .port-row .usd-input input { min-width: 0; font-size: 15px; text-align: right; }
+.port-row .usd-input { width: 100%; }
 .port-row .usd-input .money-symbol { font-size: 14px; }
+.port-row .crypto-value { min-height: 18px; padding-right: 2px; color: var(--text); font-size: 14px; font-weight: 800; letter-spacing: -.01em; text-align: right; }
+.port-row .crypto-value:not(:empty)::before { content: attr(data-label); display: block; margin-bottom: 2px; color: var(--text-faint); font-size: 9px; font-weight: 700; letter-spacing: .055em; text-transform: uppercase; }
+.port-row .crypto-value:empty::before { color: var(--text-faint); font-weight: 700; }
+.port-row .cat-remove {
+  grid-column: 4; display: grid; place-items: center; width: 36px; height: 36px; padding: 0; align-self: center;
+  border: 1px solid transparent; border-radius: 11px; background: rgba(255,255,255,.035); color: var(--text-faint);
+}
+.port-row .cat-remove svg { width: 17px; height: 17px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.port-row .cat-remove:hover { color: #ff8a8a; background: rgba(255,120,120,.12); border-color: rgba(255,120,120,.2); }
+.portfolio-holdings-panel #addHolding { width: 100%; min-height: 48px; margin-top: 14px; border-style: dashed; border-radius: 14px; }
+
+@media (max-width: 1100px) {
+  #portList { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 620px) {
+  .portfolio-holdings-panel { padding: 16px; }
+  .portfolio-holdings-head { margin-bottom: 13px; }
+  .portfolio-holdings-head p { max-width: 230px; }
+  .port-row { grid-template-columns: 42px minmax(0, 1fr) 44px; gap: 9px 10px; min-height: 132px; padding: 13px 11px; }
+  .port-asset-icon { grid-column: 1; grid-row: 1; width: 42px; height: 42px; }
+  .port-namecell { grid-column: 2; grid-row: 1; }
+  .port-row .crypto-cell, .port-amount-cell { grid-column: 2 / 4; grid-row: 2; width: 100%; display: grid; grid-template-columns: minmax(96px, 126px) minmax(0, 1fr); align-items: center; gap: 5px 9px; }
+  .port-field-label { grid-column: 1 / -1; }
+  .port-row .crypto-value { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; align-self: center; }
+  .port-row .cat-remove { grid-column: 3; grid-row: 1; width: 44px; height: 44px; }
+}
+@media (max-width: 360px) {
+  .port-row { grid-template-columns: 38px minmax(0, 1fr) 44px; padding-left: 9px; padding-right: 7px; }
+  .port-asset-icon { width: 38px; height: 38px; border-radius: 12px; font-size: 11px; }
+  .port-row .crypto-cell, .port-amount-cell { grid-template-columns: minmax(86px, 108px) minmax(0, 1fr); }
+}
 /* On dark themes the qty inputs use a light glass fill while .money-input is near
    black, so the $ amount reads darker than the other rows. Mirror the qty-field
    look on those themes. Light themes (xp/doge/medieval) already match. */

@@ -21,7 +21,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <noscript><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Sora:wght@600;700;800&family=Cinzel:wght@600;700;800&family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet" /></noscript>
-  <link rel="stylesheet" href="styles.css?v=12" />
+  <link rel="stylesheet" href="styles.css?v=14" />
 </head>
 <body>
   <div class="offline-banner" id="offlineBanner" role="status" aria-live="polite" hidden data-i18n="offline_banner">Çevrimdışısın · son kaydedilen veriler gösteriliyor</div>
@@ -632,7 +632,14 @@
         <p class="flow-note" id="flowSavings"></p>
       </section>
 
-      <section class="glass savings-panel" aria-label="Holdings">
+      <section class="glass savings-panel portfolio-holdings-panel" aria-labelledby="portfolioHoldingsTitle">
+        <div class="portfolio-holdings-head">
+          <div>
+            <h3 class="settings-label" id="portfolioHoldingsTitle" data-i18n="portfolio_holdings_title">My assets</h3>
+            <p data-i18n="portfolio_holdings_sub">Manage quantities, asset types and current values.</p>
+          </div>
+          <span class="portfolio-count" id="portHoldingCount">0</span>
+        </div>
         <div class="savings-list" id="portList"></div>
         <button class="add-cat" id="addHolding" type="button" data-i18n="add_holding">+ Add holding</button>
       </section>
@@ -794,7 +801,7 @@
     </div>
   </div>
 
-  <script src="app.js?v=12"></script>
+  <script src="app.js?v=14"></script>
 
   <!-- Vercel Web Analytics (static-site injection; loads only on the deployed Vercel domain) -->
   <script>

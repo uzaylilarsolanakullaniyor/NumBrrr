@@ -345,6 +345,8 @@ const I18N = {
     nav_portfolio: "Portfolio",
     portfolio_title: "Your portfolio", portfolio_sub: "Add what you own and see your allocation.",
     holding_ph: "Holding name", add_holding: "+ Add holding", total_value: "Total portfolio value",
+    portfolio_holdings_title: "My assets", portfolio_holdings_sub: "Manage quantities, asset types and current values.", portfolio_count: "{count} assets",
+    portfolio_amount: "Amount", portfolio_current_value: "Current value", portfolio_remove: "Remove asset",
     flow_title: "Monthly cash flow", flow_income: "Income", flow_expenses: "Expenses", flow_net: "Net / month", flow_last_month: "Last month: {x}",
     net_worth_title: "Net worth", net_worth_sub: "Monthly portfolio assets minus your total debt.", net_worth_auto: "Auto saved",
     net_worth_assets: "Assets", net_worth_debt: "Debt", net_worth_net: "Net worth", net_worth_history: "Net worth history",
@@ -524,6 +526,8 @@ const I18N = {
     nav_portfolio: "Portföy",
     portfolio_title: "Portföyün", portfolio_sub: "Sahip olduklarını ekle, dağılımını gör.",
     holding_ph: "Varlık adı", add_holding: "+ Varlık ekle", total_value: "Toplam portföy değeri",
+    portfolio_holdings_title: "Varlıklarım", portfolio_holdings_sub: "Miktarları, varlık türlerini ve güncel değerleri yönet.", portfolio_count: "{count} varlık",
+    portfolio_amount: "Miktar", portfolio_current_value: "Güncel değer", portfolio_remove: "Varlığı kaldır",
     flow_title: "Aylık nakit akışı", flow_income: "Gelir", flow_expenses: "Gider", flow_net: "Aylık net", flow_last_month: "Geçen ay: {x}",
     net_worth_title: "Net varlık", net_worth_sub: "Aylık portföy varlıkların eksi toplam borcun.", net_worth_auto: "Otomatik kaydedilir",
     net_worth_assets: "Varlıklar", net_worth_debt: "Borç", net_worth_net: "Net varlık", net_worth_history: "Net varlık geçmişi",
@@ -735,6 +739,7 @@ const el = {
   portDonut: document.getElementById("portDonut"),
   portLegend: document.getElementById("portLegend"),
   portEmpty: document.getElementById("portEmpty"),
+  portHoldingCount: document.getElementById("portHoldingCount"),
   flowIncome: document.getElementById("flowIncome"),
   flowExpenses: document.getElementById("flowExpenses"),
   flowNet: document.getElementById("flowNet"),
@@ -1986,6 +1991,11 @@ function toastCar(msg) {
 function buildPortfolio() {
   el.portList.innerHTML = "";
   state.portfolio.holdings.forEach((h) => el.portList.appendChild(makeHoldingRow(h.id)));
+  updatePortfolioHoldingCount();
+}
+
+function updatePortfolioHoldingCount() {
+  if (el.portHoldingCount) el.portHoldingCount.textContent = t("portfolio_count", { count: meaningfulHoldingCount() });
 }
 
 function holdById(id) { return state.portfolio.holdings.find((y) => y.id === id); }
@@ -2149,12 +2159,16 @@ function makeHoldingRow(id) {
   const row = document.createElement("div");
   row.className = "cat-row port-row";
   row.dataset.hold = id;
+  row.dataset.assetType = at;
   // "usd" (holding dollars as an investment) is only offered while the app is in
   // TL; in USD mode it would just be cash. Keep it visible if already selected.
   const options = ASSET_TYPES
     .filter((tp) => tp !== "usd" || state.currency === "TL" || tp === at)
     .map((tp) => `<option value="${tp}" ${tp === at ? "selected" : ""}>${t("asset_" + tp)}</option>`).join("");
   const typeSelect = `<select class="hold-type" data-hold-type="${id}" aria-label="asset type">${options}</select>`;
+  const removeButton = `<button class="cat-remove" type="button" data-hold-del="${id}" aria-label="${escapeHtml(t("portfolio_remove"))}">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3m-8 0 1 13h8l1-13M10 11v5m4-5v5"></path></svg>
+  </button>`;
 
   if (at === "usstock" || at === "bist") {
     const stockName = escapeHtml(h.stockName || "");
@@ -2167,10 +2181,11 @@ function makeHoldingRow(id) {
         ${typeSelect}
       </div>
       <div class="crypto-cell">
+        <span class="port-field-label">${t("shares_ph")}</span>
         <input class="qty-field" type="text" inputmode="decimal" data-stock-shares="${id}" value="${h.shares ? fmtQty(h.shares) : ""}" placeholder="${t("shares_ph")}" />
-        <div class="crypto-value" data-stock-value="${id}"></div>
+        <div class="crypto-value" data-label="${escapeHtml(t("portfolio_current_value"))}" data-stock-value="${id}"></div>
       </div>
-      <button class="cat-remove" type="button" data-hold-del="${id}" aria-label="remove">×</button>`;
+      ${removeButton}`;
     wireStockRow(row, id, at);
   } else if (at === "crypto") {
     const coinName = escapeHtml(h.coinName || "");
@@ -2183,10 +2198,11 @@ function makeHoldingRow(id) {
         ${typeSelect}
       </div>
       <div class="crypto-cell">
+        <span class="port-field-label">${t("qty_ph")}</span>
         <input class="qty-field" type="text" inputmode="decimal" data-coin-qty="${id}" value="${h.qty ? fmtQty(h.qty) : ""}" placeholder="${t("qty_ph")}" />
-        <div class="crypto-value" data-coin-value="${id}"></div>
+        <div class="crypto-value" data-label="${escapeHtml(t("portfolio_current_value"))}" data-coin-value="${id}"></div>
       </div>
-      <button class="cat-remove" type="button" data-hold-del="${id}" aria-label="remove">×</button>`;
+      ${removeButton}`;
     wireTypeSelect(row, id);
     wireRemove(row, id);
     wireCryptoRow(row, id);
@@ -2198,10 +2214,11 @@ function makeHoldingRow(id) {
         ${typeSelect}
       </div>
       <div class="crypto-cell">
+        <span class="port-field-label">${goldOz() ? t("oz_ph") : t("grams_ph")}</span>
         <input class="qty-field" type="text" inputmode="decimal" data-gold-grams="${id}" value="${h.grams ? fmtQty(h.grams / goldFactor()) : ""}" placeholder="${goldOz() ? t("oz_ph") : t("grams_ph")}" />
-        <div class="crypto-value" data-gold-value="${id}"></div>
+        <div class="crypto-value" data-label="${escapeHtml(t("portfolio_current_value"))}" data-gold-value="${id}"></div>
       </div>
-      <button class="cat-remove" type="button" data-hold-del="${id}" aria-label="remove">×</button>`;
+      ${removeButton}`;
     wireTypeSelect(row, id);
     wireRemove(row, id);
     row.querySelector("[data-hold-name]").addEventListener("input", (e) => { const x = holdById(id); if (x) x.label = e.target.value; saveState(); });
@@ -2225,10 +2242,11 @@ function makeHoldingRow(id) {
         ${typeSelect}
       </div>
       <div class="crypto-cell">
+        <span class="port-field-label">USD</span>
         <div class="money-input money-input--sm usd-input"><span class="money-symbol">$</span><input type="text" inputmode="numeric" data-usd-amt="${id}" value="${h.usd ? formatThousands(h.usd) : ""}" placeholder="0" /></div>
-        <div class="crypto-value" data-usd-value="${id}"></div>
+        <div class="crypto-value" data-label="${escapeHtml(t("portfolio_current_value"))}" data-usd-value="${id}"></div>
       </div>
-      <button class="cat-remove" type="button" data-hold-del="${id}" aria-label="remove">×</button>`;
+      ${removeButton}`;
     wireTypeSelect(row, id);
     wireRemove(row, id);
     row.querySelector("[data-hold-name]").addEventListener("input", (e) => { const x = holdById(id); if (x) x.label = e.target.value; saveState(); });
@@ -2254,11 +2272,14 @@ function makeHoldingRow(id) {
         <input class="cat-name port-name" data-hold-name="${id}" value="${safeLabel}" placeholder="${t("holding_ph")}" />
         <div class="port-tags">${typeSelect}${netBtn}</div>
       </div>
-      <div class="money-input money-input--sm cat-amount">
-        <span class="money-symbol savings-symbol">${meta.symbol}</span>
-        <input type="text" inputmode="numeric" data-hold-val="${id}" value="${h.value ? formatThousands(h.value) : ""}" placeholder="0" />
+      <div class="port-amount-cell">
+        <span class="port-field-label">${t("portfolio_amount")}</span>
+        <div class="money-input money-input--sm cat-amount">
+          <span class="money-symbol savings-symbol">${meta.symbol}</span>
+          <input type="text" inputmode="numeric" data-hold-val="${id}" value="${h.value ? formatThousands(h.value) : ""}" placeholder="0" />
+        </div>
       </div>
-      <button class="cat-remove" type="button" data-hold-del="${id}" aria-label="remove">×</button>`;
+      ${removeButton}`;
     wireTypeSelect(row, id);
     wireRemove(row, id);
     row.querySelector("[data-hold-name]").addEventListener("input", (e) => { const x = holdById(id); if (x) x.label = e.target.value; saveState(); });
@@ -2268,6 +2289,8 @@ function makeHoldingRow(id) {
     const netBtnEl = row.querySelector("[data-hold-net]");
     if (netBtnEl) netBtnEl.addEventListener("click", () => { const x = holdById(id); x.netTax = !x.netTax; netBtnEl.classList.toggle("is-on", x.netTax); refreshPortfolio(); refreshIncome(); });
   }
+  const assetMarks = { usstock: "US", bist: "Bİ", crypto: "₿", gold: "Au", usd: "$", deposit: "%", bonds: "◆", cash: "¤" };
+  row.insertAdjacentHTML("afterbegin", `<span class="port-asset-icon" aria-hidden="true">${assetMarks[at] || "•"}</span>`);
   return row;
 }
 
@@ -2646,6 +2669,7 @@ function refreshPortfolio() {
   const meta = CURRENCY_META[state.currency];
   document.querySelectorAll("#view-portfolio .savings-symbol").forEach((s) => (s.textContent = meta.symbol));
   const total = state.portfolio.holdings.reduce((sum, h) => sum + (h.value || 0), 0);
+  updatePortfolioHoldingCount();
   recordNetWorthSnapshot(total);
   saveState();
 
