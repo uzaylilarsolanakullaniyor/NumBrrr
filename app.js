@@ -3932,7 +3932,7 @@ function clampN(v, lo, hi) { return v < lo ? lo : v > hi ? hi : v; }
 // Radius is proportional to how big the 24h move is relative to the biggest
 // mover currently in the list, so the largest gainer/loser is the largest
 // bubble and the smallest move is the smallest, with a clear spread.
-const BUBBLE_MIN_R = 26, BUBBLE_MAX_R = 52, BUBBLE_GAP = 1;
+const BUBBLE_MIN_R = 26, BUBBLE_MAX_R = 52, BUBBLE_GAP = 2;
 function bubbleRadius(ch, maxMag) {
   const mag = ch == null ? 0 : Math.abs(ch);
   const frac = maxMag > 0 ? Math.min(mag / maxMag, 1) : 0.35;
@@ -4021,6 +4021,40 @@ function kickBubbles() {
 function renderBubbles() {
   for (const b of bubbleSim.bubbles) b.node.style.transform = `translate3d(${(b.x - b.r).toFixed(1)}px, ${(b.y - b.r).toFixed(1)}px, 0)`;
 }
+function separateBubbleOverlaps(bs, W, H, passes, applyImpulse) {
+  for (let pass = 0; pass < passes; pass++) {
+    for (let i = 0; i < bs.length; i++) for (let j = i + 1; j < bs.length; j++) {
+      const a = bs[i], c = bs[j];
+      let dx = c.x - a.x, dy = c.y - a.y, dist = Math.hypot(dx, dy);
+      if (dist < 0.001) {
+        const angle = i * 2.399963 + j * 0.917;
+        dx = Math.cos(angle) * 0.01; dy = Math.sin(angle) * 0.01; dist = 0.01;
+      }
+      const min = a.r + c.r + BUBBLE_GAP;
+      if (dist >= min) continue;
+      const nx = dx / dist, ny = dy / dist, overlap = min - dist + 0.08;
+      const invA = bubbleSim.drag === a ? 0 : 1 / Math.max(1, a.r * a.r);
+      const invC = bubbleSim.drag === c ? 0 : 1 / Math.max(1, c.r * c.r);
+      const invSum = invA + invC;
+      if (invSum <= 0) continue;
+      a.x -= nx * overlap * (invA / invSum); a.y -= ny * overlap * (invA / invSum);
+      c.x += nx * overlap * (invC / invSum); c.y += ny * overlap * (invC / invSum);
+      if (applyImpulse && pass === 0) {
+        const relativeSpeed = (c.vx - a.vx) * nx + (c.vy - a.vy) * ny;
+        if (relativeSpeed < 0) {
+          // Low restitution prevents the whole cluster exploding after a fling.
+          const impulse = -(1 + 0.24) * relativeSpeed / invSum;
+          a.vx -= impulse * invA * nx; a.vy -= impulse * invA * ny;
+          c.vx += impulse * invC * nx; c.vy += impulse * invC * ny;
+        }
+      }
+    }
+    for (const b of bs) {
+      b.x = clampN(b.x, b.r, W - b.r);
+      b.y = clampN(b.y, b.r, H - b.r);
+    }
+  }
+}
 // One-time compacting pass used for initial layout and responsive resizes.
 function relaxBubbles(W, H) {
   const bs = bubbleSim.bubbles;
@@ -4028,20 +4062,16 @@ function relaxBubbles(W, H) {
   const iterations = Math.min(90, Math.max(34, bs.length * 7));
   for (let it = 0; it < iterations; it++) {
     for (const b of bs) {
-      b.x += (cx - b.x) * 0.018;
-      b.y += (cy - b.y) * 0.018;
+      // A wider-than-tall field needs a flatter cluster; stronger vertical
+      // centring lets collisions distribute spare space horizontally.
+      b.x += (cx - b.x) * 0.012;
+      b.y += (cy - b.y) * 0.026;
     }
-    for (let i = 0; i < bs.length; i++) for (let j = i + 1; j < bs.length; j++) {
-      const a = bs[i], c = bs[j];
-      let dx = c.x - a.x, dy = c.y - a.y, dist = Math.hypot(dx, dy) || 0.01, sep = a.r + c.r + BUBBLE_GAP - dist;
-      if (sep <= 0) continue;
-      const nx = dx / dist, ny = dy / dist;
-      const invA = 1 / Math.max(1, a.r * a.r), invC = 1 / Math.max(1, c.r * c.r), sum = invA + invC;
-      a.x -= nx * sep * (invA / sum); a.y -= ny * sep * (invA / sum);
-      c.x += nx * sep * (invC / sum); c.y += ny * sep * (invC / sum);
-    }
-    for (const b of bs) { b.x = clampN(b.x, b.r, W - b.r); b.y = clampN(b.y, b.r, H - b.r); }
+    separateBubbleOverlaps(bs, W, H, 1, false);
   }
+  // The central pull above can reintroduce a tiny overlap in the final pass.
+  // Finish with strict separation passes that do not apply any attraction.
+  separateBubbleOverlaps(bs, W, H, 8, false);
 }
 // Resting bubbles use a light 30fps loop; dragging and a short post-fling window
 // switch to 60fps. Dimensions are cached so scrolling never forces layout reads.
@@ -4063,8 +4093,8 @@ function stepBubbles(now) {
       continue;
     }
     // Shared centre gravity keeps the circles in one dense, touching cluster.
-    b.vx += (cx - b.x) * 0.00072 * dt;
-    b.vy += (cy - b.y) * 0.00072 * dt;
+    b.vx += (cx - b.x) * 0.00056 * dt;
+    b.vy += (cy - b.y) * 0.00094 * dt;
     // Tiny deterministic motion prevents the field looking frozen at rest.
     const phase = now * 0.00055 + b.phase;
     b.vx += Math.cos(phase) * 0.0024 * dt;
@@ -4077,27 +4107,9 @@ function stepBubbles(now) {
     if (b.x < b.r) { b.x = b.r; b.vx = Math.abs(b.vx) * 0.42; } else if (b.x > W - b.r) { b.x = W - b.r; b.vx = -Math.abs(b.vx) * 0.42; }
     if (b.y < b.r) { b.y = b.r; b.vy = Math.abs(b.vy) * 0.42; } else if (b.y > H - b.r) { b.y = H - b.r; b.vy = -Math.abs(b.vy) * 0.42; }
   }
-  for (let i = 0; i < bs.length; i++) for (let j = i + 1; j < bs.length; j++) {
-    const a = bs[i], c = bs[j];
-    let dx = c.x - a.x, dy = c.y - a.y, dist = Math.hypot(dx, dy) || 0.01, min = a.r + c.r + BUBBLE_GAP;
-    if (dist < min) {
-      const nx = dx / dist, ny = dy / dist, ov = min - dist;
-      const invA = bubbleSim.drag === a ? 0 : 1 / Math.max(1, a.r * a.r);
-      const invC = bubbleSim.drag === c ? 0 : 1 / Math.max(1, c.r * c.r);
-      const invSum = invA + invC;
-      if (invSum > 0) {
-        a.x -= nx * ov * (invA / invSum); a.y -= ny * ov * (invA / invSum);
-        c.x += nx * ov * (invC / invSum); c.y += ny * ov * (invC / invSum);
-        const relativeSpeed = (c.vx - a.vx) * nx + (c.vy - a.vy) * ny;
-        if (relativeSpeed < 0) {
-          // Low restitution prevents the whole cluster exploding after a fling.
-          const impulse = -(1 + 0.24) * relativeSpeed / invSum;
-          a.vx -= impulse * invA * nx; a.vy -= impulse * invA * ny;
-          c.vx += impulse * invC * nx; c.vy += impulse * invC * ny;
-        }
-      }
-    }
-  }
+  // Multiple solver passes prevent a later neighbour correction from pushing
+  // an already-resolved pair back into each other.
+  separateBubbleOverlaps(bs, W, H, 4, true);
   for (const b of bs) {
     b.x = clampN(b.x, b.r, W - b.r);
     b.y = clampN(b.y, b.r, H - b.r);
