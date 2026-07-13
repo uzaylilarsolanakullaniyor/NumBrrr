@@ -261,6 +261,11 @@ const I18N = {
     exp_cat_ph: "Category", exp_day_ph: "Day", exp_paid: "Paid",
     exp_due_fmt: "Day {day}", exp_empty: "No expenses logged yet.",
     exp_overdue: "Overdue", exp_soon: "Due soon",
+    budget_title: "Monthly budget", budget_sub: "Set category limits and follow this month's progress.",
+    budget_spent: "Spent", budget_limit: "Budget", budget_remaining: "Remaining", budget_category: "Category",
+    budget_save: "Save limit", budget_empty: "No category limit yet.", budget_vehicle: "Vehicle",
+    budget_progress: "{rate}% of the monthly budget used", budget_no_limit: "Add a category limit to start planning.",
+    budget_over: "Budget exceeded by {amount}", budget_unbudgeted: "{amount} has no category limit.", budget_saved: "Category limit saved.", budget_invalid: "Enter a category and an amount above zero.",
     veh_title: "My vehicles", veh_add: "+ Add vehicle", veh_model_ph: "Vehicle model",
     veh_reminders: "Payment reminders", veh_add_reminder: "+ Add reminder", veh_label_ph: "Insurance, tax…",
     veh_expenses: "Expenses", veh_add_expense: "+ Add expense", veh_monthly: "This month",
@@ -341,6 +346,11 @@ const I18N = {
     portfolio_title: "Your portfolio", portfolio_sub: "Add what you own and see your allocation.",
     holding_ph: "Holding name", add_holding: "+ Add holding", total_value: "Total portfolio value",
     flow_title: "Monthly cash flow", flow_income: "Income", flow_expenses: "Expenses", flow_net: "Net / month", flow_last_month: "Last month: {x}",
+    net_worth_title: "Net worth", net_worth_sub: "Monthly portfolio assets minus your total debt.", net_worth_auto: "Auto saved",
+    net_worth_assets: "Assets", net_worth_debt: "Debt", net_worth_net: "Net worth", net_worth_history: "Net worth history",
+    net_worth_empty: "Add a portfolio asset or debt to start the graph.", net_worth_debt_input: "Total debt",
+    net_worth_debt_note: "Credit cards, loans and other outstanding debt.", net_worth_chart_empty: "No monthly record yet.",
+    net_worth_chart_desc: "Net worth by month: {values}",
     flow_savings_note: "+{x}/month more if you cut your tracked spending.",
     cat_cash: "Cash", cat_investment: "Investment",
     asset_stocks: "Stocks", asset_usstock: "US Stocks", asset_bist: "Turkish (BIST)", asset_crypto: "Crypto", asset_deposit: "Deposit", asset_bonds: "Bonds", asset_realestate: "Real estate", asset_gold: "Gold", asset_gold_oz: "Gold (oz)", asset_usd: "US Dollar", asset_cash: "Cash",
@@ -430,6 +440,11 @@ const I18N = {
     exp_cat_ph: "Kategori", exp_day_ph: "Gün", exp_paid: "Ödendi",
     exp_due_fmt: "Ayın {day}'i", exp_empty: "Henüz harcama eklenmedi.",
     exp_overdue: "Gecikmiş", exp_soon: "Yaklaşıyor",
+    budget_title: "Aylık bütçe", budget_sub: "Kategorilere limit koy ve bu ayın ilerlemesini takip et.",
+    budget_spent: "Harcanan", budget_limit: "Bütçe", budget_remaining: "Kalan", budget_category: "Kategori",
+    budget_save: "Limiti kaydet", budget_empty: "Henüz kategori limiti yok.", budget_vehicle: "Araç",
+    budget_progress: "Aylık bütçenin %{rate} kadarı kullanıldı", budget_no_limit: "Planlamaya başlamak için kategori limiti ekle.",
+    budget_over: "Bütçe {amount} aşıldı", budget_unbudgeted: "{amount} harcamanın kategori limiti yok.", budget_saved: "Kategori limiti kaydedildi.", budget_invalid: "Kategori ve sıfırdan büyük bir tutar gir.",
     veh_title: "Araçlarım", veh_add: "+ Araç ekle", veh_model_ph: "Araç modeli",
     veh_reminders: "Ödeme hatırlatmaları", veh_add_reminder: "+ Hatırlatma ekle", veh_label_ph: "Sigorta, vergi…",
     veh_expenses: "Harcamalar", veh_add_expense: "+ Harcama ekle", veh_monthly: "Bu ay",
@@ -510,6 +525,11 @@ const I18N = {
     portfolio_title: "Portföyün", portfolio_sub: "Sahip olduklarını ekle, dağılımını gör.",
     holding_ph: "Varlık adı", add_holding: "+ Varlık ekle", total_value: "Toplam portföy değeri",
     flow_title: "Aylık nakit akışı", flow_income: "Gelir", flow_expenses: "Gider", flow_net: "Aylık net", flow_last_month: "Geçen ay: {x}",
+    net_worth_title: "Net varlık", net_worth_sub: "Aylık portföy varlıkların eksi toplam borcun.", net_worth_auto: "Otomatik kaydedilir",
+    net_worth_assets: "Varlıklar", net_worth_debt: "Borç", net_worth_net: "Net varlık", net_worth_history: "Net varlık geçmişi",
+    net_worth_empty: "Grafiği başlatmak için portföy varlığı veya borç ekle.", net_worth_debt_input: "Toplam borç",
+    net_worth_debt_note: "Kredi kartları, krediler ve diğer kalan borçlar.", net_worth_chart_empty: "Henüz aylık kayıt yok.",
+    net_worth_chart_desc: "Aylara göre net varlık: {values}",
     flow_savings_note: "Takip ettiğin harcamaları kısarsan ayda +{x} daha.",
     cat_cash: "Nakit", cat_investment: "Yatırım",
     asset_stocks: "Hisse", asset_usstock: "ABD Hisse", asset_bist: "Türk Hisse (BIST)", asset_crypto: "Kripto", asset_deposit: "Mevduat", asset_bonds: "Tahvil", asset_realestate: "Gayrimenkul", asset_gold: "Altın", asset_gold_oz: "Ons Altın", asset_usd: "Dolar (USD)", asset_cash: "Nakit",
@@ -583,6 +603,8 @@ const state = {
   expenses: {
     month: "", recurring: [], oneoff: [], history: [], recSeq: 0, oneSeq: 0,
   },
+  // Reusable category limits, kept separately for USD and TL budgets.
+  monthlyBudget: { items: [], seq: 0 },
   // Vehicles: each has a name (brand-model), fuel specs (fuel/consumption/price for
   // route fuel cost), dated payment reminders (sched) and logged expenses (oneoff).
   // Vehicle costs roll into the monthly expense total.
@@ -598,6 +620,8 @@ const state = {
     holdings: [], seq: 0,
     target: { USD: [SAVINGS_DEFAULT_INVEST.USD], TL: [SAVINGS_DEFAULT_INVEST.TL] },
   },
+  // Monthly snapshots are currency-specific so switching country never mixes scales.
+  netWorth: { liabilities: { USD: 0, TL: 0 }, history: { USD: [], TL: [] } },
   portTotalUSD: false, // when currency is TL, show the total portfolio value in USD instead
   watchlist: [], // [{ type, key, name }] — assets to monitor (price + 24h/1mo/1yr performance)
   notifications: { enabled: false, vehicleDays: 7, priceAlerts: [], seq: 0, sent: {} },
@@ -662,6 +686,18 @@ const el = {
   expHistorySec: document.getElementById("expHistorySec"),
   expHistToggle: document.getElementById("expHistToggle"),
   expHistList: document.getElementById("expHistList"),
+  budgetMonth: document.getElementById("budgetMonth"),
+  budgetSpent: document.getElementById("budgetSpent"),
+  budgetLimit: document.getElementById("budgetLimit"),
+  budgetRemaining: document.getElementById("budgetRemaining"),
+  budgetProgress: document.getElementById("budgetProgress"),
+  budgetProgressFill: document.getElementById("budgetProgressFill"),
+  budgetProgressText: document.getElementById("budgetProgressText"),
+  budgetList: document.getElementById("budgetList"),
+  budgetEmpty: document.getElementById("budgetEmpty"),
+  budgetForm: document.getElementById("budgetForm"),
+  budgetCategory: document.getElementById("budgetCategory"),
+  budgetAmount: document.getElementById("budgetAmount"),
   vehList: document.getElementById("vehList"),
   addVehicle: document.getElementById("addVehicle"),
   vehSchedList: document.getElementById("vehSchedList"),
@@ -705,6 +741,12 @@ const el = {
   flowNetRow: document.getElementById("flowNetRow"),
   flowSavings: document.getElementById("flowSavings"),
   flowLastMonth: document.getElementById("flowLastMonth"),
+  netWorthAssets: document.getElementById("netWorthAssets"),
+  netWorthDebt: document.getElementById("netWorthDebt"),
+  netWorthValue: document.getElementById("netWorthValue"),
+  netWorthChart: document.getElementById("netWorthChart"),
+  netWorthEmpty: document.getElementById("netWorthEmpty"),
+  netWorthDebtInput: document.getElementById("netWorthDebtInput"),
   // income view
   incList: document.getElementById("incList"),
   addIncome: document.getElementById("addIncome"),
@@ -1167,9 +1209,118 @@ function vehMonthlyTotal(v) {
 }
 function vehiclesMonthlyTotal() { return (state.vehicles || []).reduce((a, v) => a + vehMonthlyTotal(v), 0); }
 
+// ---- Monthly category budgets ----
+function normalizedCategory(value) {
+  return String(value || "").trim().toLocaleLowerCase(state.lang === "tr" ? "tr-TR" : "en-US").replace(/\s+/g, " ");
+}
+function expenseCategoryId(value) {
+  const normalized = normalizedCategory(value);
+  return EXPENSE_CATS.find((id) => [id, I18N.en.ecat[id], I18N.tr.ecat[id]].some((label) => normalizedCategory(label) === normalized)) || "";
+}
+function resolveBudgetCategory(value) {
+  const trimmed = String(value || "").trim().slice(0, 40);
+  const preset = expenseCategoryId(trimmed);
+  if (preset) return { category: preset, label: "" };
+  if (["vehicle", I18N.en.budget_vehicle, I18N.tr.budget_vehicle].some((label) => normalizedCategory(label) === normalizedCategory(trimmed))) {
+    return { category: "vehicle", label: "" };
+  }
+  return { category: "custom", label: trimmed };
+}
+function budgetItemLabel(item) {
+  if (item.category === "vehicle") return t("budget_vehicle");
+  if (EXPENSE_CATS.includes(item.category)) return ecatName(item.category);
+  return item.label || t("budget_category");
+}
+function currentBudgetItems() {
+  return state.monthlyBudget.items.filter((item) => item.currency === state.currency);
+}
+function budgetItemMatches(item, rawCategory) {
+  if (item.category === "vehicle") return false;
+  if (EXPENSE_CATS.includes(item.category)) return expenseCategoryId(rawCategory) === item.category;
+  return normalizedCategory(rawCategory) === normalizedCategory(item.label);
+}
+function budgetItemSpent(item) {
+  if (item.category === "vehicle") return vehiclesMonthlyTotal();
+  let total = 0;
+  state.expenses.recurring.forEach((expense) => { if (expense.paid && budgetItemMatches(item, expense.cat)) total += expense.amount || 0; });
+  state.expenses.oneoff.forEach((expense) => { if (budgetItemMatches(item, expense.cat)) total += expense.amount || 0; });
+  return total;
+}
+function renderMonthlyBudget() {
+  if (!el.budgetList) return;
+  const items = currentBudgetItems();
+  const spent = expensesTotal();
+  const limit = items.reduce((sum, item) => sum + (item.limit || 0), 0);
+  const budgetedSpent = items.reduce((sum, item) => sum + budgetItemSpent(item), 0);
+  const unbudgetedSpent = Math.max(0, spent - budgetedSpent);
+  const remaining = limit - spent;
+  const rate = limit > 0 ? (spent / limit) * 100 : 0;
+  const cappedRate = Math.min(100, Math.max(0, rate));
+
+  el.budgetMonth.textContent = monthLabel(state.expenses.month);
+  el.budgetSpent.textContent = formatMoney(spent);
+  el.budgetLimit.textContent = formatMoney(limit);
+  el.budgetRemaining.textContent = limit > 0 ? (remaining >= 0 ? formatMoney(remaining) : "−" + formatMoney(Math.abs(remaining))) : "—";
+  el.budgetRemaining.classList.toggle("is-over", limit > 0 && remaining < 0);
+  el.budgetProgressFill.style.width = cappedRate + "%";
+  el.budgetProgress.classList.toggle("is-near", rate >= 80 && rate < 100);
+  el.budgetProgress.classList.toggle("is-over", rate >= 100);
+  el.budgetProgress.setAttribute("aria-valuenow", String(Math.round(cappedRate)));
+  const progressMessage = limit <= 0
+    ? t("budget_no_limit")
+    : remaining < 0
+      ? t("budget_over", { amount: formatMoney(Math.abs(remaining)) })
+      : t("budget_progress", { rate: Math.round(rate) });
+  el.budgetProgressText.textContent = progressMessage + (limit > 0 && unbudgetedSpent > 0 ? " · " + t("budget_unbudgeted", { amount: formatMoney(unbudgetedSpent) }) : "");
+
+  el.budgetEmpty.hidden = items.length > 0;
+  el.budgetList.innerHTML = items.map((item) => {
+    const itemSpent = budgetItemSpent(item);
+    const itemRate = item.limit > 0 ? (itemSpent / item.limit) * 100 : 0;
+    const itemWidth = Math.min(100, Math.max(0, itemRate));
+    const stateClass = itemRate >= 100 ? " is-over" : itemRate >= 80 ? " is-near" : "";
+    return `<div class="budget-row${stateClass}" data-budget-id="${escapeHtml(item.id)}">
+      <div class="budget-row-head"><strong>${escapeHtml(budgetItemLabel(item))}</strong><span>${formatMoney(itemSpent)} / ${formatMoney(item.limit)}</span></div>
+      <div class="budget-row-track" aria-hidden="true"><span style="width:${itemWidth}%"></span></div>
+      <div class="budget-row-actions">
+        <label class="money-input money-input--sm"><span class="money-symbol exp-symbol">${CURRENCY_META[state.currency].symbol}</span><input type="text" inputmode="numeric" data-budget-limit="${escapeHtml(item.id)}" value="${item.limit ? formatThousands(item.limit) : ""}" aria-label="${escapeHtml(t("budget_limit") + " · " + budgetItemLabel(item))}" /></label>
+        <button class="cat-remove" type="button" data-budget-delete="${escapeHtml(item.id)}" aria-label="remove">×</button>
+      </div>
+    </div>`;
+  }).join("");
+
+  el.budgetList.querySelectorAll("[data-budget-limit]").forEach((input) => {
+    input.addEventListener("change", () => {
+      const item = state.monthlyBudget.items.find((entry) => entry.id === input.dataset.budgetLimit);
+      if (!item) return;
+      const nextLimit = Math.max(0, parseNumber(input.value));
+      if (!(nextLimit > 0)) { showAppToast(t("budget_invalid")); renderMonthlyBudget(); return; }
+      item.limit = nextLimit;
+      saveState(); renderMonthlyBudget();
+    });
+    input.addEventListener("blur", () => { if (parseNumber(input.value) > 0) input.value = formatThousands(parseNumber(input.value)); });
+  });
+  el.budgetList.querySelectorAll("[data-budget-delete]").forEach((button) => button.addEventListener("click", () => {
+    state.monthlyBudget.items = state.monthlyBudget.items.filter((item) => item.id !== button.dataset.budgetDelete);
+    saveState(); renderMonthlyBudget(); sfx("remove");
+  }));
+}
+function saveBudgetLimit(event) {
+  event.preventDefault();
+  const resolved = resolveBudgetCategory(el.budgetCategory.value);
+  const limit = Math.max(0, parseNumber(el.budgetAmount.value));
+  if ((!resolved.label && resolved.category === "custom") || !(limit > 0)) { showAppToast(t("budget_invalid")); return; }
+  const existing = currentBudgetItems().find((item) => item.category === resolved.category && (resolved.category !== "custom" || normalizedCategory(item.label) === normalizedCategory(resolved.label)));
+  if (existing) existing.limit = limit;
+  else state.monthlyBudget.items.push({ id: "b" + ++state.monthlyBudget.seq, currency: state.currency, category: resolved.category, label: resolved.label, limit });
+  el.budgetCategory.value = "";
+  el.budgetAmount.value = "";
+  saveState(); renderMonthlyBudget(); sfx("success"); showAppToast(t("budget_saved"));
+}
+
 function buildExpenses() {
   // category suggestions (translated presets; users can still type their own)
-  el.expCatList.innerHTML = EXPENSE_CATS.map((c) => `<option value="${ecatName(c).replace(/"/g, "&quot;")}"></option>`).join("");
+  el.expCatList.innerHTML = [...EXPENSE_CATS.map((c) => ecatName(c)), t("budget_vehicle")].map((label) => `<option value="${escapeHtml(label)}"></option>`).join("");
   el.expRecList.innerHTML = "";
   state.expenses.recurring.forEach((r) => el.expRecList.appendChild(makeRecRow(r)));
   el.expOneList.innerHTML = "";
@@ -1214,7 +1365,7 @@ function makeOneRow(o) {
 
   const day = row.querySelector("[data-one-day]");
   day.addEventListener("input", () => { o.day = clampDay(parseNumber(day.value)); refreshExpenses(); });
-  row.querySelector("[data-one-cat]").addEventListener("input", (e) => { o.cat = e.target.value; saveState(); });
+  row.querySelector("[data-one-cat]").addEventListener("input", (e) => { o.cat = e.target.value; refreshExpenses(); });
   const amt = row.querySelector("[data-one-amt]");
   amt.addEventListener("input", () => { o.amount = parseNumber(amt.value); refreshExpenses(); });
   amt.addEventListener("blur", () => { if (o.amount > 0) amt.value = formatThousands(o.amount); });
@@ -1250,6 +1401,7 @@ function refreshExpenses() {
   document.querySelectorAll("#view-savings .exp-symbol").forEach((s) => (s.textContent = sym));
   el.expMonthLabel.textContent = monthLabel(state.expenses.month);
   el.expTotal.textContent = formatMoney(expensesTotal());
+  renderMonthlyBudget();
 
   // Reminders: recurring bills + vehicle dated payments, combined into one list.
   const todayDay = new Date().getDate();
@@ -2409,10 +2561,93 @@ function renderPort24h(totalNative) {
   el.port24h.innerHTML = `${sign}${Math.abs(pct).toFixed(1)}% <span class="port-24h-amt">${sign}${moneyTxt}</span> <span class="port-24h-lbl">${t("lbl_24h")}</span>`;
 }
 
+function currentNetWorthHistory() {
+  return state.netWorth.history[state.currency];
+}
+function netWorthLiability() {
+  return Math.max(0, state.netWorth.liabilities[state.currency] || 0);
+}
+function recordNetWorthSnapshot(assets) {
+  const history = currentNetWorthHistory();
+  const debt = netWorthLiability();
+  const month = currentYM();
+  const existing = history.find((item) => item.month === month);
+  if (!(assets > 0) && !(debt > 0) && !existing) return;
+  const snapshot = { month, assets: Math.max(0, assets || 0), liabilities: debt, net: Math.max(0, assets || 0) - debt };
+  if (existing) Object.assign(existing, snapshot);
+  else history.push(snapshot);
+  history.sort((a, b) => a.month.localeCompare(b.month));
+  if (history.length > 60) history.splice(0, history.length - 60);
+}
+function shortMonthLabel(ym) {
+  const [year, month] = ym.split("-").map(Number);
+  return new Date(year, month - 1, 1).toLocaleDateString(state.lang === "tr" ? "tr-TR" : "en-US", { month: "short", year: "2-digit" });
+}
+function renderNetWorth(totalAssets) {
+  if (!el.netWorthChart) return;
+  const debt = netWorthLiability();
+  const net = totalAssets - debt;
+  el.netWorthAssets.textContent = formatMoney(totalAssets);
+  el.netWorthDebt.textContent = debt > 0 ? "−" + formatMoney(debt) : formatMoney(0);
+  el.netWorthValue.textContent = formatMoney(net);
+  el.netWorthValue.classList.toggle("is-negative", net < 0);
+  if (document.activeElement !== el.netWorthDebtInput) el.netWorthDebtInput.value = debt > 0 ? formatThousands(debt) : "";
+
+  const points = currentNetWorthHistory().slice(-12);
+  el.netWorthEmpty.hidden = points.length > 0;
+  el.netWorthChart.hidden = points.length === 0;
+  if (!points.length) {
+    el.netWorthChart.innerHTML = `<title id="netWorthChartTitle">${escapeHtml(t("net_worth_history"))}</title><desc id="netWorthChartDesc">${escapeHtml(t("net_worth_chart_empty"))}</desc>`;
+    return;
+  }
+
+  const width = 640, height = 250;
+  const margin = { top: 28, right: 30, bottom: 42, left: 78 };
+  const plotW = width - margin.left - margin.right;
+  const plotH = height - margin.top - margin.bottom;
+  const values = points.map((point) => point.net);
+  let minValue = Math.min(0, ...values);
+  let maxValue = Math.max(0, ...values);
+  if (maxValue === minValue) { maxValue += 1; minValue -= 1; }
+  const padding = (maxValue - minValue) * 0.12;
+  maxValue += padding; minValue -= padding;
+  const xAt = (index) => points.length === 1 ? margin.left + plotW / 2 : margin.left + (index / (points.length - 1)) * plotW;
+  const yAt = (value) => margin.top + ((maxValue - value) / (maxValue - minValue)) * plotH;
+  const linePath = points.map((point, index) => `${index ? "L" : "M"}${xAt(index).toFixed(1)} ${yAt(point.net).toFixed(1)}`).join(" ");
+  const zeroY = yAt(0);
+  const areaPath = `${linePath} L${xAt(points.length - 1).toFixed(1)} ${zeroY.toFixed(1)} L${xAt(0).toFixed(1)} ${zeroY.toFixed(1)} Z`;
+  const ticks = Array.from({ length: 4 }, (_, index) => minValue + ((maxValue - minValue) * index) / 3).reverse();
+  const grid = ticks.map((value) => {
+    const y = yAt(value);
+    return `<line class="net-worth-grid" x1="${margin.left}" y1="${y.toFixed(1)}" x2="${width - margin.right}" y2="${y.toFixed(1)}"></line><text class="net-worth-axis" x="${margin.left - 10}" y="${(y + 4).toFixed(1)}" text-anchor="end">${escapeHtml(formatMoney(value, { compact: true }))}</text>`;
+  }).join("");
+  const labelStep = points.length > 6 ? 2 : 1;
+  const monthLabels = points.map((point, index) => (index % labelStep === 0 || index === points.length - 1)
+    ? `<text class="net-worth-month" x="${xAt(index).toFixed(1)}" y="${height - 15}" text-anchor="middle">${escapeHtml(shortMonthLabel(point.month))}</text>` : "").join("");
+  const dots = points.map((point, index) => `<circle class="net-worth-dot" cx="${xAt(index).toFixed(1)}" cy="${yAt(point.net).toFixed(1)}" r="4"><title>${escapeHtml(shortMonthLabel(point.month) + ": " + formatMoney(point.net))}</title></circle>`).join("");
+  const last = points[points.length - 1];
+  const lastX = xAt(points.length - 1), lastY = yAt(last.net);
+  const labelAnchor = lastX > width - 120 ? "end" : "start";
+  const labelX = lastX + (labelAnchor === "end" ? -10 : 10);
+  const summary = points.map((point) => `${shortMonthLabel(point.month)} ${formatMoney(point.net)}`).join(", ");
+  el.netWorthChart.innerHTML = `
+    <title id="netWorthChartTitle">${escapeHtml(t("net_worth_history"))}</title>
+    <desc id="netWorthChartDesc">${escapeHtml(t("net_worth_chart_desc", { values: summary }))}</desc>
+    ${grid}
+    <line class="net-worth-zero" x1="${margin.left}" y1="${zeroY.toFixed(1)}" x2="${width - margin.right}" y2="${zeroY.toFixed(1)}"></line>
+    <path class="net-worth-area" d="${areaPath}"></path>
+    <path class="net-worth-line" d="${linePath}"></path>
+    ${dots}
+    ${monthLabels}
+    <text class="net-worth-current" x="${labelX.toFixed(1)}" y="${Math.max(18, lastY - 11).toFixed(1)}" text-anchor="${labelAnchor}">${escapeHtml(formatMoney(last.net, { compact: true }))}</text>`;
+}
+
 function refreshPortfolio() {
-  saveState();
   const meta = CURRENCY_META[state.currency];
   document.querySelectorAll("#view-portfolio .savings-symbol").forEach((s) => (s.textContent = meta.symbol));
+  const total = state.portfolio.holdings.reduce((sum, h) => sum + (h.value || 0), 0);
+  recordNetWorthSnapshot(total);
+  saveState();
 
   // --- Monthly cash flow (Income incl. portfolio yield − Expenses) ---
   const py = portfolioYield();
@@ -2432,9 +2667,9 @@ function refreshPortfolio() {
   el.flowSavings.textContent = "";
 
   // --- Holdings total + donut (categorized Cash / Investment) ---
-  const total = state.portfolio.holdings.reduce((sum, h) => sum + (h.value || 0), 0);
   renderPortTotal(total);
   renderPort24h(total);
+  renderNetWorth(total);
 
   const segs = state.portfolio.holdings.filter((h) => h.value > 0);
   if (!segs.length) {
@@ -4473,6 +4708,7 @@ document.querySelectorAll("[data-currency]").forEach((b) => b.addEventListener("
 
 el.addRecurring.addEventListener("click", addRecurring);
 el.addExpense.addEventListener("click", addExpense);
+el.budgetForm.addEventListener("submit", saveBudgetLimit);
 el.addVehicle.addEventListener("click", addVehicle);
 el.carCalc.addEventListener("click", calcCarRoute);
 el.carSaveTrip.addEventListener("click", saveCarTrip);
@@ -4498,6 +4734,15 @@ el.expHistToggle.addEventListener("click", () => {
 el.addHolding.addEventListener("click", addHolding);
 el.addIncome.addEventListener("click", addIncome);
 el.portCcyToggle.addEventListener("click", () => { state.portTotalUSD = !state.portTotalUSD; refreshPortfolio(); });
+el.netWorthDebtInput.addEventListener("input", () => {
+  state.netWorth.liabilities[state.currency] = Math.max(0, parseNumber(el.netWorthDebtInput.value));
+  const total = state.portfolio.holdings.reduce((sum, holding) => sum + (holding.value || 0), 0);
+  recordNetWorthSnapshot(total); renderNetWorth(total); saveState();
+});
+el.netWorthDebtInput.addEventListener("blur", () => {
+  const debt = netWorthLiability();
+  el.netWorthDebtInput.value = debt > 0 ? formatThousands(debt) : "";
+});
 
 el.expenses.addEventListener("input", () => { state.monthlyExpenses = parseNumber(el.expenses.value); refresh(); });
 el.expenses.addEventListener("blur", () => { if (state.monthlyExpenses > 0) el.expenses.value = formatThousands(state.monthlyExpenses); });
@@ -4573,9 +4818,9 @@ function persistedState() {
     lang: state.lang, theme: state.theme, currency: state.currency,
     monthlyExpenses: state.monthlyExpenses, realMode: state.realMode, sound: state.sound, motion: state.motion,
     inflation: state.inflation, rates: state.rates, realEstate: state.realEstate,
-    expenses: state.expenses, vehicles: state.vehicles, vehSeq: state.vehSeq,
+    expenses: state.expenses, monthlyBudget: state.monthlyBudget, vehicles: state.vehicles, vehSeq: state.vehSeq,
     vehicleHub: state.vehicleHub,
-    income: state.income, portfolio: state.portfolio, watchlist: state.watchlist,
+    income: state.income, portfolio: state.portfolio, netWorth: state.netWorth, watchlist: state.watchlist,
     notifications: state.notifications, homeLayout: state.homeLayout, savingsGoals: state.savingsGoals, homeNotes: state.homeNotes, countdowns: state.countdowns, portTotalUSD: state.portTotalUSD,
   };
 }
@@ -4667,6 +4912,21 @@ function loadState() {
       history: e.history || [], recSeq: e.recSeq || 0, oneSeq: e.oneSeq || 0,
     };
   }
+  if (s.monthlyBudget && typeof s.monthlyBudget === "object") {
+    const seenBudgetIds = new Set();
+    const items = Array.isArray(s.monthlyBudget.items) ? s.monthlyBudget.items.map((item) => ({
+      id: typeof item.id === "string" ? item.id.slice(0, 40) : "",
+      currency: item.currency === "TL" ? "TL" : "USD",
+      category: [...EXPENSE_CATS, "vehicle", "custom"].includes(item.category) ? item.category : "custom",
+      label: typeof item.label === "string" ? item.label.trim().slice(0, 40) : "",
+      limit: Number.isFinite(item.limit) ? Math.max(0, item.limit) : 0,
+    })).filter((item) => {
+      if (!item.id || !(item.limit > 0) || (item.category === "custom" && !item.label) || seenBudgetIds.has(item.id)) return false;
+      seenBudgetIds.add(item.id); return true;
+    }).slice(0, 100) : [];
+    const highestBudgetSeq = items.reduce((max, item) => Math.max(max, Number((/^b(\d+)$/.exec(item.id) || [])[1]) || 0), 0);
+    state.monthlyBudget = { items, seq: Math.max(Number.isFinite(s.monthlyBudget.seq) ? Math.round(s.monthlyBudget.seq) : 0, highestBudgetSeq) };
+  }
   if (Array.isArray(s.vehicles)) {
     state.vehicles = s.vehicles.map((v) => ({
       id: v.id, plate: v.plate || "", fuel: v.fuel || "gas", consumption: v.consumption || 0, price: v.price || 0,
@@ -4726,6 +4986,22 @@ function loadState() {
       seq: Number.isFinite(s.portfolio.seq) ? s.portfolio.seq : holdings.length,
       target: s.portfolio.target && typeof s.portfolio.target === "object" ? s.portfolio.target : { USD: [SAVINGS_DEFAULT_INVEST.USD], TL: [SAVINGS_DEFAULT_INVEST.TL] },
     };
+  }
+  if (s.netWorth && typeof s.netWorth === "object") {
+    ["USD", "TL"].forEach((currency) => {
+      const liability = s.netWorth.liabilities && s.netWorth.liabilities[currency];
+      state.netWorth.liabilities[currency] = Number.isFinite(liability) ? Math.max(0, liability) : 0;
+      const seenMonths = new Set();
+      const history = s.netWorth.history && Array.isArray(s.netWorth.history[currency]) ? s.netWorth.history[currency] : [];
+      state.netWorth.history[currency] = history.map((item) => {
+        const assets = Number.isFinite(item.assets) ? Math.max(0, item.assets) : 0;
+        const liabilities = Number.isFinite(item.liabilities) ? Math.max(0, item.liabilities) : 0;
+        return { month: typeof item.month === "string" ? item.month : "", assets, liabilities, net: assets - liabilities };
+      }).filter((item) => {
+        if (!/^\d{4}-(0[1-9]|1[0-2])$/.test(item.month) || seenMonths.has(item.month)) return false;
+        seenMonths.add(item.month); return true;
+      }).sort((a, b) => a.month.localeCompare(b.month)).slice(-60);
+    });
   }
   if (Array.isArray(s.watchlist)) state.watchlist = s.watchlist.filter((w) => w && typeof w.type === "string" && typeof w.key === "string");
   if (s.notifications && typeof s.notifications === "object") {

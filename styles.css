@@ -2674,6 +2674,88 @@ body {
 .exp-stat--due .exp-stat-value { color: var(--warn); }
 .exp-rem-tag { color: var(--text-dim); font-weight: 600; }
 
+/* ============ Monthly budget + net worth history ============ */
+.feature-section-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
+.feature-section-head > div { min-width: 0; }
+.feature-section-head .settings-label { margin: 0 0 6px; color: var(--text); }
+.feature-section-note { margin: 0; color: var(--text-faint); font-size: 12.5px; line-height: 1.45; }
+.feature-month-chip {
+  flex: none; max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  padding: 7px 11px; border: 1px solid var(--glass-border-soft); border-radius: 999px;
+  background: rgba(255,255,255,.04); color: var(--text-dim); font-size: 11px; font-weight: 700;
+}
+.feature-empty { margin: 2px 0; color: var(--text-faint); font-size: 12.5px; line-height: 1.5; }
+.feature-empty[hidden] { display: none; }
+
+.budget-panel { padding: 22px 24px; display: flex; flex-direction: column; gap: 16px; }
+.budget-overview, .net-worth-stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 9px; }
+.budget-overview > div, .net-worth-stats > div {
+  min-width: 0; padding: 12px 13px; border: 1px solid var(--glass-border-soft); border-radius: 13px;
+  background: rgba(0,0,0,.13); display: flex; flex-direction: column; gap: 5px;
+}
+.budget-overview span, .net-worth-stats span { color: var(--text-faint); font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .055em; }
+.budget-overview strong, .net-worth-stats strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-family: "Sora", sans-serif; font-size: clamp(15px, 2.5vw, 20px); }
+.budget-overview strong.is-over, .net-worth-stats strong.is-negative { color: #ff7373; }
+.budget-progress, .budget-row-track { height: 8px; overflow: hidden; border-radius: 999px; background: rgba(255,255,255,.07); }
+.budget-progress > span, .budget-row-track > span { display: block; width: 0; height: 100%; border-radius: inherit; background: linear-gradient(90deg, var(--accent), var(--good)); transition: width .25s ease; }
+.budget-progress.is-near > span, .budget-row.is-near .budget-row-track > span { background: var(--warn); }
+.budget-progress.is-over > span, .budget-row.is-over .budget-row-track > span { background: #ff7373; }
+.budget-progress-text { margin: -9px 0 0; color: var(--text-dim); font-size: 11.5px; }
+.budget-list { display: flex; flex-direction: column; gap: 9px; }
+.budget-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 9px 14px; padding: 12px 13px; border: 1px solid var(--glass-border-soft); border-radius: 13px; background: rgba(0,0,0,.12); }
+.budget-row-head { min-width: 0; display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+.budget-row-head strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 13.5px; }
+.budget-row-head span { flex: none; color: var(--text-dim); font-size: 11.5px; }
+.budget-row-track { grid-column: 1; height: 6px; }
+.budget-row-actions { grid-column: 2; grid-row: 1 / span 2; display: flex; align-items: center; gap: 7px; }
+.budget-row-actions .money-input { width: 126px; min-width: 0; padding: 4px 9px; }
+.budget-row-actions .money-input input { min-width: 0; font-size: 14px; text-align: right; }
+.budget-row-actions .cat-remove { flex: none; width: 34px; height: 34px; }
+.budget-form { display: grid; grid-template-columns: minmax(140px, 1.2fr) minmax(120px, .8fr) auto; gap: 9px; align-items: end; padding-top: 14px; border-top: 1px solid var(--glass-border-soft); }
+.budget-form > label { min-width: 0; display: flex; flex-direction: column; gap: 6px; color: var(--text-faint); font-size: 11px; font-weight: 700; }
+.budget-form > label > input { width: 100%; min-width: 0; min-height: 44px; padding: 10px 11px; border: 1px solid var(--glass-border-soft); border-radius: 11px; background: rgba(4,12,28,.38); color: var(--text); font: inherit; font-size: 13px; }
+.budget-form .money-input { min-height: 44px; }
+
+.net-worth-card { padding: 22px 24px; display: flex; flex-direction: column; gap: 16px; }
+.net-worth-chart-wrap { position: relative; min-height: 190px; display: grid; place-items: center; }
+.net-worth-chart { display: block; width: 100%; height: auto; min-height: 190px; color: var(--text-faint); overflow: visible; }
+.net-worth-chart[hidden] { display: none; }
+.net-worth-grid { stroke: var(--glass-border-soft); stroke-width: 1; vector-effect: non-scaling-stroke; }
+.net-worth-zero { stroke: var(--glass-border); stroke-width: 1.25; vector-effect: non-scaling-stroke; }
+.net-worth-area { fill: color-mix(in srgb, var(--accent) 15%, transparent); }
+.net-worth-line { fill: none; stroke: var(--accent-2); stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; vector-effect: non-scaling-stroke; }
+.net-worth-dot { fill: var(--accent-2); stroke: var(--glass-bg-strong); stroke-width: 2; vector-effect: non-scaling-stroke; }
+.net-worth-axis, .net-worth-month { fill: var(--text-faint); font-family: "Inter", sans-serif; font-size: 11px; }
+.net-worth-current { fill: var(--text); font-family: "Sora", sans-serif; font-size: 13px; font-weight: 700; }
+.net-worth-debt-field { display: flex; align-items: center; justify-content: space-between; gap: 18px; padding-top: 14px; border-top: 1px solid var(--glass-border-soft); }
+.net-worth-debt-field > span:first-child { min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+.net-worth-debt-field strong { font-size: 13px; }
+.net-worth-debt-field small { color: var(--text-faint); font-size: 11.5px; line-height: 1.4; }
+.net-worth-debt-field .money-input { flex: none; width: min(190px, 42%); min-height: 44px; }
+.net-worth-debt-field input { min-width: 0; text-align: right; }
+
+@media (max-width: 720px) {
+  .budget-form { grid-template-columns: 1fr 1fr; }
+  .budget-form .settings-action { grid-column: 1 / -1; width: 100%; }
+}
+@media (max-width: 480px) {
+  .budget-panel, .net-worth-card { padding: 16px; gap: 14px; }
+  .feature-section-head { gap: 10px; }
+  .feature-month-chip { max-width: 116px; padding: 6px 9px; }
+  .budget-overview, .net-worth-stats { grid-template-columns: 1fr 1fr; }
+  .budget-overview > div:last-child, .net-worth-stats > div:last-child { grid-column: 1 / -1; }
+  .budget-row { grid-template-columns: minmax(0, 1fr); }
+  .budget-row-head { align-items: flex-start; flex-direction: column; gap: 3px; }
+  .budget-row-track { grid-column: 1; }
+  .budget-row-actions { grid-column: 1; grid-row: auto; justify-content: flex-end; }
+  .budget-row-actions .money-input { width: min(180px, calc(100% - 41px)); }
+  .budget-form { grid-template-columns: 1fr; }
+  .budget-form .settings-action { grid-column: 1; }
+  .net-worth-chart-wrap, .net-worth-chart { min-height: 160px; }
+  .net-worth-debt-field { align-items: stretch; flex-direction: column; gap: 10px; }
+  .net-worth-debt-field .money-input { width: 100%; }
+}
+
 /* ============================================================
    THEME: X Black (pure black, X/Twitter-like minimal)
    ============================================================ */
