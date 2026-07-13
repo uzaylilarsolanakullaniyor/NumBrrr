@@ -723,6 +723,7 @@ const el = {
   watchBubbles: document.getElementById("watchBubbles"),
   homeCardList: document.getElementById("homeCardList"),
   resetHomeCards: document.getElementById("resetHomeCards"),
+  homeCustomizePanel: document.getElementById("homeCustomizePanel"),
   dashboardGrid: document.getElementById("dashboardGrid"),
   editHome: document.getElementById("editHome"),
   freedomWidgetToggle: document.getElementById("freedomWidgetToggle"),
@@ -3142,7 +3143,8 @@ function wireHomeDashboard() {
     const settingsTab = document.querySelector('.tab[data-view="settings"]');
     if (!settingsTab) return;
     settingsTab.click();
-    setTimeout(() => document.getElementById("homeCustomizeTitle").scrollIntoView({ block: "start", behavior: "smooth" }), 0);
+    if (el.homeCustomizePanel) el.homeCustomizePanel.open = true;
+    setTimeout(() => (el.homeCustomizePanel || document.getElementById("homeCustomizeTitle")).scrollIntoView({ block: "start", behavior: "smooth" }), 0);
   });
   el.savingsGoalForm.addEventListener("submit", addSavingsGoal);
   el.homeNoteForm.addEventListener("submit", addHomeNote);
