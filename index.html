@@ -22,7 +22,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Sora:wght@600;700;800&family=Cinzel:wght@600;700;800&family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="vendor/leaflet/leaflet.css" />
-  <link rel="stylesheet" href="styles.css?v=4" />
+  <link rel="stylesheet" href="styles.css?v=6" />
 </head>
 <body>
   <div class="offline-banner" id="offlineBanner" role="status" aria-live="polite" hidden data-i18n="offline_banner">Çevrimdışısın · son kaydedilen veriler gösteriliyor</div>
@@ -187,6 +187,39 @@
           </button>
         </article>
 
+        <article class="glass dashboard-widget dashboard-widget--metric" data-home-widget="monthly" aria-labelledby="monthlySummaryTitle">
+          <div class="home-card-head">
+            <span class="dashboard-widget-icon" aria-hidden="true">📊</span>
+            <div><h2 id="monthlySummaryTitle" data-i18n="monthly_summary_title">This month</h2><p data-i18n="monthly_summary_sub">Income, spending and savings at a glance.</p></div>
+          </div>
+          <div class="monthly-summary-grid">
+            <div><span data-i18n="monthly_income">Income</span><strong id="homeMonthlyIncome">—</strong></div>
+            <div><span data-i18n="monthly_expense">Expenses</span><strong id="homeMonthlyExpense">—</strong></div>
+            <div class="monthly-summary-net"><span data-i18n="monthly_net">Net</span><strong id="homeMonthlyNet">—</strong></div>
+          </div>
+          <div class="home-progress" aria-hidden="true"><span id="homeMonthlyBar"></span></div>
+          <p class="home-card-note" id="homeMonthlyRate">—</p>
+        </article>
+
+        <article class="glass dashboard-widget dashboard-widget--metric" data-home-widget="health" aria-labelledby="healthScoreTitle">
+          <div class="home-card-head">
+            <span class="dashboard-widget-icon" aria-hidden="true">❤️</span>
+            <div><h2 id="healthScoreTitle" data-i18n="health_title">Financial health</h2><p data-i18n="health_sub">A score based on your current data.</p></div>
+          </div>
+          <div class="health-score-wrap">
+            <div class="health-ring" id="healthRing" style="--score:0"><strong id="healthScore">0</strong><span>/100</span></div>
+            <div class="health-copy"><strong id="healthLabel">—</strong><p data-i18n="health_note">Savings rate, passive income, buffer and diversification.</p></div>
+          </div>
+        </article>
+
+        <article class="glass dashboard-widget dashboard-widget--metric" data-home-widget="markets" aria-labelledby="marketSummaryTitle">
+          <div class="home-card-head">
+            <span class="dashboard-widget-icon" aria-hidden="true">💱</span>
+            <div><h2 id="marketSummaryTitle" data-i18n="market_summary_title">FX & gold</h2><p data-i18n="market_summary_sub">Current TRY market snapshot.</p></div>
+          </div>
+          <div class="home-market-list" id="homeMarketList" aria-live="polite"></div>
+        </article>
+
         <article class="glass dashboard-widget dashboard-widget--compact" data-home-widget="car">
           <button class="dashboard-widget-open" type="button" data-open-view="car">
             <span class="dashboard-widget-top"><span class="dashboard-widget-icon" aria-hidden="true">🚗</span><span data-i18n="home_widget_car">My car</span><span aria-hidden="true">→</span></span>
@@ -201,6 +234,41 @@
             <strong class="dashboard-widget-value dashboard-widget-value--text" id="homeWatchValue">—</strong>
             <small class="dashboard-widget-note" id="homeWatchNote">—</small>
           </button>
+        </article>
+
+        <article class="glass dashboard-widget dashboard-widget--feature" data-home-widget="goals" aria-labelledby="savingsGoalsTitle">
+          <div class="dashboard-feature-head">
+            <span class="dashboard-widget-icon" aria-hidden="true">🏁</span>
+            <div><h2 id="savingsGoalsTitle" data-i18n="goal_title">Savings goals</h2><p data-i18n="goal_sub">Create separate goals in Turkish lira or US dollars.</p></div>
+          </div>
+          <form class="goal-form" id="savingsGoalForm">
+            <label><span data-i18n="goal_name">Goal</span><input id="savingsGoalName" type="text" maxlength="60" autocomplete="off" data-i18n-placeholder="goal_name_ph" placeholder="Emergency fund, car…" /></label>
+            <label><span data-i18n="goal_target">Target</span><input id="savingsGoalTarget" type="text" inputmode="numeric" autocomplete="off" placeholder="0" /></label>
+            <label><span data-i18n="goal_current">Saved</span><input id="savingsGoalCurrent" type="text" inputmode="numeric" autocomplete="off" placeholder="0" /></label>
+            <label><span data-i18n="goal_currency">Currency</span><select id="savingsGoalCurrency"><option value="TL">₺ TL</option><option value="USD">$ USD</option></select></label>
+            <button class="settings-action settings-action--primary" type="submit" data-i18n="goal_add">Add goal</button>
+          </form>
+          <div class="savings-goal-list" id="savingsGoalList" aria-live="polite"></div>
+        </article>
+
+        <article class="glass dashboard-widget dashboard-widget--half" data-home-widget="notes" aria-labelledby="homeNotesTitle">
+          <div class="home-card-head">
+            <span class="dashboard-widget-icon" aria-hidden="true">📝</span>
+            <div><h2 id="homeNotesTitle" data-i18n="notes_title">Mini notes</h2><p data-i18n="notes_sub">Keep short reminders close.</p></div>
+          </div>
+          <form class="mini-note-form" id="homeNoteForm">
+            <input id="homeNoteInput" type="text" maxlength="120" autocomplete="off" data-i18n-placeholder="note_ph" placeholder="Write a short note…" />
+            <button class="settings-action settings-action--primary" type="submit" data-i18n="note_add">Add</button>
+          </form>
+          <div class="mini-note-list" id="homeNoteList" aria-live="polite"></div>
+        </article>
+
+        <article class="glass dashboard-widget dashboard-widget--half" data-home-widget="insights" aria-labelledby="smartInsightsTitle">
+          <div class="home-card-head">
+            <span class="dashboard-widget-icon" aria-hidden="true">✨</span>
+            <div><h2 id="smartInsightsTitle" data-i18n="insights_title">Smart insights</h2><p data-i18n="insights_sub">Automatic observations from your data.</p></div>
+          </div>
+          <div class="smart-insight-list" id="smartInsightList" aria-live="polite"></div>
         </article>
 
         <article class="glass dashboard-widget dashboard-widget--alerts" data-home-widget="alerts" aria-labelledby="homePriceAlertsTitle">
@@ -668,7 +736,7 @@
 
   <script src="vendor/leaflet/leaflet.js"></script>
   <script src="turkey-locations.js?v=2"></script>
-  <script src="app.js?v=4"></script>
+  <script src="app.js?v=6"></script>
 
   <!-- Vercel Web Analytics (static-site injection; loads only on the deployed Vercel domain) -->
   <script>

@@ -213,6 +213,7 @@ const GRAMS_PER_OZ = 31.1034768;
 let usdTry = 0; // TRY per 1 USD (for converting stock prices to the active currency)
 let usdTryChg24 = null; // USD/TRY 24h % move
 let watchData = {}; // key -> { price, ccy, chg24, chg1mo, chg1y } for watchlist items
+let homeMarketData = { usd: null, eur: null, loadedAt: 0, loading: false };
 
 // ============================================================
 //  i18n dictionary
@@ -274,8 +275,14 @@ const I18N = {
     savings_note: "Projection compounds yearly contributions: FV = annual × [((1 + r)ⁿ − 1) / r], where r is the selected annual return. Returns are assumptions, not guarantees.",
     settings_title: "Settings", language: "Language", theme: "Theme", country: "Country", sound: "Sound", sound_fx: "Sound effects", motion: "Motion", animations: "Animations", animations_sub: "Show interface transitions and decorative motion",
     home_customize_title: "Home screen", home_customize_desc: "Reorder widgets or hide the ones you do not use.", home_customize_reset: "Reset layout", home_move_up: "Move up", home_move_down: "Move down", home_hide: "Show this widget", home_last_card: "At least one widget must remain visible.",
-    home_widget_freedom: "Freedom calculator", home_widget_portfolio: "Portfolio", home_widget_income: "Income", home_widget_expenses: "Expenses", home_widget_car: "My car", home_widget_watch: "Watchlist", home_widget_alerts: "Price alerts", home_widget_countdown: "Countdowns",
+    home_widget_freedom: "Freedom calculator", home_widget_portfolio: "Portfolio", home_widget_income: "Income", home_widget_expenses: "Expenses", home_widget_monthly: "This month", home_widget_health: "Financial health", home_widget_markets: "FX & gold", home_widget_car: "My car", home_widget_watch: "Watchlist", home_widget_goals: "Savings goals", home_widget_notes: "Mini notes", home_widget_insights: "Smart insights", home_widget_alerts: "Price alerts", home_widget_countdown: "Countdowns",
     home_holdings: "{count} holdings", home_passive: "{amount} passive / month", home_upcoming: "{count} upcoming payments", home_vehicles: "{count} vehicles", home_last_trip: "Last trip: {route}", home_no_route: "No saved route", home_watch_count: "{count} tracked assets", home_watch_empty: "No tracked assets", home_freedom_summary: "{amount} · {name}",
+    monthly_summary_title: "This month", monthly_summary_sub: "Income, spending and savings at a glance.", monthly_income: "Income", monthly_expense: "Expenses", monthly_net: "Net", monthly_rate: "Savings rate: {rate}%", monthly_no_income: "Add monthly income to calculate your savings rate.",
+    health_title: "Financial health", health_sub: "A score based on your current data.", health_note: "Savings rate, passive income, buffer and diversification.", health_weak: "Needs attention", health_fair: "Getting stronger", health_good: "Healthy", health_excellent: "Excellent",
+    market_summary_title: "FX & gold", market_summary_sub: "Current TRY market snapshot.", market_usd: "USD / TRY", market_eur: "EUR / TRY", market_gold: "Gram gold", market_loading: "Loading live prices…", market_unavailable: "Price unavailable",
+    goal_title: "Savings goals", goal_sub: "Create separate goals in Turkish lira or US dollars.", goal_name: "Goal", goal_name_ph: "Emergency fund, car…", goal_target: "Target", goal_current: "Saved", goal_currency: "Currency", goal_add: "Add goal", goal_empty: "No savings goal yet.", goal_invalid: "Enter a goal name and a valid target amount.", goal_added: "Savings goal added ✓", goal_remove: "Remove goal", goal_progress: "{current} of {target}", goal_completed: "Goal reached",
+    notes_title: "Mini notes", notes_sub: "Keep short reminders close.", note_ph: "Write a short note…", note_add: "Add", note_empty: "No notes yet.", note_remove: "Remove note",
+    insights_title: "Smart insights", insights_sub: "Automatic observations from your data.", insight_setup_title: "Complete your numbers", insight_setup_body: "Add income and expenses to unlock personalised insights.", insight_cash_positive_title: "Positive cash flow", insight_cash_positive_body: "Income is {amount} above expenses this month.", insight_cash_negative_title: "Spending is above income", insight_cash_negative_body: "You are currently {amount} short this month.", insight_rate_title: "Savings rate", insight_rate_body: "You are keeping {rate}% of monthly income.", insight_passive_title: "Passive coverage", insight_passive_body: "Passive income covers {rate}% of monthly expenses.", insight_expense_up_title: "Expenses increased", insight_expense_up_body: "This month is {rate}% above the last archived month.", insight_expense_down_title: "Expenses decreased", insight_expense_down_body: "This month is {rate}% below the last archived month.", insight_goal_title: "Closest savings goal", insight_goal_body: "{name} is {rate}% complete.", insight_upcoming_title: "Upcoming payments", insight_upcoming_body: "You have {count} unpaid payment or maintenance reminders.",
     countdown_title: "Countdowns", countdown_sub: "Pick a target date from the calendar and follow it in days or months.", countdown_name: "Name", countdown_category: "Category", countdown_date: "Target date", countdown_unit: "Show as", countdown_days: "Days", countdown_months: "Months", countdown_add: "Add countdown", countdown_name_ph: "Vacation, exam, goal…", countdown_category_ph: "Travel, work, personal…", countdown_empty: "No countdown yet.", countdown_invalid: "Enter a name and choose a future date.", countdown_day_left: "day left", countdown_days_left: "days left", countdown_month_left: "month left", countdown_months_left: "months left", countdown_done: "Time's up", countdown_target: "Target: {date}", countdown_remove: "Remove countdown", countdown_switch_unit: "Switch days / months", countdown_added: "Countdown added ✓", countdown_active: "{count} active countdowns",
     pwa_title: "App & offline use", pwa_desc: "Install NumBrrr on your phone and keep using saved data without internet.", pwa_install: "Install app", pwa_ready: "Offline use is ready.", pwa_installed: "NumBrrr is installed on this device.", pwa_ios: "Use your browser's Add to Home Screen command to install.", pwa_unsupported: "This browser does not support app installation.", offline_banner: "You are offline · showing the latest saved data",
     notify_title: "Notifications", notify_desc: "Get price alerts and upcoming vehicle maintenance reminders, including while the app is closed when background service is available.", notify_enable: "Enable notifications",
@@ -437,8 +444,14 @@ const I18N = {
     savings_note: "Projeksiyon yıllık katkıları bileşik hesaplar: GD = yıllık × [((1 + r)ⁿ − 1) / r], r seçilen yıllık getiridir. Getiriler varsayımdır, garanti değildir.",
     settings_title: "Ayarlar", language: "Dil", theme: "Tema", country: "Ülke", sound: "Ses", sound_fx: "Ses efektleri", motion: "Hareket", animations: "Animasyonlar", animations_sub: "Arayüz geçişlerini ve dekoratif hareketleri göster",
     home_customize_title: "Ana sayfa", home_customize_desc: "Widget'ları sırala veya kullanmadıklarını gizle.", home_customize_reset: "Düzeni sıfırla", home_move_up: "Yukarı taşı", home_move_down: "Aşağı taşı", home_hide: "Bu widget'ı göster", home_last_card: "En az bir widget görünür kalmalı.",
-    home_widget_freedom: "Özgürlük hesaplayıcısı", home_widget_portfolio: "Portföy", home_widget_income: "Gelirler", home_widget_expenses: "Giderler", home_widget_car: "Aracım", home_widget_watch: "Takip listesi", home_widget_alerts: "Fiyat alarmları", home_widget_countdown: "Geri sayımlar",
+    home_widget_freedom: "Özgürlük hesaplayıcısı", home_widget_portfolio: "Portföy", home_widget_income: "Gelirler", home_widget_expenses: "Giderler", home_widget_monthly: "Bu ay", home_widget_health: "Finansal sağlık", home_widget_markets: "Kur ve altın", home_widget_car: "Aracım", home_widget_watch: "Takip listesi", home_widget_goals: "Birikim hedefleri", home_widget_notes: "Mini notlar", home_widget_insights: "Akıllı içgörüler", home_widget_alerts: "Fiyat alarmları", home_widget_countdown: "Geri sayımlar",
     home_holdings: "{count} varlık", home_passive: "Aylık {amount} pasif", home_upcoming: "{count} yaklaşan ödeme", home_vehicles: "{count} araç", home_last_trip: "Son yolculuk: {route}", home_no_route: "Kayıtlı rota yok", home_watch_count: "{count} takip edilen varlık", home_watch_empty: "Takip edilen varlık yok", home_freedom_summary: "{name} · {amount}",
+    monthly_summary_title: "Bu ayın özeti", monthly_summary_sub: "Gelir, gider ve birikim tek bakışta.", monthly_income: "Gelir", monthly_expense: "Gider", monthly_net: "Net", monthly_rate: "Birikim oranı: %{rate}", monthly_no_income: "Birikim oranını hesaplamak için aylık gelir ekle.",
+    health_title: "Finansal sağlık", health_sub: "Mevcut verilerine göre hesaplanan skor.", health_note: "Birikim oranı, pasif gelir, varlık tamponu ve çeşitlilik.", health_weak: "Dikkat gerekli", health_fair: "Güçleniyor", health_good: "Sağlıklı", health_excellent: "Mükemmel",
+    market_summary_title: "Kur ve altın", market_summary_sub: "Güncel TL piyasa özeti.", market_usd: "Dolar / TL", market_eur: "Euro / TL", market_gold: "Gram altın", market_loading: "Canlı fiyatlar yükleniyor…", market_unavailable: "Fiyat alınamadı",
+    goal_title: "Birikim hedefleri", goal_sub: "TL veya dolar cinsinden ayrı hedefler oluştur.", goal_name: "Hedef", goal_name_ph: "Acil durum fonu, araba…", goal_target: "Hedef tutar", goal_current: "Mevcut birikim", goal_currency: "Para birimi", goal_add: "Hedef ekle", goal_empty: "Henüz birikim hedefi yok.", goal_invalid: "Hedef adı ve geçerli bir hedef tutar gir.", goal_added: "Birikim hedefi eklendi ✓", goal_remove: "Hedefi kaldır", goal_progress: "{target} hedefinin {current} kadarı", goal_completed: "Hedefe ulaşıldı",
+    notes_title: "Mini notlar", notes_sub: "Kısa hatırlatmalarını yanında tut.", note_ph: "Kısa bir not yaz…", note_add: "Ekle", note_empty: "Henüz not yok.", note_remove: "Notu kaldır",
+    insights_title: "Akıllı içgörüler", insights_sub: "Verilerinden otomatik çıkarılan kısa yorumlar.", insight_setup_title: "Rakamlarını tamamla", insight_setup_body: "Kişisel içgörüler için gelir ve gider bilgilerini ekle.", insight_cash_positive_title: "Pozitif nakit akışı", insight_cash_positive_body: "Bu ay gelirlerin giderlerinden {amount} fazla.", insight_cash_negative_title: "Gider geliri aşıyor", insight_cash_negative_body: "Bu ay şu anda {amount} açık var.", insight_rate_title: "Birikim oranı", insight_rate_body: "Aylık gelirinin %{rate} kadarını elinde tutuyorsun.", insight_passive_title: "Pasif gelir kapsaması", insight_passive_body: "Pasif gelirin aylık giderlerinin %{rate} kadarını karşılıyor.", insight_expense_up_title: "Giderler arttı", insight_expense_up_body: "Bu ay son arşivlenen aya göre %{rate} daha yüksek.", insight_expense_down_title: "Giderler azaldı", insight_expense_down_body: "Bu ay son arşivlenen aya göre %{rate} daha düşük.", insight_goal_title: "En yakın birikim hedefi", insight_goal_body: "{name} hedefinin %{rate} kadarı tamamlandı.", insight_upcoming_title: "Yaklaşan ödemeler", insight_upcoming_body: "Ödenmemiş {count} ödeme veya bakım hatırlatman var.",
     countdown_title: "Geri sayımlar", countdown_sub: "Takvimden hedef tarihi seç; gün veya ay olarak takip et.", countdown_name: "Başlık", countdown_category: "Kategori", countdown_date: "Hedef tarih", countdown_unit: "Gösterim", countdown_days: "Gün", countdown_months: "Ay", countdown_add: "Geri sayım ekle", countdown_name_ph: "Tatil, sınav, hedef…", countdown_category_ph: "Seyahat, iş, kişisel…", countdown_empty: "Henüz geri sayım yok.", countdown_invalid: "Bir başlık gir ve takvimden ileri bir tarih seç.", countdown_day_left: "gün kaldı", countdown_days_left: "gün kaldı", countdown_month_left: "ay kaldı", countdown_months_left: "ay kaldı", countdown_done: "Süre doldu", countdown_target: "Hedef: {date}", countdown_remove: "Geri sayımı kaldır", countdown_switch_unit: "Gün / ay görünümünü değiştir", countdown_added: "Geri sayım eklendi ✓", countdown_active: "{count} aktif geri sayım",
     pwa_title: "Uygulama ve çevrimdışı kullanım", pwa_desc: "NumBrrr'ı telefonuna kur; internet yokken kayıtlı verilerinle kullanmaya devam et.", pwa_install: "Uygulamayı yükle", pwa_ready: "Çevrimdışı kullanım hazır.", pwa_installed: "NumBrrr bu cihaza yüklendi.", pwa_ios: "Yüklemek için tarayıcı menüsündeki Ana Ekrana Ekle seçeneğini kullan.", pwa_unsupported: "Bu tarayıcı uygulama yüklemeyi desteklemiyor.", offline_banner: "Çevrimdışısın · son kaydedilen veriler gösteriliyor",
     notify_title: "Bildirimler", notify_desc: "Fiyat alarmlarını ve yaklaşan araç bakım hatırlatmalarını, arka plan hizmeti hazırsa uygulama kapalıyken de al.", notify_enable: "Bildirimleri aç",
@@ -546,7 +559,7 @@ const I18N = {
 };
 
 // ---- State ----
-const HOME_WIDGET_IDS = ["freedom", "portfolio", "income", "expenses", "car", "watch", "alerts", "countdown"];
+const HOME_WIDGET_IDS = ["freedom", "portfolio", "income", "expenses", "monthly", "health", "markets", "car", "watch", "goals", "notes", "insights", "alerts", "countdown"];
 const state = {
   lang: "en",
   theme: "black",
@@ -589,6 +602,8 @@ const state = {
   watchlist: [], // [{ type, key, name }] — assets to monitor (price + 24h/1mo/1yr performance)
   notifications: { enabled: false, vehicleDays: 7, priceAlerts: [], seq: 0, sent: {} },
   homeLayout: { order: [...HOME_WIDGET_IDS], hidden: [], freedomExpanded: false },
+  savingsGoals: { items: [], seq: 0 },
+  homeNotes: { items: [], seq: 0 },
   countdowns: { items: [], seq: 0 },
   income: { amounts: {}, passive: {}, custom: [], seq: 0 },
 };
@@ -719,10 +734,29 @@ const el = {
   homeIncomeNote: document.getElementById("homeIncomeNote"),
   homeExpensesValue: document.getElementById("homeExpensesValue"),
   homeExpensesNote: document.getElementById("homeExpensesNote"),
+  homeMonthlyIncome: document.getElementById("homeMonthlyIncome"),
+  homeMonthlyExpense: document.getElementById("homeMonthlyExpense"),
+  homeMonthlyNet: document.getElementById("homeMonthlyNet"),
+  homeMonthlyBar: document.getElementById("homeMonthlyBar"),
+  homeMonthlyRate: document.getElementById("homeMonthlyRate"),
+  healthRing: document.getElementById("healthRing"),
+  healthScore: document.getElementById("healthScore"),
+  healthLabel: document.getElementById("healthLabel"),
+  homeMarketList: document.getElementById("homeMarketList"),
   homeCarValue: document.getElementById("homeCarValue"),
   homeCarNote: document.getElementById("homeCarNote"),
   homeWatchValue: document.getElementById("homeWatchValue"),
   homeWatchNote: document.getElementById("homeWatchNote"),
+  savingsGoalForm: document.getElementById("savingsGoalForm"),
+  savingsGoalName: document.getElementById("savingsGoalName"),
+  savingsGoalTarget: document.getElementById("savingsGoalTarget"),
+  savingsGoalCurrent: document.getElementById("savingsGoalCurrent"),
+  savingsGoalCurrency: document.getElementById("savingsGoalCurrency"),
+  savingsGoalList: document.getElementById("savingsGoalList"),
+  homeNoteForm: document.getElementById("homeNoteForm"),
+  homeNoteInput: document.getElementById("homeNoteInput"),
+  homeNoteList: document.getElementById("homeNoteList"),
+  smartInsightList: document.getElementById("smartInsightList"),
   homePriceAlertSearch: document.getElementById("homePriceAlertSearch"),
   homePriceAlertDd: document.getElementById("homePriceAlertDd"),
   homePriceAlertCondition: document.getElementById("homePriceAlertCondition"),
@@ -2157,6 +2191,8 @@ async function refreshCryptoPrices() {
   buildPortfolio();
   refreshPortfolio();
   refreshIncome();
+  renderHomeSummaries();
+  renderHomeMarketSummary();
 }
 
 function addHolding() {
@@ -2499,8 +2535,12 @@ function normalizeHomeLayout(value) {
   const source = value && typeof value === "object" ? value : {};
   const supplied = Array.isArray(source.order) ? source.order.filter((id) => HOME_WIDGET_IDS.includes(id)) : [];
   const order = [...new Set(supplied)];
-  if (!order.includes("alerts") && order.includes("countdown")) order.splice(order.indexOf("countdown"), 0, "alerts");
-  HOME_WIDGET_IDS.forEach((id) => { if (!order.includes(id)) order.push(id); });
+  HOME_WIDGET_IDS.forEach((id, index) => {
+    if (order.includes(id)) return;
+    const nextExisting = HOME_WIDGET_IDS.slice(index + 1).find((candidate) => order.includes(candidate));
+    if (nextExisting) order.splice(order.indexOf(nextExisting), 0, id);
+    else order.push(id);
+  });
   const hidden = Array.isArray(source.hidden) ? [...new Set(source.hidden.filter((id) => HOME_WIDGET_IDS.includes(id)))] : [];
   if (hidden.length >= HOME_WIDGET_IDS.length) hidden.pop();
   return { order, hidden, freedomExpanded: !!source.freedomExpanded };
@@ -2625,6 +2665,202 @@ function upcomingPaymentCount() {
   return count;
 }
 
+function financialSnapshot() {
+  const portfolioIncome = portfolioYield();
+  const income = incomeManualTotal() + portfolioIncome.interest + portfolioIncome.rental;
+  const expenses = monthlyBurn();
+  const net = income - expenses;
+  const savingsRate = income > 0 ? (net / income) * 100 : 0;
+  const passive = passiveIncomeTotal();
+  const passiveCoverage = expenses > 0 ? (passive / expenses) * 100 : 0;
+  const portfolioTotal = state.portfolio.holdings.reduce((sum, holding) => sum + Math.max(0, holding.value || 0), 0);
+  const bufferMonths = expenses > 0 ? portfolioTotal / expenses : 0;
+  const diversity = new Set(state.portfolio.holdings.filter((holding) => (holding.value || 0) > 0).map((holding) => holding.assetType)).size;
+  const savingsPoints = Math.max(0, Math.min(40, (savingsRate / 30) * 40));
+  const passivePoints = Math.max(0, Math.min(25, (passiveCoverage / 100) * 25));
+  const bufferPoints = Math.max(0, Math.min(20, (bufferMonths / 6) * 20));
+  const diversityPoints = Math.max(0, Math.min(15, (diversity / 4) * 15));
+  const score = Math.round(savingsPoints + passivePoints + bufferPoints + diversityPoints);
+  return { income, expenses, net, savingsRate, passive, passiveCoverage, portfolioTotal, bufferMonths, diversity, score };
+}
+
+function renderMonthlySummary(snapshot = financialSnapshot()) {
+  if (!el.homeMonthlyIncome) return;
+  el.homeMonthlyIncome.textContent = formatMoney(snapshot.income);
+  el.homeMonthlyExpense.textContent = formatMoney(snapshot.expenses);
+  el.homeMonthlyNet.textContent = formatMoney(snapshot.net);
+  el.homeMonthlyNet.classList.toggle("is-positive", snapshot.net >= 0);
+  el.homeMonthlyNet.classList.toggle("is-negative", snapshot.net < 0);
+  const barValue = snapshot.income > 0 ? Math.max(0, Math.min(100, snapshot.savingsRate)) : 0;
+  el.homeMonthlyBar.style.width = `${barValue}%`;
+  el.homeMonthlyBar.classList.toggle("is-negative", snapshot.net < 0);
+  el.homeMonthlyRate.textContent = snapshot.income > 0 ? t("monthly_rate", { rate: Math.round(snapshot.savingsRate) }) : t("monthly_no_income");
+}
+
+function healthLabel(score) {
+  if (score >= 80) return t("health_excellent");
+  if (score >= 60) return t("health_good");
+  if (score >= 35) return t("health_fair");
+  return t("health_weak");
+}
+
+function renderFinancialHealth(snapshot = financialSnapshot()) {
+  if (!el.healthRing) return;
+  el.healthRing.style.setProperty("--score", String(snapshot.score));
+  el.healthScore.textContent = String(snapshot.score);
+  el.healthLabel.textContent = healthLabel(snapshot.score);
+  el.healthRing.dataset.level = snapshot.score >= 80 ? "excellent" : snapshot.score >= 60 ? "good" : snapshot.score >= 35 ? "fair" : "weak";
+}
+
+function homeMarketChange(change) {
+  if (!Number.isFinite(change)) return "";
+  const sign = change >= 0 ? "+" : "";
+  return `<span class="home-market-change ${change >= 0 ? "is-up" : "is-down"}">${sign}${change.toFixed(2)}%</span>`;
+}
+
+function renderHomeMarketSummary() {
+  if (!el.homeMarketList) return;
+  const goldTry = goldPriceGram > 0 ? goldPriceGram * (state.currency === "TL" ? 1 : usdTry || 0) : 0;
+  const rows = [
+    { label: t("market_usd"), value: homeMarketData.usd && homeMarketData.usd.price > 0 ? `₺${fmtPrice(homeMarketData.usd.price)}` : "", change: homeMarketData.usd && homeMarketData.usd.chg24 },
+    { label: t("market_eur"), value: homeMarketData.eur && homeMarketData.eur.price > 0 ? `₺${fmtPrice(homeMarketData.eur.price)}` : "", change: homeMarketData.eur && homeMarketData.eur.chg24 },
+    { label: t("market_gold"), value: goldTry > 0 ? formatMoneyCcy(goldTry, "TL") : "", change: goldChg24 },
+  ];
+  el.homeMarketList.innerHTML = rows.map((row) => `<div class="home-market-row"><span>${escapeHtml(row.label)}</span><strong>${escapeHtml(row.value || (homeMarketData.loading ? "…" : t("market_unavailable")))}</strong>${homeMarketChange(row.change)}</div>`).join("");
+}
+
+async function refreshHomeMarketSummary(force = false) {
+  if (!el.homeMarketList) return;
+  if (!force && homeMarketData.loadedAt && Date.now() - homeMarketData.loadedAt < 3600 * 1000) { renderHomeMarketSummary(); return; }
+  if (homeMarketData.loading) return;
+  homeMarketData.loading = true;
+  renderHomeMarketSummary();
+  const [usd, eur] = await Promise.all([getFxQuote("TRY=X"), getFxQuote("EURTRY=X")]);
+  if (usd) { homeMarketData.usd = usd; if (usd.price > 0) usdTry = usd.price; }
+  if (eur) homeMarketData.eur = eur;
+  homeMarketData.loadedAt = Date.now();
+  homeMarketData.loading = false;
+  renderHomeMarketSummary();
+}
+
+function renderSavingsGoals() {
+  if (!el.savingsGoalList) return;
+  const items = state.savingsGoals.items;
+  if (!items.length) {
+    el.savingsGoalList.innerHTML = `<p class="countdown-empty">${escapeHtml(t("goal_empty"))}</p>`;
+    return;
+  }
+  el.savingsGoalList.innerHTML = items.map((goal) => {
+    const percent = goal.target > 0 ? Math.max(0, Math.min(100, (goal.current / goal.target) * 100)) : 0;
+    const completed = goal.current >= goal.target;
+    return `<article class="savings-goal-row${completed ? " is-complete" : ""}" data-goal-id="${escapeHtml(goal.id)}">
+      <div class="savings-goal-head"><div><strong>${escapeHtml(goal.name)}</strong><span>${escapeHtml(goal.currency)}</span></div><b>${completed ? "✓" : Math.round(percent) + "%"}</b></div>
+      <div class="savings-goal-track" aria-hidden="true"><span style="width:${percent}%"></span></div>
+      <div class="savings-goal-foot"><span>${escapeHtml(completed ? t("goal_completed") : t("goal_progress", { current: formatMoneyCcy(goal.current, goal.currency), target: formatMoneyCcy(goal.target, goal.currency) }))}</span><label><span>${escapeHtml(t("goal_current"))}</span><input type="text" inputmode="numeric" data-goal-current="${escapeHtml(goal.id)}" value="${goal.current ? formatThousands(goal.current) : ""}" placeholder="0" aria-label="${escapeHtml(goal.name + " · " + t("goal_current"))}" /></label><button type="button" data-goal-del="${escapeHtml(goal.id)}" aria-label="${escapeHtml(t("goal_remove"))}">×</button></div>
+    </article>`;
+  }).join("");
+  el.savingsGoalList.querySelectorAll("[data-goal-current]").forEach((input) => {
+    const update = (finish = false) => {
+      const goal = state.savingsGoals.items.find((item) => item.id === input.dataset.goalCurrent);
+      if (!goal) return;
+      goal.current = Math.max(0, parseNumber(input.value));
+      saveState();
+      if (finish) renderSavingsGoals();
+      else {
+        const row = input.closest(".savings-goal-row");
+        const percent = goal.target > 0 ? Math.max(0, Math.min(100, (goal.current / goal.target) * 100)) : 0;
+        const completed = goal.current >= goal.target;
+        row.classList.toggle("is-complete", completed);
+        row.querySelector(".savings-goal-track span").style.width = `${percent}%`;
+        row.querySelector(".savings-goal-head b").textContent = completed ? "✓" : Math.round(percent) + "%";
+        row.querySelector(".savings-goal-foot > span").textContent = completed ? t("goal_completed") : t("goal_progress", { current: formatMoneyCcy(goal.current, goal.currency), target: formatMoneyCcy(goal.target, goal.currency) });
+      }
+      renderSmartInsights();
+    };
+    input.addEventListener("input", () => update(false));
+    input.addEventListener("change", () => update(true));
+    input.addEventListener("blur", () => update(true));
+    input.addEventListener("keydown", (event) => { if (event.key === "Enter") { event.preventDefault(); input.blur(); } });
+  });
+  el.savingsGoalList.querySelectorAll("[data-goal-del]").forEach((button) => button.addEventListener("click", () => {
+    state.savingsGoals.items = state.savingsGoals.items.filter((item) => item.id !== button.dataset.goalDel);
+    saveState(); sfx("remove"); renderSavingsGoals(); renderSmartInsights();
+  }));
+}
+
+function addSavingsGoal(event) {
+  event.preventDefault();
+  const name = el.savingsGoalName.value.trim();
+  const target = parseNumber(el.savingsGoalTarget.value);
+  const current = Math.max(0, parseNumber(el.savingsGoalCurrent.value));
+  const currency = el.savingsGoalCurrency.value === "USD" ? "USD" : "TL";
+  if (!name || !(target > 0)) { showAppToast(t("goal_invalid")); return; }
+  state.savingsGoals.items.unshift({ id: "sg" + ++state.savingsGoals.seq, name: name.slice(0, 60), target, current, currency });
+  el.savingsGoalName.value = "";
+  el.savingsGoalTarget.value = "";
+  el.savingsGoalCurrent.value = "";
+  saveState(); renderSavingsGoals(); renderSmartInsights(); sfx("success"); showAppToast(t("goal_added"));
+}
+
+function renderHomeNotes() {
+  if (!el.homeNoteList) return;
+  const items = state.homeNotes.items;
+  if (!items.length) {
+    el.homeNoteList.innerHTML = `<p class="countdown-empty">${escapeHtml(t("note_empty"))}</p>`;
+    return;
+  }
+  el.homeNoteList.innerHTML = items.map((note) => `<div class="mini-note-row${note.done ? " is-done" : ""}" data-note-id="${escapeHtml(note.id)}"><label><input type="checkbox" data-note-done="${escapeHtml(note.id)}" ${note.done ? "checked" : ""} /><span>${escapeHtml(note.text)}</span></label><button type="button" data-note-del="${escapeHtml(note.id)}" aria-label="${escapeHtml(t("note_remove"))}">×</button></div>`).join("");
+  el.homeNoteList.querySelectorAll("[data-note-done]").forEach((input) => input.addEventListener("change", () => {
+    const note = state.homeNotes.items.find((item) => item.id === input.dataset.noteDone);
+    if (!note) return;
+    note.done = input.checked; saveState(); renderHomeNotes();
+  }));
+  el.homeNoteList.querySelectorAll("[data-note-del]").forEach((button) => button.addEventListener("click", () => {
+    state.homeNotes.items = state.homeNotes.items.filter((item) => item.id !== button.dataset.noteDel);
+    saveState(); sfx("remove"); renderHomeNotes();
+  }));
+}
+
+function addHomeNote(event) {
+  event.preventDefault();
+  const text = el.homeNoteInput.value.trim();
+  if (!text) return;
+  state.homeNotes.items.unshift({ id: "hn" + ++state.homeNotes.seq, text: text.slice(0, 120), done: false });
+  if (state.homeNotes.items.length > 50) state.homeNotes.items.length = 50;
+  el.homeNoteInput.value = "";
+  saveState(); renderHomeNotes(); sfx("add");
+}
+
+function smartInsights(snapshot = financialSnapshot()) {
+  const insights = [];
+  if (snapshot.income <= 0 && snapshot.expenses <= 0) {
+    insights.push({ icon: "🧭", title: t("insight_setup_title"), body: t("insight_setup_body") });
+  } else {
+    insights.push(snapshot.net >= 0
+      ? { icon: "↗", tone: "good", title: t("insight_cash_positive_title"), body: t("insight_cash_positive_body", { amount: formatMoney(snapshot.net) }) }
+      : { icon: "↘", tone: "warn", title: t("insight_cash_negative_title"), body: t("insight_cash_negative_body", { amount: formatMoney(Math.abs(snapshot.net)) }) });
+    if (snapshot.income > 0) insights.push({ icon: "%", tone: snapshot.savingsRate >= 20 ? "good" : "", title: t("insight_rate_title"), body: t("insight_rate_body", { rate: Math.round(snapshot.savingsRate) }) });
+    if (snapshot.expenses > 0) insights.push({ icon: "◔", title: t("insight_passive_title"), body: t("insight_passive_body", { rate: Math.round(snapshot.passiveCoverage) }) });
+  }
+  const lastMonth = state.expenses.history[0];
+  if (lastMonth && lastMonth.total > 0 && snapshot.expenses > 0) {
+    const change = ((snapshot.expenses / lastMonth.total) - 1) * 100;
+    if (Math.abs(change) >= 5) insights.push(change > 0
+      ? { icon: "↑", tone: "warn", title: t("insight_expense_up_title"), body: t("insight_expense_up_body", { rate: Math.round(Math.abs(change)) }) }
+      : { icon: "↓", tone: "good", title: t("insight_expense_down_title"), body: t("insight_expense_down_body", { rate: Math.round(Math.abs(change)) }) });
+  }
+  const closestGoal = [...state.savingsGoals.items].filter((goal) => goal.target > 0).sort((a, b) => (b.current / b.target) - (a.current / a.target))[0];
+  if (closestGoal) insights.push({ icon: "🏁", title: t("insight_goal_title"), body: t("insight_goal_body", { name: closestGoal.name, rate: Math.min(100, Math.round((closestGoal.current / closestGoal.target) * 100)) }) });
+  const upcoming = upcomingPaymentCount();
+  if (upcoming > 0) insights.push({ icon: "⏰", title: t("insight_upcoming_title"), body: t("insight_upcoming_body", { count: upcoming }) });
+  return insights.slice(0, 4);
+}
+
+function renderSmartInsights(snapshot = financialSnapshot()) {
+  if (!el.smartInsightList) return;
+  el.smartInsightList.innerHTML = smartInsights(snapshot).map((insight) => `<article class="smart-insight-row${insight.tone ? " is-" + insight.tone : ""}"><span aria-hidden="true">${escapeHtml(insight.icon)}</span><div><strong>${escapeHtml(insight.title)}</strong><p>${escapeHtml(insight.body)}</p></div></article>`).join("");
+}
+
 function renderHomeSummaries() {
   if (!el.dashboardGrid) return;
   if (el.homeFreedomSummary) {
@@ -2645,6 +2881,13 @@ function renderHomeSummaries() {
   if (el.homeWatchValue) el.homeWatchValue.textContent = state.watchlist.length ? t("home_watch_count", { count: state.watchlist.length }) : t("home_watch_empty");
   const firstWatch = state.watchlist[0];
   if (el.homeWatchNote) el.homeWatchNote.textContent = firstWatch ? `${firstWatch.name} · ${watchPriceLabel(firstWatch)}` : t("watch_search_ph");
+  const snapshot = financialSnapshot();
+  renderMonthlySummary(snapshot);
+  renderFinancialHealth(snapshot);
+  renderHomeMarketSummary();
+  renderSavingsGoals();
+  renderHomeNotes();
+  renderSmartInsights(snapshot);
   if (el.countdownName) el.countdownName.placeholder = t("countdown_name_ph");
   if (el.countdownCategory) el.countdownCategory.placeholder = t("countdown_category_ph");
   if (el.countdownDate) {
@@ -2658,6 +2901,7 @@ function renderHomeDashboard() {
   renderHomeSummaries();
   applyHomeLayout();
   renderCountdowns();
+  refreshHomeMarketSummary();
 }
 
 function dateInputValue(date) {
@@ -2782,6 +3026,8 @@ function wireHomeDashboard() {
     settingsTab.click();
     setTimeout(() => document.getElementById("homeCustomizeTitle").scrollIntoView({ block: "start", behavior: "smooth" }), 0);
   });
+  el.savingsGoalForm.addEventListener("submit", addSavingsGoal);
+  el.homeNoteForm.addEventListener("submit", addHomeNote);
   el.countdownForm.addEventListener("submit", addCountdown);
 }
 
@@ -3901,6 +4147,7 @@ function applyLanguage(lang) {
   document.querySelectorAll("[data-i18n]").forEach((node) => { node.textContent = t(node.dataset.i18n); });
   document.querySelectorAll("[data-i18n-html]").forEach((node) => { node.innerHTML = t(node.dataset.i18nHtml); });
   document.querySelectorAll("[data-i18n-title]").forEach((node) => { node.title = t(node.dataset.i18nTitle); node.setAttribute("aria-label", t(node.dataset.i18nTitle)); });
+  document.querySelectorAll("[data-i18n-placeholder]").forEach((node) => { node.placeholder = t(node.dataset.i18nPlaceholder); });
   buildLayout(); refresh();
   buildExpenses();
   buildCarHub();
@@ -3946,6 +4193,7 @@ function updateSettingsActive() {
 function setCurrency(cur) {
   if (cur === state.currency || !CURRENCY_META[cur]) return;
   state.currency = cur;
+  if (el.savingsGoalCurrency) el.savingsGoalCurrency.value = cur;
   el.inflation.value = formatRate(state.inflation[cur], false);
   // USD holdings convert differently per app currency; recompute before rendering.
   state.portfolio.holdings.forEach((h) => { if (h.assetType === "usd") h.value = usdHoldingValue(h.usd || 0); });
@@ -4209,7 +4457,7 @@ function persistedState() {
     expenses: state.expenses, vehicles: state.vehicles, vehSeq: state.vehSeq,
     vehicleHub: state.vehicleHub,
     income: state.income, portfolio: state.portfolio, watchlist: state.watchlist,
-    notifications: state.notifications, homeLayout: state.homeLayout, countdowns: state.countdowns, portTotalUSD: state.portTotalUSD,
+    notifications: state.notifications, homeLayout: state.homeLayout, savingsGoals: state.savingsGoals, homeNotes: state.homeNotes, countdowns: state.countdowns, portTotalUSD: state.portTotalUSD,
   };
 }
 
@@ -4379,6 +4627,34 @@ function loadState() {
     };
   }
   state.homeLayout = normalizeHomeLayout(s.homeLayout);
+  if (s.savingsGoals && typeof s.savingsGoals === "object") {
+    const seenGoalIds = new Set();
+    const items = Array.isArray(s.savingsGoals.items) ? s.savingsGoals.items.map((goal) => ({
+      id: typeof goal.id === "string" ? goal.id.slice(0, 80) : "",
+      name: typeof goal.name === "string" ? goal.name.slice(0, 60) : "",
+      target: Number.isFinite(goal.target) ? Math.max(0, goal.target) : 0,
+      current: Number.isFinite(goal.current) ? Math.max(0, goal.current) : 0,
+      currency: goal.currency === "USD" ? "USD" : "TL",
+    })).filter((goal) => {
+      if (!goal.id || !goal.name || !(goal.target > 0) || seenGoalIds.has(goal.id)) return false;
+      seenGoalIds.add(goal.id); return true;
+    }).slice(0, 100) : [];
+    const highestGoalSeq = items.reduce((max, goal) => Math.max(max, Number((/^sg(\d+)$/.exec(goal.id) || [])[1]) || 0), 0);
+    state.savingsGoals = { items, seq: Math.max(Number.isFinite(s.savingsGoals.seq) ? Math.round(s.savingsGoals.seq) : 0, highestGoalSeq) };
+  }
+  if (s.homeNotes && typeof s.homeNotes === "object") {
+    const seenNoteIds = new Set();
+    const items = Array.isArray(s.homeNotes.items) ? s.homeNotes.items.map((note) => ({
+      id: typeof note.id === "string" ? note.id.slice(0, 80) : "",
+      text: typeof note.text === "string" ? note.text.slice(0, 120) : "",
+      done: !!note.done,
+    })).filter((note) => {
+      if (!note.id || !note.text || seenNoteIds.has(note.id)) return false;
+      seenNoteIds.add(note.id); return true;
+    }).slice(0, 50) : [];
+    const highestNoteSeq = items.reduce((max, note) => Math.max(max, Number((/^hn(\d+)$/.exec(note.id) || [])[1]) || 0), 0);
+    state.homeNotes = { items, seq: Math.max(Number.isFinite(s.homeNotes.seq) ? Math.round(s.homeNotes.seq) : 0, highestNoteSeq) };
+  }
   if (s.countdowns && typeof s.countdowns === "object") {
     const seenCountdownIds = new Set();
     const items = Array.isArray(s.countdowns.items) ? s.countdowns.items.map((item) => {
@@ -4430,6 +4706,7 @@ rollExpenseMonth(); // archive past months + start the current month before rend
 
 el.expenses.value = formatThousands(state.monthlyExpenses);
 el.inflation.value = formatRate(state.inflation[state.currency], false);
+if (el.savingsGoalCurrency) el.savingsGoalCurrency.value = state.currency;
 applyTheme(state.theme);
 soundToggle.checked = state.sound;
 applyMotion(state.motion);
