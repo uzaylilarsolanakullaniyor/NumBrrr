@@ -74,10 +74,13 @@ async function latestFive(items) {
 }
 
 module.exports = async (req, res) => {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 8000);
   try {
     const r = await fetch("https://kap.org.tr/tr/Endeksler?indice=BIST+HALKA+ARZ", {
       headers: { "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126 Safari/537.36" },
       redirect: "follow",
+      signal: controller.signal,
     });
     if (!r.ok) { res.status(502).json({ error: "KAP fetch failed" }); return; }
     const html = await r.text();
@@ -88,6 +91,8 @@ module.exports = async (req, res) => {
     res.status(200).json({ updated: new Date().toISOString(), items });
   } catch (e) {
     res.status(502).json({ error: "fetch failed" });
+  } finally {
+    clearTimeout(timer);
   }
 };
 

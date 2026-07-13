@@ -10,9 +10,11 @@ module.exports = async (req, res) => {
     res.status(400).json({ error: "symbol required" });
     return;
   }
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 7000);
   try {
     const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}?interval=1d&range=${encodeURIComponent(range)}`;
-    const r = await fetch(url, { headers: { "User-Agent": "Mozilla/5.0 (compatible; NumBrrr/1.0)" } });
+    const r = await fetch(url, { headers: { "User-Agent": "Mozilla/5.0 (compatible; NumBrrr/1.0)" }, signal: controller.signal });
     if (!r.ok) {
       res.status(502).json({ error: "upstream failed", status: r.status });
       return;
@@ -41,5 +43,7 @@ module.exports = async (req, res) => {
     });
   } catch (e) {
     res.status(502).json({ error: "fetch failed" });
+  } finally {
+    clearTimeout(timer);
   }
 };

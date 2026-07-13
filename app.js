@@ -3915,7 +3915,14 @@ function closeChartModal() {
 // ---- Crypto bubbles: floating, draggable physics field ----
 // One circle per watched asset, sized by 24h-move magnitude, colored by direction.
 // Bubbles drift, collide, bounce off the walls, and can be dragged/flung.
-const bubbleSim = { raf: 0, bubbles: [], drag: null, lastFrame: 0 };
+const bubbleSim = {
+  raf: 0,
+  bubbles: [],
+  drag: null,
+  lastFrame: 0,
+  // Updated by the observer and synchronously before a loop starts.
+  inViewport: false,
+};
 function clampN(v, lo, hi) { return v < lo ? lo : v > hi ? hi : v; }
 
 // Radius is proportional to how big the 24h move is relative to the biggest
@@ -4050,8 +4057,19 @@ function stepBubbles(now) {
     b.node.style.transform = `translate(${(b.x - b.r).toFixed(1)}px, ${(b.y - b.r).toFixed(1)}px)`;
   }
 }
+function bubblesAreOnScreen() {
+  const host = el.watchBubbles;
+  if (!host || host.offsetParent === null) return false;
+  const rect = host.getBoundingClientRect();
+  const viewportHeight = document.documentElement.clientHeight || window.innerHeight || 0;
+  return rect.bottom >= -80 && rect.top <= viewportHeight + 80;
+}
 function bubbleMotionAllowed() {
-  return state.motion && !document.hidden && !(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches);
+  // Recheck synchronously as well as through IntersectionObserver. This makes
+  // the scroll-stop timer reliable even on older mobile WebViews whose
+  // observer callback can arrive late.
+  bubbleSim.inViewport = bubblesAreOnScreen();
+  return bubbleSim.inViewport && state.motion && !document.hidden && !(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches);
 }
 function startBubbles() {
   if (!bubbleSim.raf && bubbleMotionAllowed()) {
@@ -4077,6 +4095,18 @@ document.addEventListener("visibilitychange", () => {
   if (document.hidden) stopBubbles();
   else if (el.watchBubbles && el.watchBubbles.offsetParent !== null) startBubbles();
 });
+
+if (typeof IntersectionObserver === "function" && el.watchBubbles) {
+  const bubbleVisibilityObserver = new IntersectionObserver((entries) => {
+    const entry = entries[0];
+    const inViewport = !!(entry && entry.isIntersecting);
+    if (bubbleSim.inViewport === inViewport) return;
+    bubbleSim.inViewport = inViewport;
+    if (inViewport && el.watchBubbles.offsetParent !== null) kickBubbles();
+    else stopBubbles();
+  }, { rootMargin: "80px 0px" });
+  bubbleVisibilityObserver.observe(el.watchBubbles);
+}
 
 if (typeof ResizeObserver === "function" && el.watchBubbles) {
   new ResizeObserver(() => {
@@ -4592,6 +4622,7 @@ function applyMotion(enabled) {
   const toggle = document.getElementById("motionToggle");
   if (toggle) toggle.checked = state.motion;
   if (!state.motion) stopBubbles();
+  else if (el.watchBubbles && el.watchBubbles.offsetParent !== null) kickBubbles();
   saveState();
 }
 // Warm the browser cache with the wallpaper-backed themes so switching to them is
@@ -4599,8 +4630,14 @@ function applyMotion(enabled) {
 let themeWallpapersPreloaded = false;
 function preloadThemeWallpapers() {
   if (themeWallpapersPreloaded) return;
+  const wallpaperByTheme = { neon: "Themes/Neon/neon2.jpg", xp: "Themes/win/winwal.jpg" };
+  const sources = [...document.querySelectorAll("[data-theme-pick]:not([hidden])")]
+    .map((button) => wallpaperByTheme[button.dataset.themePick])
+    .filter(Boolean);
+  // Do not download assets for themes that are currently hidden in Settings.
+  if (!sources.length) return;
   themeWallpapersPreloaded = true;
-  ["Themes/Neon/neon2.jpg", "Themes/win/winwal.jpg"].forEach((src) => { const img = new Image(); img.src = src; });
+  sources.forEach((src) => { const img = new Image(); img.src = src; });
 }
 function updateSettingsActive() {
   document.querySelectorAll(".opt-cur").forEach((b) => b.classList.toggle("is-active", b.dataset.currency === state.currency));
@@ -4991,14 +5028,35 @@ function loadState() {
     state.monthlyBudget = { items, seq: Math.max(Number.isFinite(s.monthlyBudget.seq) ? Math.round(s.monthlyBudget.seq) : 0, highestBudgetSeq) };
   }
   if (Array.isArray(s.vehicles)) {
-    state.vehicles = s.vehicles.map((v) => ({
-      id: v.id, plate: v.plate || "", fuel: v.fuel || "gas", consumption: v.consumption || 0, price: v.price || 0,
-      lastMonthSpent: v.lastMonthSpent || 0,
-      sched: v.sched || [], oneoff: v.oneoff || [],
-      schedSeq: v.schedSeq || (v.sched ? v.sched.length : 0), expSeq: v.expSeq || (v.oneoff ? v.oneoff.length : 0),
-    }));
+    const seenVehicleIds = new Set();
+    state.vehicles = s.vehicles
+      .filter((v) => {
+        if (!v || typeof v !== "object" || typeof v.id !== "string") return false;
+        const id = v.id.trim().slice(0, 40);
+        if (!id || seenVehicleIds.has(id)) return false;
+        seenVehicleIds.add(id);
+        return true;
+      })
+      .slice(0, 50)
+      .map((v) => {
+        const sched = Array.isArray(v.sched) ? v.sched.filter((item) => item && typeof item === "object").slice(0, 100) : [];
+        const oneoff = Array.isArray(v.oneoff) ? v.oneoff.filter((item) => item && typeof item === "object").slice(0, 500) : [];
+        return {
+          id: v.id.trim().slice(0, 40),
+          plate: typeof v.plate === "string" ? v.plate.slice(0, 80) : "",
+          fuel: CAR_FUELS.includes(v.fuel) ? v.fuel : "gas",
+          consumption: Number.isFinite(v.consumption) ? Math.max(0, v.consumption) : 0,
+          price: Number.isFinite(v.price) ? Math.max(0, v.price) : 0,
+          lastMonthSpent: Number.isFinite(v.lastMonthSpent) ? Math.max(0, v.lastMonthSpent) : 0,
+          sched,
+          oneoff,
+          schedSeq: Number.isFinite(v.schedSeq) ? Math.max(0, Math.round(v.schedSeq)) : sched.length,
+          expSeq: Number.isFinite(v.expSeq) ? Math.max(0, Math.round(v.expSeq)) : oneoff.length,
+        };
+      });
   }
-  if (typeof s.vehSeq === "number") state.vehSeq = s.vehSeq;
+  const highestVehicleSeq = state.vehicles.reduce((max, vehicle) => Math.max(max, Number((/^v(\d+)$/.exec(vehicle.id) || [])[1]) || 0), 0);
+  state.vehSeq = Math.max(Number.isFinite(s.vehSeq) ? Math.max(0, Math.round(s.vehSeq)) : 0, highestVehicleSeq);
   if (s.vehicleHub && typeof s.vehicleHub === "object") {
     const v = s.vehicleHub;
     state.vehicleHub = {

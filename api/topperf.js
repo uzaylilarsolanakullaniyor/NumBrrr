@@ -57,8 +57,10 @@ async function yahoo1y(ysym) {
 }
 
 async function topCrypto() {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 7000);
   try {
-    const r = await fetch("https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=40&page=1&price_change_percentage=1y", UA);
+    const r = await fetch("https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=40&page=1&price_change_percentage=1y", { ...UA, signal: controller.signal });
     if (!r.ok) return [];
     return (await r.json())
       .filter((c) => !SKIP.has((c.symbol || "").toUpperCase()))
@@ -66,6 +68,7 @@ async function topCrypto() {
       .map((c) => ({ type: "crypto", key: c.id, sym: (c.symbol || "").toUpperCase(), name: c.name, price: c.current_price, ccy: "USD", chg1y: c.price_change_percentage_1y_in_currency }))
       .filter((c) => typeof c.chg1y === "number");
   } catch (e) { return []; }
+  finally { clearTimeout(timer); }
 }
 
 module.exports = async (req, res) => {

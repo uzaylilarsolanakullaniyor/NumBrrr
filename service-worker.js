@@ -1,10 +1,10 @@
-const SHELL_CACHE = "numbrrr-shell-v29";
+const SHELL_CACHE = "numbrrr-shell-v32";
 const DATA_CACHE = "numbrrr-data-v2";
 const APP_SHELL = [
   "/",
   "/index.html",
-  "/styles.css?v=29",
-  "/app.js?v=29",
+  "/styles.css?v=32",
+  "/app.js?v=32",
   "/manifest.webmanifest",
   "/icons/icon.svg",
   "/icons/icon-192.png",
@@ -44,6 +44,27 @@ async function networkFirst(request, fallbackUrl) {
   }
 }
 
+// Navigation must prefer the network so a fresh deployment is visible on the
+// first visit. A short deadline keeps startup responsive and preserves the
+// cached app shell when the device is offline or on an unreliable connection.
+async function navigationNetworkFirst(request) {
+  const cache = await caches.open(SHELL_CACHE);
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 3500);
+  try {
+    const response = await fetch(request, { signal: controller.signal });
+    if (response && response.ok) {
+      await cache.put("/index.html", response.clone());
+      return response;
+    }
+    return (await cache.match("/index.html")) || response || Response.error();
+  } catch (error) {
+    return (await cache.match(request)) || (await cache.match("/index.html")) || Response.error();
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 async function staleWhileRevalidate(request, fallbackUrl) {
   const cache = await caches.open(request.url.startsWith(self.location.origin) ? SHELL_CACHE : DATA_CACHE);
   const cached = (await cache.match(request)) || (fallbackUrl ? await cache.match(fallbackUrl) : undefined);
@@ -59,7 +80,7 @@ self.addEventListener("fetch", (event) => {
   if (request.method !== "GET") return;
   const url = new URL(request.url);
   if (request.mode === "navigate") {
-    event.respondWith(staleWhileRevalidate(request, "/index.html"));
+    event.respondWith(navigationNetworkFirst(request));
     return;
   }
   if (url.origin === self.location.origin && url.pathname.startsWith("/api/")) {
