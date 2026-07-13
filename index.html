@@ -9,6 +9,12 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="NumBrrr" />
   <title>NumBrrr</title>
+  <script>
+    try {
+      const savedState = JSON.parse(localStorage.getItem("numbr_state") || "null");
+      if (savedState && savedState.motion === false) document.documentElement.dataset.motion = "off";
+    } catch (error) {}
+  </script>
   <link rel="manifest" href="/manifest.webmanifest" />
   <link rel="icon" href="/icons/icon.svg" type="image/svg+xml" />
   <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
@@ -349,6 +355,18 @@
           <input type="checkbox" id="soundToggle" checked />
           <span class="switch-track"><span class="switch-thumb"></span></span>
           <span class="switch-label" data-i18n="sound_fx">Sound effects</span>
+        </label>
+      </section>
+
+      <section class="glass settings-group">
+        <h3 class="settings-label" data-i18n="motion">Motion</h3>
+        <label class="switch sound-switch">
+          <input type="checkbox" id="motionToggle" checked />
+          <span class="switch-track"><span class="switch-thumb"></span></span>
+          <span class="switch-label">
+            <span data-i18n="animations">Animations</span>
+            <small data-i18n="animations_sub">Show interface transitions and decorative motion</small>
+          </span>
         </label>
       </section>
 

@@ -1655,6 +1655,16 @@ body {
   }
 }
 
+/* App-level motion preference; the device-level media query above still wins. */
+[data-motion="off"] .money-rain { display: none; }
+[data-motion="off"] *,
+[data-motion="off"] *::before,
+[data-motion="off"] *::after {
+  scroll-behavior: auto !important;
+  animation: none !important;
+  transition-duration: 0.001ms !important;
+}
+
 /* ============================================================
    Settings view
    ============================================================ */

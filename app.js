@@ -272,7 +272,7 @@ const I18N = {
     punch: "By cutting these habits and investing, you could have {x} in 10 years.",
     punch_empty: "Toggle on the habits you want to quit and type what you spend to see your number.",
     savings_note: "Projection compounds yearly contributions: FV = annual × [((1 + r)ⁿ − 1) / r], where r is the selected annual return. Returns are assumptions, not guarantees.",
-    settings_title: "Settings", language: "Language", theme: "Theme", country: "Country", sound: "Sound", sound_fx: "Sound effects",
+    settings_title: "Settings", language: "Language", theme: "Theme", country: "Country", sound: "Sound", sound_fx: "Sound effects", motion: "Motion", animations: "Animations", animations_sub: "Show interface transitions and decorative motion",
     home_customize_title: "Home screen", home_customize_desc: "Reorder widgets or hide the ones you do not use.", home_customize_reset: "Reset layout", home_move_up: "Move up", home_move_down: "Move down", home_hide: "Show this widget", home_last_card: "At least one widget must remain visible.",
     home_widget_freedom: "Freedom calculator", home_widget_portfolio: "Portfolio", home_widget_income: "Income", home_widget_expenses: "Expenses", home_widget_car: "My car", home_widget_watch: "Watchlist", home_widget_countdown: "Countdowns",
     home_holdings: "{count} holdings", home_passive: "{amount} passive / month", home_upcoming: "{count} upcoming payments", home_vehicles: "{count} vehicles", home_last_trip: "Last trip: {route}", home_no_route: "No saved route", home_watch_count: "{count} tracked assets", home_watch_empty: "No tracked assets", home_freedom_summary: "{amount} · {name}",
@@ -435,7 +435,7 @@ const I18N = {
     punch: "Bu alışkanlıkları bırakıp yatırım yaparak 10 yılda {x} elde edebilirsin.",
     punch_empty: "Bırakmak istediğin alışkanlıkları aç ve harcamanı yaz; rakamını gör.",
     savings_note: "Projeksiyon yıllık katkıları bileşik hesaplar: GD = yıllık × [((1 + r)ⁿ − 1) / r], r seçilen yıllık getiridir. Getiriler varsayımdır, garanti değildir.",
-    settings_title: "Ayarlar", language: "Dil", theme: "Tema", country: "Ülke", sound: "Ses", sound_fx: "Ses efektleri",
+    settings_title: "Ayarlar", language: "Dil", theme: "Tema", country: "Ülke", sound: "Ses", sound_fx: "Ses efektleri", motion: "Hareket", animations: "Animasyonlar", animations_sub: "Arayüz geçişlerini ve dekoratif hareketleri göster",
     home_customize_title: "Ana sayfa", home_customize_desc: "Widget'ları sırala veya kullanmadıklarını gizle.", home_customize_reset: "Düzeni sıfırla", home_move_up: "Yukarı taşı", home_move_down: "Aşağı taşı", home_hide: "Bu widget'ı göster", home_last_card: "En az bir widget görünür kalmalı.",
     home_widget_freedom: "Özgürlük hesaplayıcısı", home_widget_portfolio: "Portföy", home_widget_income: "Gelirler", home_widget_expenses: "Giderler", home_widget_car: "Aracım", home_widget_watch: "Takip listesi", home_widget_countdown: "Geri sayımlar",
     home_holdings: "{count} varlık", home_passive: "Aylık {amount} pasif", home_upcoming: "{count} yaklaşan ödeme", home_vehicles: "{count} araç", home_last_trip: "Son yolculuk: {route}", home_no_route: "Kayıtlı rota yok", home_watch_count: "{count} takip edilen varlık", home_watch_empty: "Takip edilen varlık yok", home_freedom_summary: "{name} · {amount}",
@@ -554,6 +554,7 @@ const state = {
   monthlyExpenses: 3000,
   realMode: false,
   sound: true,
+  motion: true,
   inflation: { USD: 3, TL: 40 },
   rates: {
     USD: Object.fromEntries(INSTRUMENTS.USD.map((i) => [i.id, i.rate])),
@@ -2760,7 +2761,7 @@ function addCountdown(event) {
   el.countdownDate.value = "";
   saveState(); renderCountdowns();
   const row = el.countdownList.querySelector(`[data-countdown-id="${id}"]`);
-  if (row && !window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+  if (row && state.motion && !window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
     row.classList.add("is-new");
     row.addEventListener("animationend", () => row.classList.remove("is-new"), { once: true });
   }
@@ -3350,7 +3351,7 @@ function stepBubbles(now) {
   }
 }
 function bubbleMotionAllowed() {
-  return !document.hidden && !(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches);
+  return state.motion && !document.hidden && !(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches);
 }
 function startBubbles() {
   if (!bubbleSim.raf && bubbleMotionAllowed()) {
@@ -3882,6 +3883,14 @@ function applyTheme(theme) {
   saveState();
   try { localStorage.setItem("numbr_theme", theme); } catch (e) {}
 }
+function applyMotion(enabled) {
+  state.motion = !!enabled;
+  document.documentElement.dataset.motion = state.motion ? "on" : "off";
+  const toggle = document.getElementById("motionToggle");
+  if (toggle) toggle.checked = state.motion;
+  if (!state.motion) stopBubbles();
+  saveState();
+}
 // Warm the browser cache with the wallpaper-backed themes so switching to them is
 // instant instead of waiting ~1s for the image to download on first use.
 let themeWallpapersPreloaded = false;
@@ -4026,6 +4035,8 @@ el.realMode.addEventListener("change", () => { state.realMode = el.realMode.chec
 
 const soundToggle = document.getElementById("soundToggle");
 soundToggle.addEventListener("change", () => { state.sound = soundToggle.checked; saveState(); if (state.sound) sfx("toggle"); });
+const motionToggle = document.getElementById("motionToggle");
+motionToggle.addEventListener("change", () => applyMotion(motionToggle.checked));
 el.inflation.addEventListener("input", () => { state.inflation[state.currency] = parseDecimal(el.inflation.value); refresh(); });
 
 el.notifyToggle.addEventListener("change", () => setNotificationsEnabled(el.notifyToggle.checked));
@@ -4089,7 +4100,7 @@ function persistedState() {
   return {
     v: 2,
     lang: state.lang, theme: state.theme, currency: state.currency,
-    monthlyExpenses: state.monthlyExpenses, realMode: state.realMode, sound: state.sound,
+    monthlyExpenses: state.monthlyExpenses, realMode: state.realMode, sound: state.sound, motion: state.motion,
     inflation: state.inflation, rates: state.rates, realEstate: state.realEstate,
     expenses: state.expenses, vehicles: state.vehicles, vehSeq: state.vehSeq,
     vehicleHub: state.vehicleHub,
@@ -4157,6 +4168,7 @@ function loadState() {
   if (typeof s.monthlyExpenses === "number") state.monthlyExpenses = s.monthlyExpenses;
   if (typeof s.realMode === "boolean") state.realMode = s.realMode;
   if (typeof s.sound === "boolean") state.sound = s.sound;
+  if (typeof s.motion === "boolean") state.motion = s.motion;
   if (s.inflation && typeof s.inflation === "object") {
     ["USD", "TL"].forEach((cur) => { if (Number.isFinite(s.inflation[cur])) state.inflation[cur] = s.inflation[cur]; });
   }
@@ -4316,6 +4328,7 @@ el.expenses.value = formatThousands(state.monthlyExpenses);
 el.inflation.value = formatRate(state.inflation[state.currency], false);
 applyTheme(state.theme);
 soundToggle.checked = state.sound;
+applyMotion(state.motion);
 applyLanguage(state.lang); // builds layout + savings, applies all translations
 
 if (isFirstRun) showOnboarding();
