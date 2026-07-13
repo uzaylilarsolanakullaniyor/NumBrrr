@@ -3933,6 +3933,8 @@ function clampN(v, lo, hi) { return v < lo ? lo : v > hi ? hi : v; }
 // mover currently in the list, so the largest gainer/loser is the largest
 // bubble and the smallest move is the smallest, with a clear spread.
 const BUBBLE_MIN_R = 26, BUBBLE_MAX_R = 52, BUBBLE_GAP = 2;
+const BUBBLE_FLING_SCALE = 0.46, BUBBLE_MAX_FLING_SPEED = 6.5;
+const BUBBLE_RETURN_DELAY = 420, BUBBLE_RETURN_RAMP = 950;
 function bubbleRadius(ch, maxMag) {
   const mag = ch == null ? 0 : Math.abs(ch);
   const frac = maxMag > 0 ? Math.min(mag / maxMag, 1) : 0.35;
@@ -3969,6 +3971,7 @@ function syncBubbles() {
         x: 0, y: 0, vx: 0, vy: 0,
         dragX: 0, dragY: 0, dragVx: 0, dragVy: 0,
         phase: Math.random() * Math.PI * 2,
+        freeUntil: 0,
         place: true,
       };
       b.node.addEventListener("pointerdown", (e) => startBubbleDrag(b, e));
@@ -4092,15 +4095,18 @@ function stepBubbles(now) {
       b.vy = b.dragVy;
       continue;
     }
-    // Shared centre gravity keeps the circles in one dense, touching cluster.
-    b.vx += (cx - b.x) * 0.00056 * dt;
-    b.vy += (cy - b.y) * 0.00094 * dt;
+    // Give a released bubble room to glide, then restore the centre pull
+    // gradually so it does not snap straight back into the cluster.
+    const returnProgress = clampN((now - (b.freeUntil || 0)) / BUBBLE_RETURN_RAMP, 0, 1);
+    const returnEase = returnProgress * returnProgress * (3 - 2 * returnProgress);
+    b.vx += (cx - b.x) * 0.00034 * returnEase * dt;
+    b.vy += (cy - b.y) * 0.00054 * returnEase * dt;
     // Tiny deterministic motion prevents the field looking frozen at rest.
     const phase = now * 0.00055 + b.phase;
     b.vx += Math.cos(phase) * 0.0024 * dt;
     b.vy += Math.sin(phase) * 0.0024 * dt;
     b.x += b.vx * dt; b.y += b.vy * dt;
-    const friction = Math.pow(0.965, dt);
+    const friction = Math.pow(0.952, dt);
     b.vx *= friction; b.vy *= friction;
     const sp = Math.hypot(b.vx, b.vy);
     if (sp > 16) { b.vx *= 16 / sp; b.vy *= 16 / sp; }
@@ -4234,8 +4240,9 @@ function startBubbleDrag(b, e) {
     cleanup();
     if (!wasActive) return;
     b.x = b.dragX; b.y = b.dragY;
-    b.vx = cancelled ? 0 : clampN(b.dragVx, -16, 16);
-    b.vy = cancelled ? 0 : clampN(b.dragVy, -16, 16);
+    b.vx = cancelled ? 0 : clampN(b.dragVx * BUBBLE_FLING_SCALE, -BUBBLE_MAX_FLING_SPEED, BUBBLE_MAX_FLING_SPEED);
+    b.vy = cancelled ? 0 : clampN(b.dragVy * BUBBLE_FLING_SCALE, -BUBBLE_MAX_FLING_SPEED, BUBBLE_MAX_FLING_SPEED);
+    b.freeUntil = performance.now() + BUBBLE_RETURN_DELAY;
     b.dragVx = 0; b.dragVy = 0;
     b.node.classList.remove("is-drag");
     bubbleSim.drag = null;
