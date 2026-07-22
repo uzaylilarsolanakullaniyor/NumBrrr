@@ -1,10 +1,10 @@
-const SHELL_CACHE = "numbrrr-shell-v36";
+const SHELL_CACHE = "numbrrr-shell-v37";
 const DATA_CACHE = "numbrrr-data-v2";
 const APP_SHELL = [
   "/",
   "/index.html",
-  "/styles.css?v=36",
-  "/app.js?v=36",
+  "/styles.css?v=37",
+  "/app.js?v=37",
   "/manifest.webmanifest",
   "/icons/icon.svg",
   "/icons/icon-192.png",
@@ -89,6 +89,10 @@ self.addEventListener("fetch", (event) => {
   }
   if (url.origin === self.location.origin) {
     event.respondWith(staleWhileRevalidate(request));
+    return;
+  }
+  if (url.hostname === "api.open-meteo.com" || url.hostname === "geocoding-api.open-meteo.com") {
+    event.respondWith(networkFirst(request));
     return;
   }
   if (url.hostname === "fonts.googleapis.com" || url.hostname === "fonts.gstatic.com" || url.hostname === "api.coingecko.com") {

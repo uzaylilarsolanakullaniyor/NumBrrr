@@ -214,6 +214,9 @@ let usdTry = 0; // TRY per 1 USD (for converting stock prices to the active curr
 let usdTryChg24 = null; // USD/TRY 24h % move
 let watchData = {}; // key -> { price, ccy, chg24, chg1mo, chg1y } for watchlist items
 let homeMarketData = { usd: null, eur: null, loadedAt: 0, loading: false };
+let weatherLoading = false;
+let weatherSearchTimer = 0;
+let weatherSearchRequest = 0;
 
 // ============================================================
 //  i18n dictionary
@@ -282,11 +285,12 @@ const I18N = {
     savings_note: "Projection compounds yearly contributions: FV = annual × [((1 + r)ⁿ − 1) / r], where r is the selected annual return. Returns are assumptions, not guarantees.",
     settings_title: "Settings", language: "Language", theme: "Theme", country: "Country", sound: "Sound", sound_fx: "Sound effects", motion: "Motion", animations: "Animations", animations_sub: "Show interface transitions and decorative motion",
     home_customize_title: "Home screen", home_customize_desc: "Reorder widgets or hide the ones you do not use.", home_customize_reset: "Reset layout", home_move_up: "Move up", home_move_down: "Move down", home_hide: "Show this widget", home_last_card: "At least one widget must remain visible.",
-    home_widget_freedom: "Freedom calculator", home_widget_portfolio: "Portfolio", home_widget_income: "Income", home_widget_expenses: "Expenses", home_widget_monthly: "This month", home_widget_health: "Financial health", home_widget_markets: "FX & gold", home_widget_car: "My car", home_widget_watch: "Watchlist", home_widget_goals: "Savings goals", home_widget_notes: "Mini notes", home_widget_insights: "Smart insights", home_widget_alerts: "Price alerts", home_widget_countdown: "Countdowns",
+    home_widget_freedom: "Freedom calculator", home_widget_portfolio: "Portfolio", home_widget_income: "Income", home_widget_expenses: "Expenses", home_widget_monthly: "This month", home_widget_health: "Financial health", home_widget_markets: "FX & gold", home_widget_weather: "Weather", home_widget_car: "My car", home_widget_watch: "Watchlist", home_widget_goals: "Savings goals", home_widget_notes: "Mini notes", home_widget_insights: "Smart insights", home_widget_alerts: "Price alerts", home_widget_countdown: "Countdowns",
     home_holdings: "{count} holdings", home_passive: "{amount} passive / month", home_upcoming: "{count} upcoming payments", home_vehicles: "{count} vehicles", home_last_trip: "Last trip: {route}", home_no_route: "No saved route", home_watch_count: "{count} tracked assets", home_watch_empty: "No tracked assets", home_freedom_summary: "{amount} · {name}",
     monthly_summary_title: "This month", monthly_summary_sub: "Income, spending and savings at a glance.", monthly_income: "Income", monthly_expense: "Expenses", monthly_net: "Net", monthly_rate: "Savings rate: {rate}%", monthly_no_income: "Add monthly income to calculate your savings rate.",
     health_title: "Financial health", health_sub: "A score based on your current data.", health_note: "Savings rate, passive income, buffer and diversification.", health_weak: "Needs attention", health_fair: "Getting stronger", health_good: "Healthy", health_excellent: "Excellent",
     market_summary_title: "FX & gold", market_summary_sub: "Current TRY market snapshot.", market_usd: "USD / TRY", market_eur: "EUR / TRY", market_gold: "Gram gold", market_loading: "Loading live prices…", market_unavailable: "Price unavailable",
+    weather_title: "Weather", weather_sub: "Local forecast at a glance.", weather_change_location: "Change location", weather_refresh: "Refresh weather", weather_search_ph: "Search city…", weather_use_location: "Use my location", weather_current_location: "Current location", weather_loading: "Loading weather…", weather_unavailable: "Weather is unavailable right now.", weather_no_results: "No matching city found.", weather_location_denied: "Location access was not available. Search for a city instead.", weather_feels_like: "Feels like {temp}", weather_wind: "Wind {speed}", weather_rain: "Rain {rate}%", weather_updated: "Updated {time}", weather_today: "Today", weather_tomorrow: "Tomorrow", weather_clear: "Clear", weather_partly_cloudy: "Partly cloudy", weather_cloudy: "Cloudy", weather_fog: "Foggy", weather_drizzle: "Drizzle", weather_rainy: "Rainy", weather_snow: "Snowy", weather_showers: "Showers", weather_thunderstorm: "Thunderstorm",
     goal_title: "Savings goals", goal_sub: "Create separate goals in Turkish lira or US dollars.", goal_name: "Goal", goal_name_ph: "Emergency fund, car…", goal_target: "Target", goal_current: "Saved", goal_currency: "Currency", goal_add: "Add goal", goal_empty: "No savings goal yet.", goal_invalid: "Enter a goal name and a valid target amount.", goal_added: "Savings goal added ✓", goal_remove: "Remove goal", goal_progress: "{current} of {target}", goal_completed: "Goal reached",
     notes_title: "Mini notes", notes_sub: "Keep short reminders close.", note_ph: "Write a short note…", note_add: "Add", note_empty: "No notes yet.", note_remove: "Remove note",
     insights_title: "Smart insights", insights_sub: "Automatic observations from your data.", insight_setup_title: "Complete your numbers", insight_setup_body: "Add income and expenses to unlock personalised insights.", insight_cash_positive_title: "Positive cash flow", insight_cash_positive_body: "Income is {amount} above expenses this month.", insight_cash_negative_title: "Spending is above income", insight_cash_negative_body: "You are currently {amount} short this month.", insight_rate_title: "Savings rate", insight_rate_body: "You are keeping {rate}% of monthly income.", insight_passive_title: "Passive coverage", insight_passive_body: "Passive income covers {rate}% of monthly expenses.", insight_expense_up_title: "Expenses increased", insight_expense_up_body: "This month is {rate}% above the last archived month.", insight_expense_down_title: "Expenses decreased", insight_expense_down_body: "This month is {rate}% below the last archived month.", insight_goal_title: "Closest savings goal", insight_goal_body: "{name} is {rate}% complete.", insight_upcoming_title: "Upcoming payments", insight_upcoming_body: "You have {count} unpaid payment or maintenance reminders.",
@@ -467,11 +471,12 @@ const I18N = {
     savings_note: "Projeksiyon yıllık katkıları bileşik hesaplar: GD = yıllık × [((1 + r)ⁿ − 1) / r], r seçilen yıllık getiridir. Getiriler varsayımdır, garanti değildir.",
     settings_title: "Ayarlar", language: "Dil", theme: "Tema", country: "Ülke", sound: "Ses", sound_fx: "Ses efektleri", motion: "Hareket", animations: "Animasyonlar", animations_sub: "Arayüz geçişlerini ve dekoratif hareketleri göster",
     home_customize_title: "Ana sayfa", home_customize_desc: "Widget'ları sırala veya kullanmadıklarını gizle.", home_customize_reset: "Düzeni sıfırla", home_move_up: "Yukarı taşı", home_move_down: "Aşağı taşı", home_hide: "Bu widget'ı göster", home_last_card: "En az bir widget görünür kalmalı.",
-    home_widget_freedom: "Özgürlük hesaplayıcısı", home_widget_portfolio: "Portföy", home_widget_income: "Gelirler", home_widget_expenses: "Giderler", home_widget_monthly: "Bu ay", home_widget_health: "Finansal sağlık", home_widget_markets: "Kur ve altın", home_widget_car: "Aracım", home_widget_watch: "Takip listesi", home_widget_goals: "Birikim hedefleri", home_widget_notes: "Mini notlar", home_widget_insights: "Akıllı içgörüler", home_widget_alerts: "Fiyat alarmları", home_widget_countdown: "Geri sayımlar",
+    home_widget_freedom: "Özgürlük hesaplayıcısı", home_widget_portfolio: "Portföy", home_widget_income: "Gelirler", home_widget_expenses: "Giderler", home_widget_monthly: "Bu ay", home_widget_health: "Finansal sağlık", home_widget_markets: "Kur ve altın", home_widget_weather: "Hava durumu", home_widget_car: "Aracım", home_widget_watch: "Takip listesi", home_widget_goals: "Birikim hedefleri", home_widget_notes: "Mini notlar", home_widget_insights: "Akıllı içgörüler", home_widget_alerts: "Fiyat alarmları", home_widget_countdown: "Geri sayımlar",
     home_holdings: "{count} varlık", home_passive: "Aylık {amount} pasif", home_upcoming: "{count} yaklaşan ödeme", home_vehicles: "{count} araç", home_last_trip: "Son yolculuk: {route}", home_no_route: "Kayıtlı rota yok", home_watch_count: "{count} takip edilen varlık", home_watch_empty: "Takip edilen varlık yok", home_freedom_summary: "{name} · {amount}",
     monthly_summary_title: "Bu ayın özeti", monthly_summary_sub: "Gelir, gider ve birikim tek bakışta.", monthly_income: "Gelir", monthly_expense: "Gider", monthly_net: "Net", monthly_rate: "Birikim oranı: %{rate}", monthly_no_income: "Birikim oranını hesaplamak için aylık gelir ekle.",
     health_title: "Finansal sağlık", health_sub: "Mevcut verilerine göre hesaplanan skor.", health_note: "Birikim oranı, pasif gelir, varlık tamponu ve çeşitlilik.", health_weak: "Dikkat gerekli", health_fair: "Güçleniyor", health_good: "Sağlıklı", health_excellent: "Mükemmel",
     market_summary_title: "Kur ve altın", market_summary_sub: "Güncel TL piyasa özeti.", market_usd: "Dolar / TL", market_eur: "Euro / TL", market_gold: "Gram altın", market_loading: "Canlı fiyatlar yükleniyor…", market_unavailable: "Fiyat alınamadı",
+    weather_title: "Hava durumu", weather_sub: "Yerel tahmin tek bakışta.", weather_change_location: "Konumu değiştir", weather_refresh: "Hava durumunu yenile", weather_search_ph: "Şehir ara…", weather_use_location: "Konumumu kullan", weather_current_location: "Mevcut konum", weather_loading: "Hava durumu yükleniyor…", weather_unavailable: "Hava durumu şu anda alınamıyor.", weather_no_results: "Eşleşen şehir bulunamadı.", weather_location_denied: "Konum bilgisine ulaşılamadı. Bunun yerine şehir arayabilirsin.", weather_feels_like: "Hissedilen {temp}", weather_wind: "Rüzgâr {speed}", weather_rain: "Yağış %{rate}", weather_updated: "{time} güncellendi", weather_today: "Bugün", weather_tomorrow: "Yarın", weather_clear: "Açık", weather_partly_cloudy: "Parçalı bulutlu", weather_cloudy: "Bulutlu", weather_fog: "Sisli", weather_drizzle: "Çisenti", weather_rainy: "Yağmurlu", weather_snow: "Karlı", weather_showers: "Sağanak", weather_thunderstorm: "Gök gürültülü",
     goal_title: "Birikim hedefleri", goal_sub: "TL veya dolar cinsinden ayrı hedefler oluştur.", goal_name: "Hedef", goal_name_ph: "Acil durum fonu, araba…", goal_target: "Hedef tutar", goal_current: "Mevcut birikim", goal_currency: "Para birimi", goal_add: "Hedef ekle", goal_empty: "Henüz birikim hedefi yok.", goal_invalid: "Hedef adı ve geçerli bir hedef tutar gir.", goal_added: "Birikim hedefi eklendi ✓", goal_remove: "Hedefi kaldır", goal_progress: "{target} hedefinin {current} kadarı", goal_completed: "Hedefe ulaşıldı",
     notes_title: "Mini notlar", notes_sub: "Kısa hatırlatmalarını yanında tut.", note_ph: "Kısa bir not yaz…", note_add: "Ekle", note_empty: "Henüz not yok.", note_remove: "Notu kaldır",
     insights_title: "Akıllı içgörüler", insights_sub: "Verilerinden otomatik çıkarılan kısa yorumlar.", insight_setup_title: "Rakamlarını tamamla", insight_setup_body: "Kişisel içgörüler için gelir ve gider bilgilerini ekle.", insight_cash_positive_title: "Pozitif nakit akışı", insight_cash_positive_body: "Bu ay gelirlerin giderlerinden {amount} fazla.", insight_cash_negative_title: "Gider geliri aşıyor", insight_cash_negative_body: "Bu ay şu anda {amount} açık var.", insight_rate_title: "Birikim oranı", insight_rate_body: "Aylık gelirinin %{rate} kadarını elinde tutuyorsun.", insight_passive_title: "Pasif gelir kapsaması", insight_passive_body: "Pasif gelirin aylık giderlerinin %{rate} kadarını karşılıyor.", insight_expense_up_title: "Giderler arttı", insight_expense_up_body: "Bu ay son arşivlenen aya göre %{rate} daha yüksek.", insight_expense_down_title: "Giderler azaldı", insight_expense_down_body: "Bu ay son arşivlenen aya göre %{rate} daha düşük.", insight_goal_title: "En yakın birikim hedefi", insight_goal_body: "{name} hedefinin %{rate} kadarı tamamlandı.", insight_upcoming_title: "Yaklaşan ödemeler", insight_upcoming_body: "Ödenmemiş {count} ödeme veya bakım hatırlatman var.",
@@ -591,7 +596,7 @@ const I18N = {
 };
 
 // ---- State ----
-const HOME_WIDGET_IDS = ["freedom", "portfolio", "income", "expenses", "monthly", "health", "markets", "car", "watch", "goals", "notes", "insights", "alerts", "countdown"];
+const HOME_WIDGET_IDS = ["freedom", "portfolio", "income", "expenses", "monthly", "health", "markets", "weather", "car", "watch", "goals", "notes", "insights", "alerts", "countdown"];
 const state = {
   lang: "en",
   theme: "black",
@@ -638,6 +643,11 @@ const state = {
   watchlist: [], // [{ type, key, name }] — assets to monitor (price + 24h/1mo/1yr performance)
   notifications: { enabled: false, vehicleDays: 7, priceAlerts: [], seq: 0, sent: {} },
   homeLayout: { order: [...HOME_WIDGET_IDS], hidden: [], freedomExpanded: false },
+  weather: {
+    location: { name: "İstanbul", latitude: 41.0082, longitude: 28.9784 },
+    data: null,
+    updatedAt: 0,
+  },
   savingsGoals: { items: [], seq: 0 },
   homeNotes: { items: [], seq: 0 },
   countdowns: { items: [], seq: 0 },
@@ -803,6 +813,15 @@ const el = {
   healthScore: document.getElementById("healthScore"),
   healthLabel: document.getElementById("healthLabel"),
   homeMarketList: document.getElementById("homeMarketList"),
+  weatherHeaderIcon: document.getElementById("weatherHeaderIcon"),
+  weatherLocationToggle: document.getElementById("weatherLocationToggle"),
+  weatherRefresh: document.getElementById("weatherRefresh"),
+  weatherLocationPanel: document.getElementById("weatherLocationPanel"),
+  weatherSearch: document.getElementById("weatherSearch"),
+  weatherSearchResults: document.getElementById("weatherSearchResults"),
+  weatherUseLocation: document.getElementById("weatherUseLocation"),
+  weatherContent: document.getElementById("weatherContent"),
+  weatherStatus: document.getElementById("weatherStatus"),
   homeCarValue: document.getElementById("homeCarValue"),
   homeCarNote: document.getElementById("homeCarNote"),
   homeWatchValue: document.getElementById("homeWatchValue"),
@@ -3050,12 +3069,13 @@ function renderHomeCardSettings() {
     }
     state.homeLayout.hidden = input.checked ? state.homeLayout.hidden.filter((item) => item !== id) : [...state.homeLayout.hidden, id];
     saveState(); applyHomeLayout(); renderHomeCardSettings();
+    if (id === "weather" && input.checked) refreshHomeWeather();
   }));
 }
 
 function resetHomeLayout() {
   state.homeLayout = { order: [...HOME_WIDGET_IDS], hidden: [], freedomExpanded: false };
-  saveState(); applyHomeLayout(); renderHomeCardSettings();
+  saveState(); applyHomeLayout(); renderHomeCardSettings(); refreshHomeWeather();
 }
 
 function setFreedomWidgetExpanded(expanded) {
@@ -3158,6 +3178,249 @@ async function refreshHomeMarketSummary(force = false) {
   homeMarketData.loadedAt = Date.now();
   homeMarketData.loading = false;
   renderHomeMarketSummary();
+}
+
+const WEATHER_FRESH_MS = 20 * 60 * 1000;
+
+function weatherCondition(code, isDay = true) {
+  const n = Number(code);
+  if (n === 0) return { icon: isDay ? "☀️" : "🌙", label: t("weather_clear") };
+  if (n === 1 || n === 2) return { icon: isDay ? "🌤️" : "☁️", label: t("weather_partly_cloudy") };
+  if (n === 3) return { icon: "☁️", label: t("weather_cloudy") };
+  if (n === 45 || n === 48) return { icon: "🌫️", label: t("weather_fog") };
+  if (n >= 51 && n <= 57) return { icon: "🌦️", label: t("weather_drizzle") };
+  if (n >= 61 && n <= 67) return { icon: "🌧️", label: t("weather_rainy") };
+  if (n >= 71 && n <= 77) return { icon: "🌨️", label: t("weather_snow") };
+  if (n >= 80 && n <= 82) return { icon: "🌦️", label: t("weather_showers") };
+  if (n === 85 || n === 86) return { icon: "🌨️", label: t("weather_snow") };
+  if (n >= 95) return { icon: "⛈️", label: t("weather_thunderstorm") };
+  return { icon: "🌡️", label: t("weather_unavailable") };
+}
+
+function normalizeWeatherData(value) {
+  if (!value || typeof value !== "object" || !value.current || !Array.isArray(value.daily)) return null;
+  const current = value.current;
+  if (![current.temperature, current.apparent, current.code, current.wind].every(Number.isFinite)) return null;
+  const daily = value.daily.map((day) => ({
+    date: typeof day.date === "string" && /^\d{4}-\d{2}-\d{2}$/.test(day.date) ? day.date : "",
+    code: Number.isFinite(day.code) ? day.code : 0,
+    min: Number.isFinite(day.min) ? day.min : 0,
+    max: Number.isFinite(day.max) ? day.max : 0,
+    rain: Number.isFinite(day.rain) ? Math.max(0, Math.min(100, day.rain)) : 0,
+  })).filter((day) => day.date).slice(0, 3);
+  if (!daily.length) return null;
+  return {
+    current: {
+      temperature: current.temperature,
+      apparent: current.apparent,
+      isDay: current.isDay === false ? false : !!current.isDay,
+      code: current.code,
+      wind: Math.max(0, current.wind),
+    },
+    daily,
+  };
+}
+
+function parseWeatherApi(data) {
+  const current = data && data.current;
+  const daily = data && data.daily;
+  if (!current || !daily || !Array.isArray(daily.time)) return null;
+  return normalizeWeatherData({
+    current: {
+      temperature: current.temperature_2m,
+      apparent: current.apparent_temperature,
+      isDay: current.is_day === 1,
+      code: current.weather_code,
+      wind: current.wind_speed_10m,
+    },
+    daily: daily.time.map((date, index) => ({
+      date,
+      code: daily.weather_code && daily.weather_code[index],
+      min: daily.temperature_2m_min && daily.temperature_2m_min[index],
+      max: daily.temperature_2m_max && daily.temperature_2m_max[index],
+      rain: daily.precipitation_probability_max && daily.precipitation_probability_max[index],
+    })),
+  });
+}
+
+function renderHomeWeather() {
+  if (!el.weatherContent) return;
+  const data = state.weather.data;
+  const location = state.weather.location;
+  if (!data) {
+    el.weatherContent.innerHTML = `<p class="weather-placeholder">${escapeHtml(weatherLoading ? t("weather_loading") : t("weather_unavailable"))}</p>`;
+    return;
+  }
+  const current = data.current;
+  const condition = weatherCondition(current.code, current.isDay);
+  if (el.weatherHeaderIcon) el.weatherHeaderIcon.textContent = condition.icon;
+  const locale = state.lang === "tr" ? "tr-TR" : "en-US";
+  const days = data.daily.map((day, index) => {
+    const dayCondition = weatherCondition(day.code, true);
+    let label = index === 0 ? t("weather_today") : index === 1 ? t("weather_tomorrow") : "";
+    if (!label) {
+      const parts = day.date.split("-").map(Number);
+      label = new Date(parts[0], parts[1] - 1, parts[2]).toLocaleDateString(locale, { weekday: "short" });
+    }
+    return `<div class="weather-forecast-day"><span>${escapeHtml(label)}</span><b aria-label="${escapeHtml(dayCondition.label)}">${dayCondition.icon}</b><strong>${Math.round(day.max)}°</strong><small>${Math.round(day.min)}°</small></div>`;
+  }).join("");
+  const updated = new Date(state.weather.updatedAt).toLocaleTimeString(locale, { hour: "2-digit", minute: "2-digit" });
+  el.weatherContent.innerHTML = `
+    <div class="weather-current">
+      <span class="weather-current-icon" role="img" aria-label="${escapeHtml(condition.label)}">${condition.icon}</span>
+      <div class="weather-current-copy"><strong>${escapeHtml(location.name)}</strong><span>${escapeHtml(condition.label)}</span></div>
+      <strong class="weather-temperature">${Math.round(current.temperature)}°</strong>
+    </div>
+    <div class="weather-details">
+      <span>${escapeHtml(t("weather_feels_like", { temp: Math.round(current.apparent) + "°" }))}</span>
+      <span>${escapeHtml(t("weather_wind", { speed: Math.round(current.wind) + (state.lang === "tr" ? " km/sa" : " km/h") }))}</span>
+      <span>${escapeHtml(t("weather_rain", { rate: Math.round(data.daily[0].rain) }))}</span>
+    </div>
+    <div class="weather-forecast">${days}</div>
+    <small class="weather-updated">${escapeHtml(t("weather_updated", { time: updated }))} · <a href="https://open-meteo.com/" target="_blank" rel="noopener noreferrer">Open-Meteo</a></small>`;
+}
+
+function weatherWidgetVisible() {
+  return !state.homeLayout.hidden.includes("weather");
+}
+
+async function refreshHomeWeather(force = false) {
+  if (!el.weatherContent || !weatherWidgetVisible()) return;
+  if (!force && state.weather.data && state.weather.updatedAt && Date.now() - state.weather.updatedAt < WEATHER_FRESH_MS) {
+    renderHomeWeather();
+    return;
+  }
+  if (weatherLoading) return;
+  weatherLoading = true;
+  if (el.weatherRefresh) el.weatherRefresh.disabled = true;
+  if (el.weatherContent) el.weatherContent.setAttribute("aria-busy", "true");
+  if (el.weatherStatus) el.weatherStatus.textContent = "";
+  renderHomeWeather();
+  try {
+    const loc = state.weather.location;
+    const query = new URLSearchParams({
+      latitude: String(loc.latitude), longitude: String(loc.longitude),
+      current: "temperature_2m,apparent_temperature,is_day,weather_code,wind_speed_10m",
+      daily: "weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max",
+      timezone: "auto", forecast_days: "3",
+    });
+    const response = await fetchWithTimeout(`https://api.open-meteo.com/v1/forecast?${query}`, {}, 7000);
+    if (!response.ok) throw new Error("weather response");
+    const data = parseWeatherApi(await response.json());
+    if (!data) throw new Error("weather data");
+    state.weather.data = data;
+    state.weather.updatedAt = Date.now();
+    saveState();
+  } catch (error) {
+    if (el.weatherStatus) el.weatherStatus.textContent = t("weather_unavailable");
+  } finally {
+    weatherLoading = false;
+    if (el.weatherRefresh) el.weatherRefresh.disabled = false;
+    if (el.weatherContent) el.weatherContent.removeAttribute("aria-busy");
+    renderHomeWeather();
+  }
+}
+
+function chooseWeatherLocation(location) {
+  state.weather.location = {
+    name: String(location.name || t("weather_current_location")).slice(0, 80),
+    latitude: Math.max(-90, Math.min(90, Number(location.latitude))),
+    longitude: Math.max(-180, Math.min(180, Number(location.longitude))),
+  };
+  state.weather.data = null;
+  state.weather.updatedAt = 0;
+  if (el.weatherSearch) el.weatherSearch.value = "";
+  if (el.weatherSearchResults) el.weatherSearchResults.hidden = true;
+  if (el.weatherSearch) el.weatherSearch.setAttribute("aria-expanded", "false");
+  if (el.weatherLocationPanel) el.weatherLocationPanel.hidden = true;
+  if (el.weatherLocationToggle) el.weatherLocationToggle.setAttribute("aria-expanded", "false");
+  saveState();
+  renderHomeWeather();
+  refreshHomeWeather(true);
+}
+
+async function searchWeatherLocations(query, requestId) {
+  if (!el.weatherSearchResults || !el.weatherSearch) return;
+  try {
+    const params = new URLSearchParams({ name: query, count: "6", language: state.lang === "tr" ? "tr" : "en", format: "json" });
+    const response = await fetchWithTimeout(`https://geocoding-api.open-meteo.com/v1/search?${params}`, {}, 5500);
+    if (!response.ok) throw new Error("geocoding response");
+    const payload = await response.json();
+    if (requestId !== weatherSearchRequest || el.weatherSearch.value.trim() !== query) return;
+    const matches = Array.isArray(payload.results) ? payload.results.filter((item) => Number.isFinite(item.latitude) && Number.isFinite(item.longitude)).slice(0, 6) : [];
+    if (!matches.length) {
+      el.weatherSearchResults.innerHTML = `<p>${escapeHtml(t("weather_no_results"))}</p>`;
+    } else {
+      el.weatherSearchResults.innerHTML = matches.map((item, index) => {
+        const secondary = [item.admin1, item.country].filter(Boolean).filter((part, i, all) => all.indexOf(part) === i).join(" · ");
+        return `<button type="button" role="option" data-weather-result="${index}"><strong>${escapeHtml(item.name)}</strong><span>${escapeHtml(secondary)}</span></button>`;
+      }).join("");
+      el.weatherSearchResults.querySelectorAll("[data-weather-result]").forEach((button) => {
+        button.addEventListener("mousedown", (event) => event.preventDefault());
+        button.addEventListener("click", () => {
+          const item = matches[Number(button.dataset.weatherResult)];
+          const name = [item.name, item.admin1].filter(Boolean).filter((part, i, all) => all.indexOf(part) === i).join(", ");
+          chooseWeatherLocation({ name, latitude: item.latitude, longitude: item.longitude });
+        });
+      });
+    }
+    el.weatherSearchResults.hidden = false;
+    el.weatherSearch.setAttribute("aria-expanded", "true");
+  } catch (error) {
+    if (requestId !== weatherSearchRequest) return;
+    el.weatherSearchResults.innerHTML = `<p>${escapeHtml(t("weather_unavailable"))}</p>`;
+    el.weatherSearchResults.hidden = false;
+    el.weatherSearch.setAttribute("aria-expanded", "true");
+  }
+}
+
+function wireWeatherWidget() {
+  if (!el.weatherLocationToggle || !el.weatherLocationPanel) return;
+  const closeResults = () => {
+    if (el.weatherSearchResults) el.weatherSearchResults.hidden = true;
+    if (el.weatherSearch) el.weatherSearch.setAttribute("aria-expanded", "false");
+  };
+  el.weatherLocationToggle.addEventListener("click", () => {
+    const open = el.weatherLocationPanel.hidden;
+    el.weatherLocationPanel.hidden = !open;
+    el.weatherLocationToggle.setAttribute("aria-expanded", String(open));
+    if (open && el.weatherSearch) setTimeout(() => el.weatherSearch.focus(), 0);
+    else closeResults();
+  });
+  el.weatherRefresh.addEventListener("click", () => refreshHomeWeather(true));
+  el.weatherSearch.addEventListener("input", () => {
+    clearTimeout(weatherSearchTimer);
+    closeResults();
+    const query = el.weatherSearch.value.trim();
+    if (query.length < 2) return;
+    const requestId = ++weatherSearchRequest;
+    weatherSearchTimer = setTimeout(() => searchWeatherLocations(query, requestId), 300);
+  });
+  el.weatherSearch.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") { closeResults(); el.weatherSearch.value = ""; }
+    else if (event.key === "ArrowDown" && !el.weatherSearchResults.hidden) {
+      event.preventDefault();
+      const first = el.weatherSearchResults.querySelector("button");
+      if (first) first.focus();
+    }
+  });
+  el.weatherSearch.addEventListener("blur", () => setTimeout(closeResults, 150));
+  el.weatherUseLocation.addEventListener("click", () => {
+    if (!("geolocation" in navigator)) {
+      if (el.weatherStatus) el.weatherStatus.textContent = t("weather_location_denied");
+      return;
+    }
+    el.weatherUseLocation.disabled = true;
+    if (el.weatherStatus) el.weatherStatus.textContent = t("weather_loading");
+    navigator.geolocation.getCurrentPosition((position) => {
+      el.weatherUseLocation.disabled = false;
+      if (el.weatherStatus) el.weatherStatus.textContent = "";
+      chooseWeatherLocation({ name: t("weather_current_location"), latitude: position.coords.latitude, longitude: position.coords.longitude });
+    }, () => {
+      el.weatherUseLocation.disabled = false;
+      if (el.weatherStatus) el.weatherStatus.textContent = t("weather_location_denied");
+    }, { enableHighAccuracy: false, timeout: 10000, maximumAge: 10 * 60 * 1000 });
+  });
 }
 
 function renderSavingsGoals() {
@@ -3302,6 +3565,7 @@ function renderHomeSummaries() {
   renderMonthlySummary(snapshot);
   renderFinancialHealth(snapshot);
   renderHomeMarketSummary();
+  renderHomeWeather();
   renderSavingsGoals();
   renderHomeNotes();
   renderSmartInsights(snapshot);
@@ -3318,7 +3582,10 @@ function renderHomeDashboard(refreshMarket = true) {
   renderHomeSummaries();
   applyHomeLayout();
   renderCountdowns();
-  if (refreshMarket) refreshHomeMarketSummary();
+  if (refreshMarket) {
+    refreshHomeMarketSummary();
+    refreshHomeWeather();
+  }
 }
 
 function dateInputValue(date) {
@@ -3447,6 +3714,7 @@ function wireHomeDashboard() {
   el.savingsGoalForm.addEventListener("submit", addSavingsGoal);
   el.homeNoteForm.addEventListener("submit", addHomeNote);
   el.countdownForm.addEventListener("submit", addCountdown);
+  wireWeatherWidget();
 }
 
 // ============================================================
@@ -5031,7 +5299,7 @@ function persistedState() {
     expenses: state.expenses, monthlyBudget: state.monthlyBudget, vehicles: state.vehicles, vehSeq: state.vehSeq,
     vehicleHub: state.vehicleHub,
     income: state.income, portfolio: state.portfolio, netWorth: state.netWorth, watchlist: state.watchlist,
-    notifications: state.notifications, homeLayout: state.homeLayout, savingsGoals: state.savingsGoals, homeNotes: state.homeNotes, countdowns: state.countdowns, portTotalUSD: state.portTotalUSD,
+    notifications: state.notifications, homeLayout: state.homeLayout, weather: state.weather, savingsGoals: state.savingsGoals, homeNotes: state.homeNotes, countdowns: state.countdowns, portTotalUSD: state.portTotalUSD,
   };
 }
 
@@ -5253,6 +5521,20 @@ function loadState() {
     };
   }
   state.homeLayout = normalizeHomeLayout(s.homeLayout);
+  if (s.weather && typeof s.weather === "object") {
+    const savedLocation = s.weather.location;
+    const latitude = savedLocation && Number(savedLocation.latitude);
+    const longitude = savedLocation && Number(savedLocation.longitude);
+    if (savedLocation && Number.isFinite(latitude) && latitude >= -90 && latitude <= 90 && Number.isFinite(longitude) && longitude >= -180 && longitude <= 180) {
+      state.weather.location = {
+        name: typeof savedLocation.name === "string" && savedLocation.name.trim() ? savedLocation.name.trim().slice(0, 80) : "İstanbul",
+        latitude,
+        longitude,
+      };
+    }
+    state.weather.data = normalizeWeatherData(s.weather.data);
+    state.weather.updatedAt = state.weather.data && Number.isFinite(s.weather.updatedAt) ? Math.max(0, Math.min(Date.now(), s.weather.updatedAt)) : 0;
+  }
   if (s.savingsGoals && typeof s.savingsGoals === "object") {
     const seenGoalIds = new Set();
     const items = Array.isArray(s.savingsGoals.items) ? s.savingsGoals.items.map((goal) => ({
@@ -5358,6 +5640,7 @@ function startStartupBackgroundWork() {
   if (document.readyState === "complete") loadAppFonts();
   else window.addEventListener("load", loadAppFonts, { once: true });
   refreshHomeMarketSummary();
+  refreshHomeWeather();
   refreshCryptoPrices();
   runNotificationChecks();
   setTimeout(refreshWatchData, 450);
@@ -5375,4 +5658,4 @@ scheduleStartupBackgroundWork();
 
 setInterval(() => { checkVehicleNotifications(); refreshWatchData(); }, 60 * 60 * 1000);
 setInterval(renderCountdowns, 60 * 1000);
-document.addEventListener("visibilitychange", () => { if (!document.hidden) { checkVehicleNotifications(); refreshWatchData(); } });
+document.addEventListener("visibilitychange", () => { if (!document.hidden) { checkVehicleNotifications(); refreshWatchData(); refreshHomeWeather(); } });
